@@ -12,14 +12,14 @@ function Home() {
     <Container>
       <Row className="mt-4">
         <Col className="col-12 col-lg-6 d-flex flex-column justify-content-center">
-          <h1>Bus Booking System</h1>
-          <h4>Book tickets hoe.</h4>
+          <h1>Bueno Booking System</h1>
+          <h4>Book tickets LOVEEEE.</h4>
           <Link to="/booking">
             <Button
               variant="primary"
               type="submit"
             >
-              Book Now
+              Book Today
             </Button>
           </Link>
         </Col>
