@@ -19,7 +19,7 @@ function Home() {
               variant="primary"
               type="submit"
             >
-              Book Bus
+              Book Now
             </Button>
           </Link>
         </Col>
