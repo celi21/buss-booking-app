@@ -20,11 +20,6 @@ export const cities = [
 export const filters = [
   "Pretty",
   "South",
-  "Baby",
-  "Non-AC",
-  "Wi-Fi",
-  "Charger",
-  "Movies",
 ];
 
 export const sorters = ["Price"];
