@@ -15,7 +15,7 @@ export const createPayment = async (req, res, next) => {
 
     const payment = await stripeInstance.paymentIntents.create({
       amount: amount,
-      currency: "INR",
+      currency: "USD",
     });
 
     return res.status(200).json({
