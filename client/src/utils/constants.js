@@ -18,8 +18,8 @@ export const cities = [
 ];
 
 export const filters = [
-  "",
-  "",
+  "Pretty",
+  "Wi-Fi",
 ];
 
 export const sorters = ["Price"];
