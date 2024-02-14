@@ -30,6 +30,7 @@ const getAverageRating = (reviews) => {
 function SearchResultCard({ bus, index, boarding, deboarding, date }) {
   const [showBookModal, setShowBookModal] = useState(false);
   const [seatsBooked, setSeatsBooked] = useState([]);
+  const [showSidebar, setShowSidebar] = useState("");
 
   useEffect(() => {
     const booked = [];
@@ -53,12 +54,20 @@ function SearchResultCard({ bus, index, boarding, deboarding, date }) {
         style={{ borderWidth: "2px" }}
       >
         <Card.Header as="h5" className="d-flex align-items-center">
-          {bus.busName}
-          {index === 0 && (
-            <Badge bg="danger" className="ms-2">
-              Cheapest
-            </Badge>
-          )}
+        <div className="d-flex justify-content-between w-100">
+            <div className="w-25">
+              {bus.busName}
+              {index === 0 && (
+                <Badge bg="danger" className="ms-2">
+                  Cheapest
+                </Badge>
+              )}
+            </div>
+            <div className="d-flex gap-2 justify-content-end">
+              <div onClick={(e)=>setShowSidebar("policy")} className={`text-muted fs-6 btn cursor-pointer ${showSidebar === "policy" && "custom-aliceblue-bg"}`}>Bookung Policy</div>
+              <div onClick={(e)=>setShowSidebar("dropPoints")}className={`text-muted fs-6 btn cursor-pointer ${showSidebar === "dropPoints" && "custom-aliceblue-bg"}`}>Boarding and Droping Points</div>
+            </div>
+          </div>
         </Card.Header>
         <Card.Body>
           <Row>
@@ -160,6 +169,35 @@ function SearchResultCard({ bus, index, boarding, deboarding, date }) {
               <Button onClick={(e) => setShowBookModal(true)}>Book Now</Button>
             </Col>
           </Row>
+          {showSidebar == 'policy' && bus.bookingPolicies.length > 0 &&
+            <div>
+              <h4 className="d-flex justify-content-center">Booking Policies</h4>
+              { bus.bookingPolicies.map((policy, index) => (
+                <div key={index} className="mt-4">
+                  <div className="h5">{policy.name}</div>
+                  <div className="text-muted">{policy.description}</div>
+                  <div className="mt-2">
+                    <div className="text-muted">Cancellation Policy</div>
+                    <div className="text-muted">{policy.cancellationPolicy}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          }
+
+          {showSidebar == 'dropPoints' &&
+            <div>
+              <h4 className="d-flex justify-content-center">Boarding and Droping Points</h4>
+              <ul>
+                  <li>Boarding: {bus.from}</li>
+                  {bus.busRoute.slice(1, bus.busRoute.length - 1).map((stop, index) => (
+                    <li key={index}>{stop}</li>
+                  ))}
+                  <li>Droping: {bus.to}</li>
+              </ul>
+            </div>
+          }
+          
         </Card.Body>
       </Card>
       {showBookModal && (

@@ -34,6 +34,7 @@ export const addBus = async (req, res, next) => {
       arrival,
       facilities,
       fare,
+      bookingPolicies,
     } = req.body;
 
     const newBus = new Bus({
@@ -51,6 +52,7 @@ export const addBus = async (req, res, next) => {
       facilities,
       fare,
       user: req.user.id,
+      bookingPolicies,
     });
 
     await newBus.save();

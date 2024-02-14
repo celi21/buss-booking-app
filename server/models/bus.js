@@ -57,6 +57,19 @@ const busSchema = new Schema(
       type: Number,
       required: true,
     },
+    // booking policies and other details
+    bookingPolicies: [
+      {
+        name: {
+          type: String,
+          required: true,
+        },
+        description: {
+          type: String,
+          required: true,
+        },
+      },
+    ],
     bookings: [
       {
         type: mongoose.Schema.Types.ObjectId,

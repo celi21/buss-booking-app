@@ -19,6 +19,9 @@ function AddBus() {
   const [runsOnDays, setRunsOnDays] = useState([]);
   const [facilities, setFacilities] = useState([]);
   const [fare, setFare] = useState(0);
+  // booking policies array of objects with name and description
+  const [bookingPolicies, setBookingPolicies] = useState([]);
+  const [singlePolicy, setSinglePolicy] = useState({name: "", description: ""});
 
   const [busRoute, setBusRoute] = useState([
     { location: cities[0], time: "00:00", fare: 0 },
@@ -136,6 +139,7 @@ function AddBus() {
           arrival: busRoute[busRoute.length - 1].time,
           facilities,
           fare,
+          bookingPolicies
         },
         {
           headers: {
@@ -318,6 +322,66 @@ function AddBus() {
                   min="0"
                   onChange={(e) => setFare(e.target.value)}
                 />
+              </Form.Group>
+            </Col>
+          </Row>
+
+          {/* input for booking policies with name and descriptions */}
+          <Row>
+            <Col className="col-xs-12">
+              <Form.Group className="mb-3" controlId="bookingPolicies">
+                <Form.Label>Booking Policies</Form.Label>
+                <Table responsive striped>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Name</th>
+                      <th>Description</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bookingPolicies.map((policy, index) => {
+                      return (
+                        <tr key={index}>
+                          <th>{index + 1}</th>
+                          <td>{policy.name}</td>
+                          <td>{policy.description}</td>
+                          <td>
+                            <XCircleFill
+                              className="mt-2 text-danger"
+                              style={{ fontSize: "1.4rem" }}
+                              onClick={() => setBookingPolicies(bookingPolicies.filter((p, i) => i !== index))}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                    <tr>
+                      <td></td>
+                      <td>
+                        <Form.Control
+                          type="text"
+                          placeholder="Policy name"
+                          onChange={(e) => setSinglePolicy({...singlePolicy, name: e.target.value})}
+                        />
+                      </td>
+                      <td>
+                        <Form.Control
+                          type="text"
+                          placeholder="Policy description"
+                          onChange={(e) => setSinglePolicy({...singlePolicy, description: e.target.value})}
+                        />
+                      </td>
+                      <td>
+                        <PlusCircleFill
+                          className="mt-2 text-success"
+                          style={{ fontSize: "1.4rem" }}
+                          onClick={() => setBookingPolicies([...bookingPolicies, singlePolicy])}
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </Table>
               </Form.Group>
             </Col>
           </Row>
