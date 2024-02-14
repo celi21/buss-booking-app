@@ -169,7 +169,7 @@ function SearchResultCard({ bus, index, boarding, deboarding, date }) {
               <Button onClick={(e) => setShowBookModal(true)}>Book Now</Button>
             </Col>
           </Row>
-          {showSidebar == 'policy' && bus.bookingPolicies.length > 0 &&
+          {showSidebar === 'policy' && bus.bookingPolicies.length > 0 &&
             <div>
               <h4 className="d-flex justify-content-center">Booking Policies</h4>
               { bus.bookingPolicies.map((policy, index) => (
@@ -185,7 +185,7 @@ function SearchResultCard({ bus, index, boarding, deboarding, date }) {
             </div>
           }
 
-          {showSidebar == 'dropPoints' &&
+          {showSidebar === 'dropPoints' &&
             <div>
               <h4 className="d-flex justify-content-center">Boarding and Droping Points</h4>
               <ul>
