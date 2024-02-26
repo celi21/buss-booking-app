@@ -30,6 +30,7 @@ jobs:
       - name: Building client
         env:
           REACT_APP_API_BASE_URL: https://3.145.115.170/api
+          REACT_APP_STRIPE_KEY: pk_test_51M1ajNAFFo9b3crIj3MJY9tJH9xmcPRJ0uzF6LJPNAvdHoFBiV4OKLDSKT5pYRadHisiUHAYp5hAWiFq9c3cQZqZ00fz3RcM8U
         run: npm run build
       - name: File list
         run: pwd && ls -al
