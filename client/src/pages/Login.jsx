@@ -7,20 +7,17 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
-import api from "../utils/api";
-import useAuthContext from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../store/slices/AuthSlice";
 
 function Login() {
-  const { user, dispatch } = useAuthContext();
   const navigate = useNavigate();
+  const { loading, user, error } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
 
   useEffect(() => {
     if (user) {
@@ -30,34 +27,13 @@ function Login() {
 
   const handleLogin = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-
-    try {
-      const res = await api.post("/auth/login", { email, password });
-      const data = res.data;
-
-      localStorage.setItem("token", data.token);
-
-      dispatch({ type: "LOGIN_SUCCESS", payload: data.token });
-
-      setSuccess(res.data.message);
-
-      navigate("/");
-    } catch (err) {
-      console.log(err);
-      setError(err.response.data.message);
-    }
-
-    setLoading(false);
+    dispatch(loginUser({ email, password }));
   };
 
   return (
     <Container className="mt-3">
       <Row>
         <h2>Login</h2>
-        {success && <Alert variant="success">{success}</Alert>}
         {error && <Alert variant="danger">{error}</Alert>}
       </Row>
       <Row>
