@@ -18,12 +18,6 @@ const userSchema = new Schema(
       type: Boolean,
       default: false,
     },
-    bookings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Booking",
-      },
-    ],
   },
   {
     timestamps: true,
