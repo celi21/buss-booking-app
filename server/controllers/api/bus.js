@@ -182,3 +182,22 @@ export const fetchBusTypes = async (req, res, next) => {
     });
   }
 };
+
+export const removeBusType = async (req, res, next) => {
+  const { busTypeId } = req.body;
+
+  try {
+    const busType = await BusType.findByIdAndDelete(busTypeId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Bus type removed successfully.",
+      busType,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

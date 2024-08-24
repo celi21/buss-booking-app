@@ -26,8 +26,6 @@ const AddNewBusType = ({ show, handleClose }) => {
       dispatch(setNewBusTypeError("Seats must be greater than 0"));
       return;
     }
-
-    // addNewBusType({ name, seats });
     dispatch(addNewBusType({ name, seats }));
     setName(null);
     setSeats(0);

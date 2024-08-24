@@ -12,7 +12,10 @@ import { Plus, Search } from "react-bootstrap-icons";
 import AddNewBusType from "./components/AddNewBusType";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchBusTypes } from "../../../../store/slices/BusTypeSlice";
+import {
+  fetchBusTypes,
+  removeBusTypeItem,
+} from "../../../../store/slices/BusTypeSlice";
 
 const BusTypes = () => {
   const [show, setShow] = useState(false);
@@ -26,6 +29,12 @@ const BusTypes = () => {
   useEffect(() => {
     dispatch(fetchBusTypes());
   }, []);
+
+  const removeBusType = (id) => {
+    // confirm before deleting
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    dispatch(removeBusTypeItem(id));
+  };
 
   return (
     <Container fluid>
@@ -58,7 +67,7 @@ const BusTypes = () => {
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-        <Table responsive>
+        <Table responsive hover striped>
           <thead>
             <tr>
               <th>#</th>
@@ -79,7 +88,13 @@ const BusTypes = () => {
                   <Button variant="primary" size="sm" className="me-2">
                     Edit
                   </Button>
-                  <Button variant="danger" size="sm">
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      removeBusType(busType._id);
+                    }}
+                  >
                     Delete
                   </Button>
                 </td>

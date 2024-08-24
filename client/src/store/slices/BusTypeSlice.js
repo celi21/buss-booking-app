@@ -62,6 +62,33 @@ export const addNewBusType = createAsyncThunk(
   }
 );
 
+export const removeBusTypeItem = createAsyncThunk(
+  "bus/removeBusType",
+  async (busTypeId, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          busTypeId,
+        },
+      };
+      const response = await axios.delete(
+        `${process.env.REACT_APP_API_BASE_URL}/bus/remove-bus-type`,
+        config
+      );
+      return response.data.success;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const busTypeSlice = createSlice({
   name: "busType",
   initialState,
@@ -97,6 +124,20 @@ const busTypeSlice = createSlice({
       .addCase(addNewBusType.rejected, (state, action) => {
         state.isNewBusTypeLoading = false;
         state.newBusTypeError = action.payload;
+      })
+      .addCase(removeBusTypeItem.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(removeBusTypeItem.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          state.busTypes = state.busTypes.filter(
+            (busType) => busType._id !== action.meta.arg
+          );
+        }
+      })
+      .addCase(removeBusTypeItem.rejected, (state) => {
+        state.isLoading = false;
       });
   },
 });
