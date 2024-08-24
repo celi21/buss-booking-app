@@ -1,4 +1,5 @@
 import Bus from "../../models/bus.js";
+import BusType from "../../models/BusType.js";
 
 import { getDateTimeFromTime } from "./../../utils/datetime.js";
 
@@ -132,5 +133,71 @@ export const getReview = async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+};
+
+export const addBusType = async (req, res, next) => {
+  const { name, seats } = req.body;
+  if (!name || !seats) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide all the required fields.",
+    });
+  }
+
+  try {
+    const busType = new BusType({
+      name,
+      seats: parseInt(seats),
+    });
+
+    const savedBusType = await busType.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Bus type added successfully.",
+      busType: savedBusType,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const fetchBusTypes = async (req, res, next) => {
+  try {
+    const busTypes = await BusType.find();
+
+    return res.status(200).json({
+      success: true,
+      message: "Bus types fetched successfully.",
+      busTypes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const removeBusType = async (req, res, next) => {
+  const { busTypeId } = req.body;
+
+  try {
+    const busType = await BusType.findByIdAndDelete(busTypeId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Bus type removed successfully.",
+      busType,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
   }
 };

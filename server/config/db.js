@@ -5,10 +5,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 set("strictQuery", false);
-
 connect(process.env.MONGO_URL, {})
   .then(() => console.log(`Connected to MongoDB database.`))
-  .catch((error) => console.log(`${error} did not connect`));
+  .catch((error) => {
+    console.log("Error connecting to MongoDB database: ");
+    console.log(error);
+  });
 
 const db = connection;
 

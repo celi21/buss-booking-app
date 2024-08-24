@@ -10,19 +10,23 @@ import Spinner from "react-bootstrap/Spinner";
 import api from "../utils/api";
 import useAuthContext from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { registerUser } from "../store/slices/AuthSlice";
 
 function Signup() {
-  const { user } = useAuthContext();
   const navigate = useNavigate();
+  const {
+    loading,
+    user,
+    error: registrationError,
+  } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -32,32 +36,17 @@ function Signup() {
 
   const handleSignup = async (event) => {
     event.preventDefault();
-    setError("");
-    setSuccess("");
-    setLoading(true);
-
+    setError(null);
     if (!name || !email || !password || !confirmPassword) {
       setError("Please fill in all the fields.");
-      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
       setError("Password and confirm passwords should be the same.");
-      setLoading(false);
       return;
     }
-
-    try {
-      const res = await api.post("/auth/signup", { name, email, password });
-
-      setSuccess(res.data.message);
-    } catch (err) {
-      console.log(err);
-      setError(err.response.data.message);
-    }
-
-    setLoading(false);
+    dispatch(registerUser({ name, email, password }));
   };
 
   return (
@@ -69,8 +58,10 @@ function Signup() {
       </Row>
       <Row>
         <Col>
-          {success && <Alert variant="success">{success}</Alert>}
           {error && <Alert variant="danger">{error}</Alert>}
+          {registrationError && (
+            <Alert variant="danger">{registrationError}</Alert>
+          )}
           <Form>
             <Form.Group className="mb-3" controlId="formBasicName">
               <Form.Label>Name</Form.Label>
@@ -117,7 +108,7 @@ function Signup() {
               onClick={handleSignup}
               disabled={loading}
             >
-              {loading ? <Spinner animation="border" /> : "Log In"}
+              {loading ? <Spinner animation="border" /> : "Sign Up"}
             </Button>
           </Form>
         </Col>

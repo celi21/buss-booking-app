@@ -25,7 +25,5 @@ app.use(errorMiddleware);
 // Server listens on specified PORT
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
-  console.log(
-    `Server is up and listening on PORT: ${PORT || 8000}.`
-  );
+  console.log(`Server is up and listening on PORT: ${PORT || 8000}.`);
 });
