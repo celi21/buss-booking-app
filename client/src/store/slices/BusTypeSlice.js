@@ -6,6 +6,9 @@ const initialState = {
   isLoading: false,
   isNewBusTypeLoading: false,
   newBusTypeError: null,
+  editBusTypeObject: null,
+  editBusTypeError: null,
+  isEditBusTypeLoading: false,
 };
 
 export const fetchBusTypes = createAsyncThunk(
@@ -89,6 +92,58 @@ export const removeBusTypeItem = createAsyncThunk(
   }
 );
 
+export const updateBusTypeStatus = createAsyncThunk(
+  "bus/updateBusTypeStatus",
+  async ({ busTypeId, status }, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL}/bus/update-bus-type-status`,
+        { busTypeId, status },
+        config
+      );
+      return response.data.success;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const editBusType = createAsyncThunk(
+  "bus/editBusType",
+  async (busType, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+    if (!busType) return rejectWithValue("Invalid bus type data");
+    if (!busType._id) return rejectWithValue("Invalid bus type id");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL}/bus/update-bus-type`,
+        busType,
+        config
+      );
+      return response.data.busType;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const busTypeSlice = createSlice({
   name: "busType",
   initialState,
@@ -98,6 +153,15 @@ const busTypeSlice = createSlice({
     },
     setNewBusTypeError: (state, action) => {
       state.newBusTypeError = action.payload;
+    },
+    setEditBusTypeObject: (state, action) => {
+      state.editBusTypeObject = action.payload;
+    },
+    clearEditBusTypeError: (state) => {
+      state.editBusTypeError = null;
+    },
+    setEditBusTypeError: (state, action) => {
+      state.editBusTypeError = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -138,10 +202,45 @@ const busTypeSlice = createSlice({
       })
       .addCase(removeBusTypeItem.rejected, (state) => {
         state.isLoading = false;
+      })
+      .addCase(updateBusTypeStatus.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateBusTypeStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          const busType = state.busTypes.find(
+            (busType) => busType._id === action.meta.arg.busTypeId
+          );
+          busType.status = action.meta.arg.status;
+        }
+      })
+      .addCase(updateBusTypeStatus.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(editBusType.pending, (state) => {
+        state.isEditBusTypeLoading = true;
+      })
+      .addCase(editBusType.fulfilled, (state, action) => {
+        state.isEditBusTypeLoading = false;
+        if (action.payload) {
+          const index = state.busTypes.findIndex(
+            (busType) => busType._id === action.payload._id
+          );
+          state.busTypes[index] = action.payload;
+        }
+      })
+      .addCase(editBusType.rejected, (state) => {
+        state.isEditBusTypeLoading = false;
       });
   },
 });
 
-export const { clearNewBusTypeError, setNewBusTypeError } =
-  busTypeSlice.actions;
+export const {
+  clearNewBusTypeError,
+  setNewBusTypeError,
+  clearEditBusTypeError,
+  setEditBusTypeError,
+  setEditBusTypeObject,
+} = busTypeSlice.actions;
 export default busTypeSlice.reducer;

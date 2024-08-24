@@ -8,22 +8,28 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { Plus, Search } from "react-bootstrap-icons";
+import { PencilSquare, Plus, Search, Trash3 } from "react-bootstrap-icons";
 import AddNewBusType from "./components/AddNewBusType";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBusTypes,
   removeBusTypeItem,
+  setEditBusTypeObject,
+  updateBusTypeStatus,
 } from "../../../../store/slices/BusTypeSlice";
+import EditBusType from "./components/EditBusType";
 
 const BusTypes = () => {
   const [show, setShow] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleEditClose = () => setShowEdit(false);
   const { busTypes, isLoading } = useSelector((state) => state.busType);
   const dispatch = useDispatch();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(fetchBusTypes());
@@ -35,9 +41,29 @@ const BusTypes = () => {
     dispatch(removeBusTypeItem(id));
   };
 
+  const updateStatus = (busTypeId, status) => {
+    dispatch(updateBusTypeStatus({ busTypeId, status }));
+  };
+
+  const editButType = (busType) => {
+    dispatch(setEditBusTypeObject(busType));
+    setShowEdit(true);
+  };
+
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  let filteredBusTypes = busTypes.filter((busType) => {
+    return (
+      (statusFilter === "all" || busType.status === statusFilter) &&
+      (busType.name.toLowerCase().includes(search.toLowerCase()) ||
+        busType.seats.toString().includes(search))
+    );
+  });
+
   return (
     <Container fluid>
       <AddNewBusType handleClose={handleClose} show={show} />
+      <EditBusType handleClose={handleEditClose} show={showEdit} />
       <Row>
         <Col md="auto">
           <Button
@@ -55,13 +81,45 @@ const BusTypes = () => {
               placeholder="Search..."
               aria-label="Search"
               aria-describedby="search-icon"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <InputGroup.Text id="search-icon" className="bg-transparent">
               <Search />
             </InputGroup.Text>
           </InputGroup>
         </Col>
-        <Col className="d-flex justify-content-end">hello</Col>
+        <Col className="d-flex justify-content-end">
+          <Row>
+            <Col>
+              <Button
+                variant="light"
+                className="border"
+                onClick={() => setStatusFilter("all")}
+              >
+                All
+              </Button>
+            </Col>
+            <Col>
+              <Button
+                variant="light"
+                className="border"
+                onClick={() => setStatusFilter("active")}
+              >
+                Active
+              </Button>
+            </Col>
+            <Col>
+              <Button
+                variant="light"
+                className="border"
+                onClick={() => setStatusFilter("inactive")}
+              >
+                InActive
+              </Button>
+            </Col>
+          </Row>
+        </Col>
       </Row>
       {isLoading ? (
         <LoadingSpinner />
@@ -77,15 +135,40 @@ const BusTypes = () => {
             </tr>
           </thead>
           <tbody>
-            {busTypes.map((busType, index) => (
+            {filteredBusTypes.map((busType, index) => (
               <tr key={busType._id}>
                 <td>{index + 1}</td>
                 <td>{busType.name}</td>
                 <td>{busType.seats}</td>
-                <td>{busType.status}</td>
                 <td>
-                  <Button variant="primary" size="sm" className="me-2">
-                    Edit
+                  <div className="d-flex flex-row justify-content-start align-items-center gap-2">
+                    <select
+                      className="form-select form-select-sm w-auto"
+                      defaultValue={busType.status}
+                      onChange={(e) => {
+                        updateStatus(busType._id, e.target.value);
+                      }}
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                    <div
+                      className={`w-4 h-4 ${
+                        busType.status == "active" ? "bg-success" : "bg-warning"
+                      } p-2 rounded-circle`}
+                    ></div>
+                  </div>
+                </td>
+                <td>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => {
+                      editButType(busType);
+                    }}
+                  >
+                    <PencilSquare />
                   </Button>
                   <Button
                     variant="danger"
@@ -94,7 +177,7 @@ const BusTypes = () => {
                       removeBusType(busType._id);
                     }}
                   >
-                    Delete
+                    <Trash3 />
                   </Button>
                 </td>
               </tr>
