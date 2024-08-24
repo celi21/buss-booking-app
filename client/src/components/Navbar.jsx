@@ -51,7 +51,7 @@ function Header() {
             {user && isAdmin && (
               <>
                 <Navbar.Text style={{ marginRight: "1rem" }}>
-                  <Link to="/admin-dashboard">Dashboard</Link>
+                  <Link to="/admin/dashboard">Dashboard</Link>
                 </Navbar.Text>
                 <Navbar.Text style={{ marginRight: "1rem" }}>
                   <Link to="/add-bus">Add Bus</Link>

@@ -5,6 +5,8 @@ import {
   removeBus,
   addReview,
   getReview,
+  addBusType,
+  fetchBusTypes,
 } from "../../controllers/api/bus.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -12,6 +14,8 @@ import verifyUser from "../../middlewares/verifyUser.js";
 const router = express.Router();
 
 router.get("/", verifyAdmin, getBuses);
+router.post("/add-bus-type", verifyAdmin, addBusType);
+router.post("/fetch-bus-types", verifyAdmin, fetchBusTypes);
 router.post("/add", verifyAdmin, addBus);
 router.delete("/remove/:busId", verifyAdmin, removeBus);
 

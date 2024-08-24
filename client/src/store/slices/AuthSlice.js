@@ -5,7 +5,7 @@ import Cookies from "js-cookie";
 const initialState = {
   user: null,
   isAdmin: false,
-  authToken: null,
+  token: null,
   loading: false,
   error: null,
 };
@@ -101,7 +101,7 @@ const authSlice = createSlice({
     logoutUser: (state) => {
       state.user = null;
       state.isAdmin = false;
-      state.authToken = null;
+      state.token = null;
       state.loading = false;
       state.error = null;
 
@@ -118,7 +118,7 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
-        state.authToken = action.payload.token;
+        state.token = action.payload.token;
         state.user = action.payload.user;
         state.isAdmin = action.payload.user.isAdmin;
 
@@ -138,7 +138,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
-        state.authToken = action.payload.token;
+        state.token = action.payload.token;
         state.user = action.payload.user;
         state.isAdmin = action.payload.isAdmin;
 
@@ -158,7 +158,7 @@ const authSlice = createSlice({
       .addCase(retrieveUser.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
-        state.authToken = localStorage.getItem("token") || Cookies.get("token");
+        state.token = localStorage.getItem("token") || Cookies.get("token");
         state.user = action.payload.user;
         state.isAdmin = action.payload.isAdmin;
       })
