@@ -22,8 +22,7 @@ const BusTypes = () => {
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const { busTypes, isLoading, isNewBusTypeLoading, newBusTypeError } =
-    useSelector((state) => state.busType);
+  const { busTypes, isLoading } = useSelector((state) => state.busType);
   const dispatch = useDispatch();
 
   useEffect(() => {

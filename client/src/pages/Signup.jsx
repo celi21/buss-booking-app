@@ -7,8 +7,6 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Alert from "react-bootstrap/Alert";
 import Spinner from "react-bootstrap/Spinner";
-import api from "../utils/api";
-import useAuthContext from "../hooks/useAuthContext";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../store/slices/AuthSlice";
