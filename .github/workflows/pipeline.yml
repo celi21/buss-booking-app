@@ -31,10 +31,9 @@ jobs:
         env:
           REACT_APP_API_BASE_URL: http://3.145.115.170/api
           REACT_APP_STRIPE_KEY: pk_live_51M1ajNAFFo9b3crI6VNw4h8hZwMTYJiplJE8QdsIZ2qYHorJQNfYAy64kwfPclDzEWkv45IfknjHCx4YTHAV0JZ7000hiJLrPOubuntu@ip-1
-        run: npm run build
+        run: CI=false npm run build
       - name: File list
         run: pwd && ls -al
-
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
@@ -56,7 +55,6 @@ jobs:
       - name: Current directory details
         run: pwd && ls
 
-
       - name: Deploy to Server
         uses: easingthemes/ssh-deploy@main
         env:
@@ -72,7 +70,6 @@ jobs:
             sudo chown -R www-data:www-data /var/www/app
             sudo rm -rf /home/ubuntu/client/* 
             sudo systemctl restart nginx
-
 
   server:
     name: Backend setup to the server
