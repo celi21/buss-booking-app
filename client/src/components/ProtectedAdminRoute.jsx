@@ -1,9 +1,10 @@
 import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import useAuthContext from "../hooks/useAuthContext";
+import { useSelector } from "react-redux";
 
 function ProtectedAdminRoute() {
-  const { user, isAdmin } = useAuthContext();
+  const { user, isAdmin } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
   useEffect(() => {

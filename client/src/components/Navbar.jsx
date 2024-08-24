@@ -3,20 +3,18 @@ import Nav from "react-bootstrap/Nav";
 import Navbar from "react-bootstrap/Navbar";
 import Container from "react-bootstrap/Container";
 import { Link, useNavigate } from "react-router-dom";
-import useAuthContext from "../hooks/useAuthContext";
 import Button from "react-bootstrap/Button";
 import { PersonCircle } from "react-bootstrap-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { logoutUser } from "../store/slices/AuthSlice";
 
 function Header() {
-  const { user, isAdmin, dispatch } = useAuthContext();
+  const { user, isAdmin } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const handleLogout = () => {
-    localStorage.clear("token");
-
-    dispatch({ type: "LOGOUT" });
-
-    navigate("/login");
+    dispatch(logoutUser());
+    navigate("/");
   };
 
   return (
@@ -52,6 +50,9 @@ function Header() {
 
             {user && isAdmin && (
               <>
+                <Navbar.Text style={{ marginRight: "1rem" }}>
+                  <Link to="/admin-dashboard">Dashboard</Link>
+                </Navbar.Text>
                 <Navbar.Text style={{ marginRight: "1rem" }}>
                   <Link to="/add-bus">Add Bus</Link>
                 </Navbar.Text>
