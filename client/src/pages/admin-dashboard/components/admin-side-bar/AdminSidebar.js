@@ -1,6 +1,6 @@
 // Sidebar.js
-import React, { useState } from "react";
-import { Button, Container, Nav, Row } from "react-bootstrap";
+import React from "react";
+import { Nav } from "react-bootstrap";
 import {
   House,
   Calendar,
@@ -13,8 +13,6 @@ import {
   People,
   CloudArrowDown,
   BoxArrowRight,
-  X,
-  MenuButton,
 } from "react-bootstrap-icons";
 import "./admin-sidebar.css";
 import { Link } from "react-router-dom";

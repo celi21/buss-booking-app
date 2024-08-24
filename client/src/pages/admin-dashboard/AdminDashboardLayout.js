@@ -1,6 +1,6 @@
 import React from "react";
 import { Col, Container, Row } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 import AdminSidebar from "./components/admin-side-bar/AdminSidebar";
 
