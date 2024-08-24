@@ -8,6 +8,7 @@ import {
   addBusType,
   fetchBusTypes,
   removeBusType,
+  updateBusTypeStatus,
 } from "../../controllers/api/bus.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -18,6 +19,7 @@ router.get("/", verifyAdmin, getBuses);
 router.post("/add-bus-type", verifyAdmin, addBusType);
 router.post("/fetch-bus-types", verifyAdmin, fetchBusTypes);
 router.delete("/remove-bus-type", verifyAdmin, removeBusType);
+router.put("/update-bus-type-status", verifyAdmin, updateBusTypeStatus);
 router.post("/add", verifyAdmin, addBus);
 router.delete("/remove/:busId", verifyAdmin, removeBus);
 

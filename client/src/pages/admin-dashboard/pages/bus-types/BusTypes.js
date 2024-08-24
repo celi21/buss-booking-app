@@ -8,13 +8,14 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { Plus, Search } from "react-bootstrap-icons";
+import { PencilSquare, Plus, Search, Trash3 } from "react-bootstrap-icons";
 import AddNewBusType from "./components/AddNewBusType";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBusTypes,
   removeBusTypeItem,
+  updateBusTypeStatus,
 } from "../../../../store/slices/BusTypeSlice";
 
 const BusTypes = () => {
@@ -33,6 +34,10 @@ const BusTypes = () => {
     // confirm before deleting
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     dispatch(removeBusTypeItem(id));
+  };
+
+  const updateStatus = (busTypeId, status) => {
+    dispatch(updateBusTypeStatus({ busTypeId, status }));
   };
 
   return (
@@ -82,10 +87,35 @@ const BusTypes = () => {
                 <td>{index + 1}</td>
                 <td>{busType.name}</td>
                 <td>{busType.seats}</td>
-                <td>{busType.status}</td>
                 <td>
-                  <Button variant="primary" size="sm" className="me-2">
-                    Edit
+                  <div className="d-flex flex-row justify-content-start align-items-center gap-2">
+                    <select
+                      className="form-select form-select-sm w-auto"
+                      defaultValue={busType.status}
+                      onChange={(e) => {
+                        updateStatus(busType._id, e.target.value);
+                      }}
+                    >
+                      <option value="active">Active</option>
+                      <option value="inactive">Inactive</option>
+                    </select>
+                    <div
+                      className={`w-4 h-4 ${
+                        busType.status == "active" ? "bg-success" : "bg-warning"
+                      } p-2 rounded-circle`}
+                    ></div>
+                  </div>
+                </td>
+                <td>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => {
+                      // editButType(busType._id)
+                    }}
+                  >
+                    <PencilSquare />
                   </Button>
                   <Button
                     variant="danger"
@@ -94,7 +124,7 @@ const BusTypes = () => {
                       removeBusType(busType._id);
                     }}
                   >
-                    Delete
+                    <Trash3 />
                   </Button>
                 </td>
               </tr>

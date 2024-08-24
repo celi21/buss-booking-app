@@ -89,6 +89,31 @@ export const removeBusTypeItem = createAsyncThunk(
   }
 );
 
+export const updateBusTypeStatus = createAsyncThunk(
+  "bus/updateBusTypeStatus",
+  async ({ busTypeId, status }, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL}/bus/update-bus-type-status`,
+        { busTypeId, status },
+        config
+      );
+      return response.data.success;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const busTypeSlice = createSlice({
   name: "busType",
   initialState,
@@ -137,6 +162,21 @@ const busTypeSlice = createSlice({
         }
       })
       .addCase(removeBusTypeItem.rejected, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(updateBusTypeStatus.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(updateBusTypeStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload) {
+          const busType = state.busTypes.find(
+            (busType) => busType._id === action.meta.arg.busTypeId
+          );
+          busType.status = action.meta.arg.status;
+        }
+      })
+      .addCase(updateBusTypeStatus.rejected, (state) => {
         state.isLoading = false;
       });
   },

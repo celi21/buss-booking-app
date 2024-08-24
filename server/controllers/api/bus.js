@@ -201,3 +201,25 @@ export const removeBusType = async (req, res, next) => {
     });
   }
 };
+
+export const updateBusTypeStatus = async (req, res, next) => {
+  const { busTypeId, status } = req.body;
+  try {
+    const busType = await BusType.findByIdAndUpdate(
+      busTypeId,
+      { status },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Bus type status updated successfully.",
+      busType,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
