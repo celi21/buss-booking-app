@@ -118,3 +118,38 @@ export const login = async (req, res, next) => {
     });
   }
 };
+
+export const checkIfUserIsLoggedIn = async (req, res, next) => {
+  const token = req.cookies.token || req.headers.authorization.split(" ")[1];
+  if (!token) {
+    res.status(401);
+    return res.json({
+      success: false,
+      message: "Not authenticated",
+    });
+  }
+
+  const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+  if (decodedToken) {
+    const user = await User.findById(decodedToken.id);
+    if (!user) {
+      res.status(401);
+      return res.json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "User is logged in",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+      },
+      isAdmin: user.isAdmin,
+    });
+  }
+};
