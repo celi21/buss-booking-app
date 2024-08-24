@@ -15,16 +15,21 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   fetchBusTypes,
   removeBusTypeItem,
+  setEditBusTypeObject,
   updateBusTypeStatus,
 } from "../../../../store/slices/BusTypeSlice";
+import EditBusType from "./components/EditBusType";
 
 const BusTypes = () => {
   const [show, setShow] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const handleEditClose = () => setShowEdit(false);
   const { busTypes, isLoading } = useSelector((state) => state.busType);
   const dispatch = useDispatch();
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(fetchBusTypes());
@@ -40,9 +45,25 @@ const BusTypes = () => {
     dispatch(updateBusTypeStatus({ busTypeId, status }));
   };
 
+  const editButType = (busType) => {
+    dispatch(setEditBusTypeObject(busType));
+    setShowEdit(true);
+  };
+
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  let filteredBusTypes = busTypes.filter((busType) => {
+    return (
+      (statusFilter === "all" || busType.status === statusFilter) &&
+      (busType.name.toLowerCase().includes(search.toLowerCase()) ||
+        busType.seats.toString().includes(search))
+    );
+  });
+
   return (
     <Container fluid>
       <AddNewBusType handleClose={handleClose} show={show} />
+      <EditBusType handleClose={handleEditClose} show={showEdit} />
       <Row>
         <Col md="auto">
           <Button
@@ -60,13 +81,45 @@ const BusTypes = () => {
               placeholder="Search..."
               aria-label="Search"
               aria-describedby="search-icon"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
             />
             <InputGroup.Text id="search-icon" className="bg-transparent">
               <Search />
             </InputGroup.Text>
           </InputGroup>
         </Col>
-        <Col className="d-flex justify-content-end">hello</Col>
+        <Col className="d-flex justify-content-end">
+          <Row>
+            <Col>
+              <Button
+                variant="light"
+                className="border"
+                onClick={() => setStatusFilter("all")}
+              >
+                All
+              </Button>
+            </Col>
+            <Col>
+              <Button
+                variant="light"
+                className="border"
+                onClick={() => setStatusFilter("active")}
+              >
+                Active
+              </Button>
+            </Col>
+            <Col>
+              <Button
+                variant="light"
+                className="border"
+                onClick={() => setStatusFilter("inactive")}
+              >
+                InActive
+              </Button>
+            </Col>
+          </Row>
+        </Col>
       </Row>
       {isLoading ? (
         <LoadingSpinner />
@@ -82,7 +135,7 @@ const BusTypes = () => {
             </tr>
           </thead>
           <tbody>
-            {busTypes.map((busType, index) => (
+            {filteredBusTypes.map((busType, index) => (
               <tr key={busType._id}>
                 <td>{index + 1}</td>
                 <td>{busType.name}</td>
@@ -112,7 +165,7 @@ const BusTypes = () => {
                     size="sm"
                     className="me-2"
                     onClick={() => {
-                      // editButType(busType._id)
+                      editButType(busType);
                     }}
                   >
                     <PencilSquare />
