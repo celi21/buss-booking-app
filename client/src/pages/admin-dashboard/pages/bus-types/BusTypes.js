@@ -8,7 +8,14 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { PencilSquare, Plus, Search, Trash3 } from "react-bootstrap-icons";
+import {
+  Check,
+  PencilSquare,
+  Plus,
+  Search,
+  Trash3,
+  X,
+} from "react-bootstrap-icons";
 import AddNewBusType from "./components/AddNewBusType";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
@@ -153,10 +160,19 @@ const BusTypes = () => {
                       <option value="inactive">Inactive</option>
                     </select>
                     <div
-                      className={`w-4 h-4 ${
-                        busType.status == "active" ? "bg-success" : "bg-warning"
-                      } p-2 rounded-circle`}
-                    ></div>
+                      className={` ${
+                        busType.status == "active"
+                          ? "bg-success"
+                          : "bg-secondary"
+                      } rounded-circle d-flex justify-content-center align-items-center`}
+                      style={{ width: "20px", height: "20px" }}
+                    >
+                      {busType.status == "active" ? (
+                        <Check className="text-white" size={17} />
+                      ) : (
+                        <X className="text-white" size={17} />
+                      )}
+                    </div>
                   </div>
                 </td>
                 <td>

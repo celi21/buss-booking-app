@@ -9,11 +9,12 @@ import ProtectedAdminRoute from "./components/ProtectedAdminRoute";
 import ProtectedUserRoute from "./components/ProtectedUserRoute";
 import ViewBookings from "./pages/ViewBookings";
 import SearchTickets from "./pages/SearchTickets";
-import AdminDashboard from "./pages/admin-dashboard/pages/admin-dashboard/AdminDashboard";
+import AdminHome from "./pages/admin-dashboard/pages/admin-home/AdminHome";
 import { useDispatch } from "react-redux";
 import { retrieveUser } from "./store/slices/AuthSlice";
 import AdminDashboardLayout from "./pages/admin-dashboard/AdminDashboardLayout";
 import BusTypes from "./pages/admin-dashboard/pages/bus-types/BusTypes";
+import BusRoutes from "./pages/admin-dashboard/pages/bus-routes/BusRoutes";
 
 function App() {
   const dispatch = useDispatch();
@@ -39,8 +40,9 @@ function App() {
             </ProtectedAdminRoute>
           }
         >
-          <Route path="dashboard" element={<AdminDashboard />} />
+          <Route path="dashboard" element={<AdminHome />} />
           <Route path="bus-types" element={<BusTypes />} />
+          <Route path="bus-routes" element={<BusRoutes />} />
           {/* <Route path="/view-bus" element={<ViewBus />} />
           <Route path="/booking/:busId" element={<ViewBusBookings />} />
           <Route path="/booking/:busId" element={<ViewBusBookings />} /> */}
