@@ -53,12 +53,6 @@ function Header() {
                 <Navbar.Text style={{ marginRight: "1rem" }}>
                   <Link to="/admin/dashboard">Dashboard</Link>
                 </Navbar.Text>
-                <Navbar.Text style={{ marginRight: "1rem" }}>
-                  <Link to="/add-bus">Add Bus</Link>
-                </Navbar.Text>
-                <Navbar.Text style={{ marginRight: "1rem" }}>
-                  <Link to="/view-bus">View Bus</Link>
-                </Navbar.Text>
               </>
             )}
 

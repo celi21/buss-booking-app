@@ -15,67 +15,132 @@ import {
   BoxArrowRight,
 } from "react-bootstrap-icons";
 import "./admin-sidebar.css";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 
 function AdminSidebar() {
   return (
     <Nav className="flex-column bg-light sidebar p-2">
-      <Link
+      <NavLink
         to="/admin/dashboard"
-        active
-        className="text-primary bg-white nav-link"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
       >
-        <House className="me-2 text-primary" />
+        <House className="me-2" />
         Dashboard
-      </Link>
-      <Nav.Link href="/schedule" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/schedule"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <Calendar className="me-2" />
         Schedule
-      </Nav.Link>
-      <Nav.Link href="/bookings" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/bookings"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <Clipboard className="me-2" />
         Bookings
-      </Nav.Link>
-      <Nav.Link href="/buses" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/buses"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <BusFront className="me-2" />
         Buses
-      </Nav.Link>
-      <Nav.Link href="/routes" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/admin/bus-routes"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <Diagram3 className="me-2" />
         Routes
-      </Nav.Link>
-      <Link to="/admin/bus-types" className="text-secondary nav-link">
+      </NavLink>
+      <NavLink
+        to="/admin/bus-types"
+        className={({ isActive, isPending }) =>
+          isPending
+            ? "text-primary nav-link"
+            : isActive
+            ? "active nav-link "
+            : "nav-link"
+        }
+      >
         <Diagram3 className="me-2" />
         Bus Types
-      </Link>
-      <Nav.Link href="/reports" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/reports"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <BarChart className="me-2" />
         Reports
-      </Nav.Link>
-      <Nav.Link href="/google-sheets" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/google-sheets"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <FileEarmarkSpreadsheet className="me-2" />
         Google Sheets
-      </Nav.Link>
-      <Nav.Link href="/bookings-table" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/bookings-table"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <FileEarmarkSpreadsheet className="me-2" />
         Bookings Table
-      </Nav.Link>
-      <Nav.Link href="/settings" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/settings"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <Gear className="me-2" />
         Settings
-      </Nav.Link>
-      <Nav.Link href="/users" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/users"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <People className="me-2" />
         Users
-      </Nav.Link>
-      <Nav.Link href="/install-preview" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/install-preview"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <CloudArrowDown className="me-2" />
         Install & Preview
-      </Nav.Link>
-      <Nav.Link href="/logout" className="text-secondary">
+      </NavLink>
+      <NavLink
+        to="/logout"
+        className={({ isActive, isPending }) =>
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
+        }
+      >
         <BoxArrowRight className="me-2" />
         Logout
-      </Nav.Link>
+      </NavLink>
     </Nav>
   );
 }

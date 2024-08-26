@@ -1,10 +1,3 @@
-/* Sidebar.css */
-
-.sidebar {
-  /* color: #ffffff; */
-  /* Text color */
-}
-
 .sidebar .nav-link {
   /* color: #ffffff; */
   font-size: 16px;
@@ -12,16 +5,9 @@
   border-radius: 5px;
   font-weight: 500;
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  background-color: transparent;
 }
 
 .sidebar .nav-link:hover {
   background-color: #e0dfdf;
-}
-
-.sidebar .nav-link.active {
-  background-color: #e0dfdf;
-}
-
-.sidebar .nav-link .svg-inline--fa {
-  margin-right: 10px;
 }
