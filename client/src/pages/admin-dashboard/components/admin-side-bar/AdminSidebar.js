@@ -23,11 +23,7 @@ function AdminSidebar() {
       <NavLink
         to="/admin/dashboard"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <House className="me-2" />
@@ -36,11 +32,7 @@ function AdminSidebar() {
       <NavLink
         to="/schedule"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <Calendar className="me-2" />
@@ -49,11 +41,7 @@ function AdminSidebar() {
       <NavLink
         to="/bookings"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <Clipboard className="me-2" />
@@ -62,11 +50,7 @@ function AdminSidebar() {
       <NavLink
         to="/buses"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <BusFront className="me-2" />
@@ -75,11 +59,7 @@ function AdminSidebar() {
       <NavLink
         to="/admin/bus-routes"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <Diagram3 className="me-2" />
@@ -91,8 +71,8 @@ function AdminSidebar() {
           isPending
             ? "text-primary nav-link"
             : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+            ? "active nav-link "
+            : "nav-link"
         }
       >
         <Diagram3 className="me-2" />
@@ -101,11 +81,7 @@ function AdminSidebar() {
       <NavLink
         to="/reports"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <BarChart className="me-2" />
@@ -114,11 +90,7 @@ function AdminSidebar() {
       <NavLink
         to="/google-sheets"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <FileEarmarkSpreadsheet className="me-2" />
@@ -127,11 +99,7 @@ function AdminSidebar() {
       <NavLink
         to="/bookings-table"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <FileEarmarkSpreadsheet className="me-2" />
@@ -140,11 +108,7 @@ function AdminSidebar() {
       <NavLink
         to="/settings"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <Gear className="me-2" />
@@ -153,11 +117,7 @@ function AdminSidebar() {
       <NavLink
         to="/users"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <People className="me-2" />
@@ -166,11 +126,7 @@ function AdminSidebar() {
       <NavLink
         to="/install-preview"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <CloudArrowDown className="me-2" />
@@ -179,11 +135,7 @@ function AdminSidebar() {
       <NavLink
         to="/logout"
         className={({ isActive, isPending }) =>
-          isPending
-            ? "text-muted nav-link"
-            : isActive
-            ? "active nav-link bg-white"
-            : "nav-link text-secondary"
+          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
       >
         <BoxArrowRight className="me-2" />

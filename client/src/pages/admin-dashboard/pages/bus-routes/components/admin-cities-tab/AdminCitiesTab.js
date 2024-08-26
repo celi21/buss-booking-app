@@ -3,42 +3,47 @@ import { Button, Col, Container, Row, Table } from "react-bootstrap";
 import { Check, PencilSquare, Plus, Trash3, X } from "react-bootstrap-icons";
 import LoadingSpinner from "../../../../../../components/loading-spinner/LoadingSpinner";
 import AddCity from "../add-city/AddCity";
-import { fetchCities } from "../../../../../../store/slices/RoutesSlice";
+import {
+  fetchCities,
+  removeCityItem,
+  setEditCityObject,
+  updateCityStatus,
+} from "../../../../../../store/slices/RoutesSlice";
 import { useDispatch, useSelector } from "react-redux";
+import EditCity from "../edit-city/EditCity";
 
 const AdminCitiesTab = () => {
   const [show, setShow] = useState(false);
-  // const [showEdit, setShowEdit] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const handleClose = () => setShow(false);
-  // const handleShow = () => setShow(true);
-  // const handleEditClose = () => setShowEdit(false);
+  const handleEditClose = () => setShowEdit(false);
   const { cities, isCitiesLoading } = useSelector((state) => state.routes);
   const dispatch = useDispatch();
-  const [search, setSearch] = useState("");
 
   useEffect(() => {
     dispatch(fetchCities());
   }, []);
 
-  const removeBusType = (id) => {
+  const removeCity = (id) => {
     // confirm before deleting
     if (!window.confirm("Are you sure you want to delete this item?")) return;
-    // dispatch(removeBusTypeItem(id));
+    dispatch(removeCityItem(id));
   };
 
   const updateStatus = (cityId, status) => {
-    // dispatch(updateBusTypeStatus({ busTypeId, status }));
+    dispatch(updateCityStatus({ cityId, status }));
   };
 
   const editCity = (city) => {
-    // dispatch(setEditBusTypeObject(busType));
-    // setShowEdit(true);
+    dispatch(setEditCityObject(city));
+    setShowEdit(true);
   };
 
   return (
     <Container fluid>
       <AddCity show={show} handleClose={handleClose} />
+      <EditCity show={showEdit} handleClose={handleEditClose} />
       <Row className="mb-3">
         <Col md="auto">
           <Button
@@ -110,7 +115,7 @@ const AdminCitiesTab = () => {
                     variant="danger"
                     size="sm"
                     onClick={() => {
-                      removeBusType(city._id);
+                      removeCity(city._id);
                     }}
                   >
                     <Trash3 />

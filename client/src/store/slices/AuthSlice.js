@@ -164,7 +164,7 @@ const authSlice = createSlice({
       })
       .addCase(retrieveUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload;
+        state.error = null;
       });
   },
 });

@@ -42,3 +42,62 @@ export const fetchCities = async (req, res, next) => {
     });
   }
 };
+
+export const updateCityStatus = async (req, res, next) => {
+  try {
+    const { cityId, status } = req.body;
+    const city = await City.findByIdAndUpdate(
+      cityId,
+      { status },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "City status updated successfully.",
+      city,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const removeCity = async (req, res, next) => {
+  const { cityId } = req.body;
+
+  try {
+    const city = await City.findByIdAndDelete(cityId);
+
+    return res.status(200).json({
+      success: true,
+      message: "City removed successfully.",
+      city,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const updateCity = async (req, res, next) => {
+  const { _id, name } = req.body;
+  try {
+    const city = await City.findByIdAndUpdate(_id, { name }, { new: true });
+
+    return res.status(200).json({
+      success: true,
+      message: "City updated successfully.",
+      city,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
