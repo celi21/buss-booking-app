@@ -5,6 +5,8 @@ import {
   updateCityStatus,
   removeCity,
   updateCity,
+  addRoute,
+  fetchRoutes,
 } from "../../controllers/api/routes.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 
@@ -15,4 +17,6 @@ router.post("/fetch-cities", verifyAdmin, fetchCities);
 router.put("/update-city-status", verifyAdmin, updateCityStatus);
 router.delete("/remove-city", verifyAdmin, removeCity);
 router.put("/update-city", verifyAdmin, updateCity);
+router.post("/add-route", verifyAdmin, addRoute);
+router.post("/fetch-routes", verifyAdmin, fetchRoutes);
 export default router;
