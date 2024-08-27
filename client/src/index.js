@@ -6,9 +6,9 @@ import { MainStore } from "./store/MainStore";
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-  <React.StrictMode>
-    <Provider store={MainStore}>
-      <App />
-    </Provider>
-  </React.StrictMode>
+  // <React.StrictMode>
+  <Provider store={MainStore}>
+    <App />
+  </Provider>
+  // </React.StrictMode>
 );

@@ -1,4 +1,5 @@
 import City from "../../models/City.js";
+import Route from "../../models/Route.js";
 import { getDateTimeFromTime } from "./../../utils/datetime.js";
 
 export const addCity = async (req, res, next) => {
@@ -93,6 +94,51 @@ export const updateCity = async (req, res, next) => {
       success: true,
       message: "City updated successfully.",
       city,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const addRoute = async (req, res) => {
+  const { name, from, to, locations } = req.body;
+  if (!name || !from || !to || !locations) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide all the required fields.",
+    });
+  }
+
+  try {
+    const route = new Route({
+      name,
+      from,
+      to,
+      locations,
+    });
+    const savedRoute = await route.save();
+    return res.status(200).json({
+      success: true,
+      message: "Route added successfully.",
+      route: savedRoute,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const fetchRoutes = async (req, res) => {
+  try {
+    const routes = await Route.find().populate("from to locations");
+    return res.status(200).json({
+      success: true,
+      routes,
     });
   } catch (error) {
     return res.status(500).json({

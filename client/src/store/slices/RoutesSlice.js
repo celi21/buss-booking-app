@@ -151,6 +151,60 @@ export const editCityItem = createAsyncThunk(
   }
 );
 
+export const addNewRoute = createAsyncThunk(
+  "routes/addNewRoute",
+  async (newRoute, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/routes/add-route`,
+        newRoute,
+        config
+      );
+      if (response.data.success) return response.data.route;
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+export const fetchRoutes = createAsyncThunk(
+  "routes/fetchRoutes",
+  async (_, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/routes/fetch-routes`,
+        {},
+        config
+      );
+      return response.data.routes;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const RoutesSlice = createSlice({
   name: "routes",
   initialState,
@@ -163,6 +217,15 @@ const RoutesSlice = createSlice({
     },
     setEditCityError: (state, action) => {
       state.editCityError = action.payload;
+    },
+    setNewRouteError: (state, action) => {
+      state.newRouteError = action.payload;
+    },
+    setEditRouteObject: (state, action) => {
+      state.editRouteObject = action.payload;
+    },
+    setEditRouteError: (state, action) => {
+      state.editRouteError = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -242,11 +305,42 @@ const RoutesSlice = createSlice({
         state.isEditCityLoading = false;
         state.editCityError = action.payload;
         state.isCitiesLoading = false;
+      })
+      .addCase(addNewRoute.pending, (state) => {
+        state.isNewRouteLoading = true;
+        state.isRoutesLoading = true;
+        state.newRouteError = null;
+      })
+      .addCase(addNewRoute.fulfilled, (state, action) => {
+        state.isNewRouteLoading = false;
+        state.isRoutesLoading = false;
+        state.routes.push(action.payload);
+      })
+      .addCase(addNewRoute.rejected, (state, action) => {
+        state.isNewRouteLoading = false;
+        state.isRoutesLoading = false;
+        state.newRouteError = action.payload;
+      })
+      .addCase(fetchRoutes.pending, (state) => {
+        state.isRoutesLoading = true;
+      })
+      .addCase(fetchRoutes.fulfilled, (state, action) => {
+        state.isRoutesLoading = false;
+        state.routes = action.payload;
+      })
+      .addCase(fetchRoutes.rejected, (state) => {
+        state.isRoutesLoading = false;
       });
   },
 });
 
-export const { setNewCityError, setEditCityObject, setEditCityError } =
-  RoutesSlice.actions;
+export const {
+  setNewCityError,
+  setEditCityObject,
+  setEditCityError,
+  setEditRouteError,
+  setEditRouteObject,
+  setNewRouteError,
+} = RoutesSlice.actions;
 
 export default RoutesSlice.reducer;
