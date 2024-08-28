@@ -19,7 +19,13 @@ import {
 import LoadingSpinner from "../../../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import AddRoute from "../add-route/AddRoute";
-import { fetchRoutes } from "../../../../../../store/slices/RoutesSlice";
+import EditRoute from "../edit-route/EditRoute";
+import {
+  fetchRoutes,
+  removeRouteItem,
+  setEditRouteObject,
+  updateRouteStatus,
+} from "../../../../../../store/slices/RoutesSlice";
 
 const AdminRoutesTab = () => {
   const [show, setShow] = useState(false);
@@ -38,9 +44,33 @@ const AdminRoutesTab = () => {
     dispatch(fetchRoutes());
   }, []);
 
+  const removeRoute = (id) => {
+    // confirm before deleting
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    dispatch(removeRouteItem(id));
+  };
+
+  const editRoute = (route) => {
+    dispatch(setEditRouteObject(route));
+    setShowEdit(true);
+  };
+
+  const updateStatus = (id, status) => {
+    dispatch(updateRouteStatus({ id, status }));
+  };
+
+  const [statusFilter, setStatusFilter] = useState("all");
+  let filteredRoutes = routes.filter((route) => {
+    return (
+      (statusFilter === "all" || route.status === statusFilter) &&
+      route.name.toLowerCase().includes(search.toLowerCase())
+    );
+  });
+
   return (
     <Container fluid>
       <AddRoute show={show} handleClose={handleClose} />
+      <EditRoute show={showEdit} handleClose={handleEditClose} />
       <Row>
         <Col md="auto">
           <Button
@@ -72,7 +102,7 @@ const AdminRoutesTab = () => {
               <Button
                 variant="light"
                 className="border"
-                // onClick={() => setStatusFilter("all")}
+                onClick={() => setStatusFilter("all")}
               >
                 All
               </Button>
@@ -81,7 +111,7 @@ const AdminRoutesTab = () => {
               <Button
                 variant="light"
                 className="border"
-                // onClick={() => setStatusFilter("active")}
+                onClick={() => setStatusFilter("active")}
               >
                 Active
               </Button>
@@ -90,7 +120,7 @@ const AdminRoutesTab = () => {
               <Button
                 variant="light"
                 className="border"
-                // onClick={() => setStatusFilter("inactive")}
+                onClick={() => setStatusFilter("inactive")}
               >
                 InActive
               </Button>
@@ -113,7 +143,7 @@ const AdminRoutesTab = () => {
             </tr>
           </thead>
           <tbody>
-            {routes.map((route, index) => (
+            {filteredRoutes.map((route, index) => (
               <tr key={route._id}>
                 <td>{index + 1}</td>
                 <td>{route.name}</td>
@@ -125,7 +155,7 @@ const AdminRoutesTab = () => {
                       className="form-select form-select-sm w-auto"
                       defaultValue={route.status}
                       onChange={(e) => {
-                        // updateStatus(route._id, e.target.value);
+                        updateStatus(route._id, e.target.value);
                       }}
                     >
                       <option value="active">Active</option>
@@ -150,18 +180,18 @@ const AdminRoutesTab = () => {
                     variant="primary"
                     size="sm"
                     className="me-2"
-                    // onClick={() => {
-                    //   editButType(route);
-                    // }}
+                    onClick={() => {
+                      editRoute(route);
+                    }}
                   >
                     <PencilSquare />
                   </Button>
                   <Button
                     variant="danger"
                     size="sm"
-                    // onClick={() => {
-                    //   removeBusType(route._id);
-                    // }}
+                    onClick={() => {
+                      removeRoute(route._id);
+                    }}
                   >
                     <Trash3 />
                   </Button>

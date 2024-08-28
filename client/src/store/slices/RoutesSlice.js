@@ -205,6 +205,85 @@ export const fetchRoutes = createAsyncThunk(
   }
 );
 
+export const editRouteItem = createAsyncThunk(
+  "routes/editRouteItem",
+  async (route, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+    if (!route) return rejectWithValue("Invalid route data");
+    if (!route._id) return rejectWithValue("Invalid route id");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL}/routes/update-route`,
+        route,
+        config
+      );
+      return response.data.route;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const removeRouteItem = createAsyncThunk(
+  "routes/removeRoute",
+  async (routeId, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          routeId,
+        },
+      };
+      const response = await axios.delete(
+        `${process.env.REACT_APP_API_BASE_URL}/routes/remove-route`,
+        config
+      );
+      return response.data.success;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+export const updateRouteStatus = createAsyncThunk(
+  "routes/updateRouteStatus",
+  async ({ id, status }, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.put(
+        `${process.env.REACT_APP_API_BASE_URL}/routes/update-route-status`,
+        { id, status },
+        config
+      );
+      return response.data.success;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const RoutesSlice = createSlice({
   name: "routes",
   initialState,
@@ -329,6 +408,55 @@ const RoutesSlice = createSlice({
         state.routes = action.payload;
       })
       .addCase(fetchRoutes.rejected, (state) => {
+        state.isRoutesLoading = false;
+      })
+      .addCase(removeRouteItem.pending, (state) => {
+        state.isRoutesLoading = true;
+      })
+      .addCase(removeRouteItem.fulfilled, (state, action) => {
+        state.isRoutesLoading = false;
+        if (action.payload) {
+          state.routes = state.routes.filter(
+            (route) => route._id !== action.meta.arg
+          );
+        }
+      })
+      .addCase(removeRouteItem.rejected, (state) => {
+        state.isRoutesLoading = false;
+      })
+      .addCase(editRouteItem.pending, (state) => {
+        state.isEditRouteLoading = true;
+        state.editRouteError = null;
+        state.isRoutesLoading = true;
+      })
+      .addCase(editRouteItem.fulfilled, (state, action) => {
+        state.isEditRouteLoading = false;
+        if (action.payload) {
+          const index = state.routes.findIndex(
+            (route) => route._id === action.payload._id
+          );
+          state.routes[index] = action.payload;
+        }
+        state.isRoutesLoading = false;
+      })
+      .addCase(editRouteItem.rejected, (state, action) => {
+        state.isEditRouteLoading = false;
+        state.editRouteError = action.payload;
+        state.isRoutesLoading = false;
+      })
+      .addCase(updateRouteStatus.pending, (state) => {
+        state.isRoutesLoading = true;
+      })
+      .addCase(updateRouteStatus.fulfilled, (state, action) => {
+        state.isRoutesLoading = false;
+        if (action.payload) {
+          const route = state.routes.find(
+            (route) => route._id === action.meta.arg.id
+          );
+          route.status = action.meta.arg.status;
+        }
+      })
+      .addCase(updateRouteStatus.rejected, (state) => {
         state.isRoutesLoading = false;
       });
   },

@@ -3,58 +3,72 @@ import { Alert, Button, Modal } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import LocationsDragDrop from "../locations-drag-drop/LocationsDragDrop";
 import {
-  addNewRoute,
+  editRouteItem,
   fetchCities,
-  setNewRouteError,
+  setEditRouteError,
 } from "../../../../../../store/slices/RoutesSlice";
 
-const AddRoute = ({ show, handleClose }) => {
+const EditRoute = ({ show, handleClose }) => {
+  const { editRouteObject, isEditRouteLoading, editRouteError, cities } =
+    useSelector((state) => state.routes);
   const [title, setTitle] = useState(null);
-  const [locationsList, setLocationsList] = useState([
-    {
-      id: `location-1`,
-      name: null,
-      routeIndex: 1,
-      _id: null,
-    },
-  ]);
-  const { newRouteError, cities, isNewRouteLoading } = useSelector(
-    (state) => state.routes
-  );
+  const [locationsList, setLocationsList] = useState([]);
   const dispatch = useDispatch();
+
   useEffect(() => {
     dispatch(fetchCities());
   }, []);
 
+  useEffect(() => {
+    if (editRouteObject) {
+      console.log(editRouteObject);
+      setTitle(editRouteObject.name);
+
+      // loop over locations and add routeIndex to each location
+      const locations = editRouteObject.locations.map((loc, index) => {
+        return {
+          ...loc,
+          id: `location-${index + 1}`,
+          routeIndex: index + 1,
+        };
+      });
+      setLocationsList(locations);
+    }
+  }, [editRouteObject]);
+
   const handleSubmit = (e) => {
     if (!title || title.trim() === "") {
-      dispatch(setNewRouteError("Please provide title for route"));
+      dispatch(setEditRouteError("Please provide title for route"));
       return;
     }
 
     // check if any location is empty
     for (let i = 0; i < locationsList.length; i++) {
       if (!locationsList[i].name) {
-        dispatch(setNewRouteError("Please select location for all the fields"));
+        dispatch(
+          setEditRouteError("Please select location for all the fields")
+        );
         return;
       } else if (!locationsList[i].routeIndex || !locationsList[i]._id) {
-        dispatch(setNewRouteError("Something went wrong"));
+        dispatch(setEditRouteError("Something went wrong"));
         return;
       }
     }
 
     if (locationsList.length <= 0 || locationsList.length <= 1) {
-      dispatch(setNewRouteError("Please add at least two locations"));
+      dispatch(setEditRouteError("Please add at least two locations"));
       return;
     }
-    console.log(locationsList, "submit");
 
     const fromLocation = locationsList[0]._id;
     const toLocation = locationsList[locationsList.length - 1]._id;
     const locations = locationsList.map((loc) => loc._id);
 
+    console.log(locationsList, toLocation, fromLocation, "submit");
+
     dispatch(
-      addNewRoute({
+      editRouteItem({
+        ...editRouteObject,
         name: title,
         from: fromLocation,
         to: toLocation,
@@ -71,16 +85,16 @@ const AddRoute = ({ show, handleClose }) => {
       },
     ]);
 
-    dispatch(setNewRouteError(null));
-    if (!isNewRouteLoading) handleClose();
+    dispatch(setEditRouteError(null));
+    if (!isEditRouteLoading) handleClose();
   };
 
   return (
     <Modal show={show} onHide={handleClose} centered size="lg">
       <Modal.Header closeButton>
-        <Modal.Title>Add New Route</Modal.Title>
+        <Modal.Title>Edit Route</Modal.Title>
       </Modal.Header>
-      {newRouteError && <Alert variant="danger">{newRouteError}</Alert>}
+      {editRouteError && <Alert variant="danger">{editRouteError}</Alert>}
       <Modal.Body>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
@@ -116,6 +130,7 @@ const AddRoute = ({ show, handleClose }) => {
               setLocationsList={setLocationsList}
               cities={cities}
               setTitle={setTitle}
+              isEditModal={true}
             />
           </div>
         </form>
@@ -127,13 +142,13 @@ const AddRoute = ({ show, handleClose }) => {
         <Button
           variant="primary"
           onClick={handleSubmit}
-          disabled={isNewRouteLoading}
+          disabled={isEditRouteLoading}
         >
-          {isNewRouteLoading ? "loading..." : "Save"}
+          {isEditRouteLoading ? "loading..." : "Save"}
         </Button>
       </Modal.Footer>
     </Modal>
   );
 };
 
-export default AddRoute;
+export default EditRoute;

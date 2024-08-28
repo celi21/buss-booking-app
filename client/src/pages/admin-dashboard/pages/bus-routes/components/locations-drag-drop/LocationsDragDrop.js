@@ -36,6 +36,7 @@ const LocationsDragDrop = ({
   setLocationsList,
   cities,
   setTitle,
+  isEditModal = false,
 }) => {
   const handleOnDragEnd = (result) => {
     if (!result.destination) return;
@@ -56,7 +57,7 @@ const LocationsDragDrop = ({
         id: `location-${locationsList.length + 1}`,
         name: null,
         routeIndex: locationsList.length + 1,
-        cityId: null,
+        _id: null,
       },
     ]);
   };
@@ -75,7 +76,7 @@ const LocationsDragDrop = ({
         return {
           ...loc,
           name: value,
-          cityId: findCity._id,
+          _id: findCity._id,
         };
       }
       return loc;
@@ -87,14 +88,16 @@ const LocationsDragDrop = ({
   useEffect(() => {
     return () => {
       setTitle(null);
-      setLocationsList([
-        {
-          id: `location-1`,
-          name: null,
-          routeIndex: 1,
-          cityId: null,
-        },
-      ]);
+      if (!isEditModal) {
+        setLocationsList([
+          {
+            id: `location-1`,
+            name: null,
+            routeIndex: 1,
+            _id: null,
+          },
+        ]);
+      }
       dispatch(setNewRouteError(null));
     };
   }, []);
@@ -102,7 +105,7 @@ const LocationsDragDrop = ({
   return (
     <div>
       <DragDropContext onDragEnd={handleOnDragEnd}>
-        <Droppable droppableId="droppable">
+        <Droppable droppableId={"droppable-" + Math.random()}>
           {(provided, snapshot) => (
             <div
               {...provided.droppableProps}
@@ -124,24 +127,47 @@ const LocationsDragDrop = ({
                       <div className="d-flex justify-content-between align-items-center">
                         <div className="fw-semibold">Location {index + 1}:</div>
                         <div>
-                          <select
-                            className="form-select"
-                            onChange={(e) =>
-                              handleCityChange(e.target.value, index)
-                            }
-                          >
-                            <option value="" key="" selected>
-                              Select Location
-                            </option>
-                            {cities.map(
-                              (city) =>
-                                city.status === "active" && (
-                                  <option value={city.name} key={city._id}>
-                                    {city.name}
-                                  </option>
-                                )
-                            )}
-                          </select>
+                          {isEditModal == true ? (
+                            <select
+                              className="form-select"
+                              onChange={(e) =>
+                                handleCityChange(e.target.value, index)
+                              }
+                            >
+                              <option value={item.name} key={item._id} selected>
+                                {item.name}
+                              </option>
+
+                              {cities.map(
+                                (city) =>
+                                  city.status === "active" &&
+                                  item._id !== city._id && (
+                                    <option value={city.name} key={city._id}>
+                                      {city.name}
+                                    </option>
+                                  )
+                              )}
+                            </select>
+                          ) : (
+                            <select
+                              className="form-select"
+                              onChange={(e) =>
+                                handleCityChange(e.target.value, index)
+                              }
+                            >
+                              <option value="" key="" selected>
+                                Select Location
+                              </option>
+                              {cities.map(
+                                (city) =>
+                                  city.status === "active" && (
+                                    <option value={city.name} key={city._id}>
+                                      {city.name}
+                                    </option>
+                                  )
+                              )}
+                            </select>
+                          )}
                         </div>
                         <div className="d-flex align-items-center gap-2">
                           <button

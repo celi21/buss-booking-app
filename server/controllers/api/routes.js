@@ -120,10 +120,13 @@ export const addRoute = async (req, res) => {
       locations,
     });
     const savedRoute = await route.save();
+    const returnRoute = await Route.findById(savedRoute._id).populate(
+      "from to locations"
+    );
     return res.status(200).json({
       success: true,
       message: "Route added successfully.",
-      route: savedRoute,
+      route: returnRoute,
     });
   } catch (error) {
     return res.status(500).json({
@@ -139,6 +142,69 @@ export const fetchRoutes = async (req, res) => {
     return res.status(200).json({
       success: true,
       routes,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const removeRoute = async (req, res) => {
+  const { routeId } = req.body;
+
+  try {
+    const route = await Route.findByIdAndDelete(routeId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Route removed successfully.",
+      route,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const updateRoute = async (req, res) => {
+  const { _id, name, from, to, locations } = req.body;
+  try {
+    const route = await Route.findByIdAndUpdate(
+      _id,
+      { name, from, to, locations },
+      { new: true }
+    ).populate("from to locations");
+
+    return res.status(200).json({
+      success: true,
+      message: "Route updated successfully.",
+      route,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const updateRouteStatus = async (req, res) => {
+  const { id, status } = req.body;
+  try {
+    const route = await Route.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    ).populate("from to locations");
+
+    return res.status(200).json({
+      success: true,
+      message: "Route status updated successfully.",
+      route,
     });
   } catch (error) {
     return res.status(500).json({
