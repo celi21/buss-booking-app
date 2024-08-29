@@ -48,7 +48,7 @@ function AdminSidebar() {
         Bookings
       </NavLink>
       <NavLink
-        to="/buses"
+        to="/admin/buses"
         className={({ isActive, isPending }) =>
           isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
@@ -122,15 +122,6 @@ function AdminSidebar() {
       >
         <People className="me-2" />
         Users
-      </NavLink>
-      <NavLink
-        to="/install-preview"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <CloudArrowDown className="me-2" />
-        Install & Preview
       </NavLink>
       <NavLink
         to="/logout"
