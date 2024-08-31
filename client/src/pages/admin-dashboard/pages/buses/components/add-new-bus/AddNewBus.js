@@ -1,13 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Button, Modal } from "react-bootstrap";
+import { Alert, Button, Modal } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchRoutes } from "../../../../../../store/slices/RoutesSlice";
 import { fetchBusTypes } from "../../../../../../store/slices/BusTypeSlice";
 import { ArrowDown } from "react-bootstrap-icons";
 import LoadingSpinner from "../../../../../../components/loading-spinner/LoadingSpinner";
+import {
+  addNewBus,
+  setAddNewBusError,
+} from "../../../../../../store/slices/BusSlice";
 
 const AddNewBus = ({ handleClose, show }) => {
   const { routes, isRoutesLoading } = useSelector((state) => state.routes);
+  const { addNewBusError, addNewBusLoading } = useSelector(
+    (state) => state.bus
+  );
   const { busTypes } = useSelector((state) => state.busType);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [selectedBusType, setSelectedBusType] = useState(null);
@@ -137,8 +144,94 @@ const AddNewBus = ({ handleClose, show }) => {
   };
 
   const handleSubmit = () => {
-    console.log(selectedRoute, "submit");
-    console.log(recurring);
+    if (!selectedRoute) {
+      dispatch(setAddNewBusError("Please choose a route"));
+      return;
+    }
+    if (!selectedBusType) {
+      dispatch(setAddNewBusError("Please choose a bus type"));
+      return;
+    }
+
+    for (let i = 0; i < selectedRoute.locations.length; i++) {
+      let loc = selectedRoute.locations[i];
+      if (i == 0) {
+        if (loc.departureTime == null || loc.departureTime == "") {
+          dispatch(
+            setAddNewBusError(
+              "Please select departure time for starting location"
+            )
+          );
+          return;
+        }
+      } else if (i == selectedRoute.locations.length - 1) {
+        if (loc.arrivalTime == null || loc.arrivalTime == "") {
+          dispatch(
+            setAddNewBusError("Please select arrival time for the destination")
+          );
+          return;
+        }
+      } else {
+        if (
+          loc.arrivalTime == null ||
+          loc.arrivalTime == "" ||
+          loc.departureTime == null ||
+          loc.departureTime == ""
+        ) {
+          dispatch(
+            setAddNewBusError(
+              "Please select arrival and departure time for all locations"
+            )
+          );
+          return;
+        }
+      }
+    }
+
+    if (
+      !periodOperatingFrom ||
+      periodOperatingFrom.trim() == "" ||
+      periodOperatingFrom == null
+    ) {
+      dispatch(setAddNewBusError("Please select period operating from date"));
+      return;
+    }
+
+    if (
+      !periodOperatingTo ||
+      periodOperatingTo.trim() == "" ||
+      periodOperatingTo == null
+    ) {
+      dispatch(setAddNewBusError("Please select period operating to date"));
+      return;
+    }
+
+    const busObject = {
+      routeId: selectedRoute._id,
+      busTypeId: selectedBusType,
+      locations: selectedRoute.locations,
+      periodOperatingFrom,
+      periodOperatingTo,
+      recurring,
+    };
+
+    console.log(busObject);
+    dispatch(addNewBus(busObject));
+    dispatch(setAddNewBusError(null));
+    setSelectedRoute(null);
+    setSelectedBusType(null);
+    setPeriodOperatingFrom(null);
+    setPeriodOperatingTo(null);
+    setRecurring([
+      { id: 1, name: "Monday", checked: false },
+      { id: 2, name: "Tuesday", checked: false },
+      { id: 3, name: "Wednesday", checked: false },
+      { id: 4, name: "Thursday", checked: false },
+      { id: 5, name: "Friday", checked: false },
+      { id: 6, name: "Saturday", checked: false },
+      { id: 7, name: "Sunday", checked: false },
+    ]);
+    if (!addNewBusLoading) handleClose();
   };
 
   return (
@@ -154,7 +247,7 @@ const AddNewBus = ({ handleClose, show }) => {
       <Modal.Header closeButton>
         <Modal.Title>Add New Bus</Modal.Title>
       </Modal.Header>
-      {/* {newCityError && <Alert variant="danger">{newCityError}</Alert>} */}
+      {addNewBusError && <Alert variant="danger">{addNewBusError}</Alert>}
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
           <div className="w-50 fw-semibold">Route:</div>
@@ -357,10 +450,9 @@ const AddNewBus = ({ handleClose, show }) => {
         <Button
           variant="primary"
           onClick={handleSubmit}
-          // disabled={isNewCityLoading}
+          disabled={addNewBusLoading}
         >
-          {/* {isNewCityLoading ? "loading..." : "Save"} */}
-          Save
+          {addNewBusLoading ? "loading..." : "Save"}
         </Button>
       </Modal.Footer>
     </Modal>

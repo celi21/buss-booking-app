@@ -12,7 +12,6 @@ import { Plus, Search } from "react-bootstrap-icons";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import AddNewBus from "./components/add-new-bus/AddNewBus";
-import { fetchRoutes } from "../../../../store/slices/RoutesSlice";
 
 const Buses = () => {
   const [show, setShow] = useState(false);
@@ -23,6 +22,8 @@ const Buses = () => {
   const handleEditClose = () => setShowEdit(false);
   const { routes, isLoading } = useSelector((state) => state.routes);
   const [search, setSearch] = useState("");
+  const { isBusesLoading, buses } = useSelector((state) => state.bus);
+  const dispatch = useDispatch();
 
   return (
     <Container fluid>

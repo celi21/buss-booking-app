@@ -1,93 +1,65 @@
 import mongoose, { Schema, model } from "mongoose";
 
+const BusLocationSchema = new Schema(
+  {
+    city: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "City",
+      required: true,
+    },
+    departureTime: {
+      type: "String",
+      required: false,
+    },
+    arrivalTime: {
+      type: "String",
+      required: false,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const DaySchema = new Schema({
+  id: {
+    type: Number,
+  },
+  name: {
+    type: String,
+    required: true,
+  },
+  checked: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+});
+
 const busSchema = new Schema(
   {
-    busName: {
+    status: {
       type: String,
-      required: true,
+      default: "active",
     },
-    user: {
+    route: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: "Route",
+      required: true,
     },
-    contactNumber: {
+    busType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BusType",
+      required: true,
+    },
+    locations: [BusLocationSchema],
+    periodStartDate: {
       type: String,
-      required: true,
     },
-    from: {
+    periodEndDate: {
       type: String,
-      required: true,
     },
-    to: {
-      type: String,
-      required: true,
-    },
-    busRoute: {
-      type: [String],
-      required: true,
-    },
-    busRouteTimes: {
-      type: [Date],
-      required: true,
-    },
-    busRouteFares: {
-      type: [Number],
-      required: true,
-    },
-    numOfSeats: {
-      type: Number,
-      required: true,
-    },
-    runsOnDays: {
-      type: [String],
-      required: true,
-    },
-    departure: {
-      type: Date,
-      required: true,
-    },
-    arrival: {
-      type: Date,
-      required: true,
-    },
-    facilities: {
-      type: [String],
-    },
-    fare: {
-      type: Number,
-      required: true,
-    },
-    // booking policies and other details
-    bookingPolicies: [
-      {
-        name: {
-          type: String,
-          required: true,
-        },
-        description: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
-    bookings: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Booking",
-      },
-    ],
-    reviews: [
-      {
-        rating: {
-          type: Number,
-          required: true,
-        },
-        content: {
-          type: String,
-          required: true,
-        },
-      },
-    ],
+    recurring: [DaySchema],
   },
   {
     timestamps: true,

@@ -245,3 +245,36 @@ export const updateBusType = async (req, res, next) => {
     });
   }
 };
+
+export const AddNewBus = async (req, res, next) => {
+  const busObject = req.body;
+  try {
+    console.log(busObject);
+    let locations = busObject.locations.map((loc) => {
+      return {
+        city: loc._id,
+        departureTime: loc.departureTime ? loc.departureTime : null,
+        arrivalTime: loc.arrivalTime ? loc.arrivalTime : null,
+      };
+    });
+    const newBus = new Bus({
+      route: busObject.routeId,
+      busType: busObject.busTypeId,
+      periodStartDate: busObject.periodOperatingFrom,
+      periodEndDate: busObject.periodOperatingTo,
+      locations: locations,
+      recurring: busObject.recurring,
+    });
+    await newBus.save();
+    return res.status(200).json({
+      success: true,
+      message: "Bus Added Successfully",
+      busObject: newBus,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Interval Server Error",
+    });
+  }
+};
