@@ -8,10 +8,11 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import { Plus, Search } from "react-bootstrap-icons";
+import { PencilSquare, Plus, Search, Trash3 } from "react-bootstrap-icons";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import AddNewBus from "./components/add-new-bus/AddNewBus";
+import { fetchBuses } from "../../../../store/slices/BusSlice";
 
 const Buses = () => {
   const [show, setShow] = useState(false);
@@ -20,10 +21,15 @@ const Buses = () => {
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const handleEditClose = () => setShowEdit(false);
-  const { routes, isLoading } = useSelector((state) => state.routes);
   const [search, setSearch] = useState("");
   const { isBusesLoading, buses } = useSelector((state) => state.bus);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchBuses());
+  }, []);
+
+  console.log(buses);
 
   return (
     <Container fluid>
@@ -66,7 +72,7 @@ const Buses = () => {
           </Row>
         </Col>
       </Row>
-      {isLoading ? (
+      {isBusesLoading ? (
         <LoadingSpinner />
       ) : (
         <Table responsive hover striped>
@@ -79,71 +85,49 @@ const Buses = () => {
               <th>Actions</th>
             </tr>
           </thead>
-          {/* <tbody> */}
-          {/* {filteredBusTypes.map((busType, index) => (
-            <tr key={busType._id}>
-              <td>{index + 1}</td>
-              <td>{busType.name}</td>
-              <td>{busType.seats}</td>
-              <td>
-                <div className="d-flex flex-row justify-content-start align-items-center gap-2">
-                  <select
-                    className="form-select form-select-sm w-auto"
-                    defaultValue={busType.status}
-                    onChange={(e) => {
-                      updateStatus(busType._id, e.target.value);
+          <tbody>
+            {buses.map((bus, index) => (
+              <tr key={bus._id}>
+                <td>{index + 1}</td>
+                <td>{bus.route.name}</td>
+                <td>
+                  {bus.locations[0].departureTime} -{" "}
+                  {bus.locations[bus.locations.length - 1].arrivalTime}
+                </td>
+                <td>
+                  {bus.periodStartDate} - {bus.periodEndDate}
+                </td>
+                <td>
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="me-2"
+                    onClick={() => {
+                      // editButType(bus);
                     }}
                   >
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
-                  </select>
-                  <div
-                    className={` ${
-                      busType.status == "active"
-                        ? "bg-success"
-                        : "bg-secondary"
-                    } rounded-circle d-flex justify-content-center align-items-center`}
-                    style={{ width: "20px", height: "20px" }}
+                    <PencilSquare />
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => {
+                      // removeBus(bus._id);
+                    }}
                   >
-                    {busType.status == "active" ? (
-                      <Check className="text-white" size={17} />
-                    ) : (
-                      <X className="text-white" size={17} />
-                    )}
-                  </div>
-                </div>
-              </td>
-              <td>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  className="me-2"
-                  onClick={() => {
-                    editButType(busType);
-                  }}
-                >
-                  <PencilSquare />
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => {
-                    removeBusType(busType._id);
-                  }}
-                >
-                  <Trash3 />
-                </Button>
-              </td>
-            </tr>
-          ))} */}
-          {/* {busTypes.length === 0 && (
-            <tr>
-              <td colSpan="5" className="text-center">
-                No data found
-              </td>
-            </tr>
-          )}
-        </tbody> */}
+                    <Trash3 />
+                  </Button>
+                </td>
+              </tr>
+            ))}
+            {buses.length === 0 && (
+              <tr>
+                <td colSpan="5" className="text-center">
+                  No data found
+                </td>
+              </tr>
+            )}
+          </tbody>
         </Table>
       )}
     </Container>

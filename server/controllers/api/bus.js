@@ -249,7 +249,6 @@ export const updateBusType = async (req, res, next) => {
 export const AddNewBus = async (req, res, next) => {
   const busObject = req.body;
   try {
-    console.log(busObject);
     let locations = busObject.locations.map((loc) => {
       return {
         city: loc._id,
@@ -270,6 +269,22 @@ export const AddNewBus = async (req, res, next) => {
       success: true,
       message: "Bus Added Successfully",
       busObject: newBus,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Interval Server Error",
+    });
+  }
+};
+
+export const fetchBuses = async (req, res, next) => {
+  try {
+    const buses = await Bus.find({}).populate("route busType locations");
+    return res.status(200).json({
+      success: true,
+      message: "Buses Fetched Successfully",
+      buses,
     });
   } catch (error) {
     return res.status(500).json({

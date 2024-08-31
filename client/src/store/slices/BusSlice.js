@@ -39,6 +39,35 @@ export const addNewBus = createAsyncThunk(
   }
 );
 
+export const fetchBuses = createAsyncThunk(
+  "bus/fetchBuses",
+  async (_, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/bus/fetch-buses`,
+        {},
+        config
+      );
+      if (response.data.success) return response.data.buses;
+    } catch (error) {
+      if (error && error.response.data.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
 const BusSlice = createSlice({
   name: "bus",
   initialState,
@@ -63,6 +92,16 @@ const BusSlice = createSlice({
         state.addNewBusLoading = false;
         state.isBusesLoading = false;
         state.addNewBusError = action.payload;
+      })
+      .addCase(fetchBuses.pending, (state) => {
+        state.isBusesLoading = true;
+      })
+      .addCase(fetchBuses.fulfilled, (state, action) => {
+        state.buses = action.payload;
+        state.isBusesLoading = false;
+      })
+      .addCase(fetchBuses.rejected, (state, action) => {
+        state.isBusesLoading = false;
       });
   },
 });
