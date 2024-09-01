@@ -239,7 +239,11 @@ const AddNewBus = ({ handleClose, show }) => {
       show={show}
       onHide={() => {
         setSelectedRoute(null);
+        setSelectedBusType(null);
+        dispatch(setAddNewBusError(null));
         handleClose();
+        setPeriodOperatingFrom(null);
+        setPeriodOperatingTo(null);
       }}
       centered
       size="lg"

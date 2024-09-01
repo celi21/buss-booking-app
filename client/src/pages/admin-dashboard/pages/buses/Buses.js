@@ -13,6 +13,7 @@ import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinne
 import { useDispatch, useSelector } from "react-redux";
 import AddNewBus from "./components/add-new-bus/AddNewBus";
 import { fetchBuses } from "../../../../store/slices/BusSlice";
+import { useNavigate } from "react-router-dom";
 
 const Buses = () => {
   const [show, setShow] = useState(false);
@@ -24,12 +25,15 @@ const Buses = () => {
   const [search, setSearch] = useState("");
   const { isBusesLoading, buses } = useSelector((state) => state.bus);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchBuses());
   }, []);
 
-  console.log(buses);
+  const editBus = (bus) => {
+    navigate(`/admin/edit-bus/${bus._id}`);
+  };
 
   return (
     <Container fluid>
@@ -103,7 +107,7 @@ const Buses = () => {
                     size="sm"
                     className="me-2"
                     onClick={() => {
-                      // editButType(bus);
+                      editBus(bus);
                     }}
                   >
                     <PencilSquare />

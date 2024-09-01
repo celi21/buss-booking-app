@@ -293,3 +293,27 @@ export const fetchBuses = async (req, res, next) => {
     });
   }
 };
+
+export const fetchBus = async (req, res, next) => {
+  try {
+    const { busId } = req.params;
+    const bus = await Bus.findById(busId).populate("route busType locations");
+    if (bus) {
+      return res.status(200).json({
+        success: true,
+        message: "Bus Fetch Successfully",
+        bus,
+      });
+    } else {
+      return res.status(500).json({
+        success: false,
+        message: "Bus not found",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Interval Server Error",
+    });
+  }
+};
