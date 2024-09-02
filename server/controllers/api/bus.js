@@ -297,7 +297,9 @@ export const fetchBuses = async (req, res, next) => {
 export const fetchBus = async (req, res, next) => {
   try {
     const { busId } = req.params;
-    const bus = await Bus.findById(busId).populate("route busType locations");
+    const bus = await Bus.findById(busId).populate(
+      "route busType locations locations.city"
+    );
     if (bus) {
       return res.status(200).json({
         success: true,
