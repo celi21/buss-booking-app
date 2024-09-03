@@ -9,6 +9,7 @@ import {
   addNewBus,
   setAddNewBusError,
 } from "../../../../../../store/slices/BusSlice";
+import toast from "react-hot-toast";
 
 const AddNewBus = ({ handleClose, show }) => {
   const { routes, isRoutesLoading } = useSelector((state) => state.routes);
@@ -146,9 +147,15 @@ const AddNewBus = ({ handleClose, show }) => {
   const handleSubmit = () => {
     if (!selectedRoute) {
       dispatch(setAddNewBusError("Please choose a route"));
+      toast.error("Please choose a route", {
+        duration: 4000,
+      });
       return;
     }
     if (!selectedBusType) {
+      toast.error("Please choose a bus type", {
+        duration: 4000,
+      });
       dispatch(setAddNewBusError("Please choose a bus type"));
       return;
     }
@@ -157,6 +164,9 @@ const AddNewBus = ({ handleClose, show }) => {
       let loc = selectedRoute.locations[i];
       if (i == 0) {
         if (loc.departureTime == null || loc.departureTime == "") {
+          toast.error("Please select departure time for starting location", {
+            duration: 4000,
+          });
           dispatch(
             setAddNewBusError(
               "Please select departure time for starting location"
@@ -166,6 +176,9 @@ const AddNewBus = ({ handleClose, show }) => {
         }
       } else if (i == selectedRoute.locations.length - 1) {
         if (loc.arrivalTime == null || loc.arrivalTime == "") {
+          toast.error("Please select arrival time for the destination", {
+            duration: 4000,
+          });
           dispatch(
             setAddNewBusError("Please select arrival time for the destination")
           );
@@ -178,6 +191,12 @@ const AddNewBus = ({ handleClose, show }) => {
           loc.departureTime == null ||
           loc.departureTime == ""
         ) {
+          toast.error(
+            "Please select arrival and departure time for all locations",
+            {
+              duration: 4000,
+            }
+          );
           dispatch(
             setAddNewBusError(
               "Please select arrival and departure time for all locations"
@@ -193,6 +212,9 @@ const AddNewBus = ({ handleClose, show }) => {
       periodOperatingFrom.trim() == "" ||
       periodOperatingFrom == null
     ) {
+      toast.error("Please select period operating from date", {
+        duration: 4000,
+      });
       dispatch(setAddNewBusError("Please select period operating from date"));
       return;
     }
@@ -202,6 +224,9 @@ const AddNewBus = ({ handleClose, show }) => {
       periodOperatingTo.trim() == "" ||
       periodOperatingTo == null
     ) {
+      toast.error("Please select period operating to date", {
+        duration: 4000,
+      });
       dispatch(setAddNewBusError("Please select period operating to date"));
       return;
     }
@@ -230,7 +255,12 @@ const AddNewBus = ({ handleClose, show }) => {
       { id: 6, name: "Saturday", checked: false },
       { id: 7, name: "Sunday", checked: false },
     ]);
-    if (!addNewBusLoading) handleClose();
+    if (!addNewBusLoading) {
+      toast.success("New Bus Added Successfully", {
+        duration: 4000,
+      });
+      handleClose();
+    }
   };
 
   return (
@@ -250,7 +280,7 @@ const AddNewBus = ({ handleClose, show }) => {
       <Modal.Header closeButton>
         <Modal.Title>Add New Bus</Modal.Title>
       </Modal.Header>
-      {addNewBusError && <Alert variant="danger">{addNewBusError}</Alert>}
+      {/* {addNewBusError && <Alert variant="danger">{addNewBusError}</Alert>} */}
       <Modal.Body>
         <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
           <div className="w-50 fw-semibold">Route:</div>

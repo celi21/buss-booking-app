@@ -7,6 +7,7 @@ import {
   fetchCities,
   setNewRouteError,
 } from "../../../../../../store/slices/RoutesSlice";
+import toast from "react-hot-toast";
 
 const AddRoute = ({ show, handleClose }) => {
   const [title, setTitle] = useState(null);
@@ -29,6 +30,9 @@ const AddRoute = ({ show, handleClose }) => {
   const handleSubmit = (e) => {
     if (!title || title.trim() === "") {
       dispatch(setNewRouteError("Please provide title for route"));
+      toast.error("Please provide title for route", {
+        duration: 4000,
+      });
       return;
     }
 
@@ -36,18 +40,26 @@ const AddRoute = ({ show, handleClose }) => {
     for (let i = 0; i < locationsList.length; i++) {
       if (!locationsList[i].name) {
         dispatch(setNewRouteError("Please select location for all the fields"));
+        toast.error("Please select location for all the fields", {
+          duration: 4000,
+        });
         return;
       } else if (!locationsList[i].routeIndex || !locationsList[i]._id) {
+        toast.error("Something went wrong", {
+          duration: 4000,
+        });
         dispatch(setNewRouteError("Something went wrong"));
         return;
       }
     }
 
     if (locationsList.length <= 0 || locationsList.length <= 1) {
+      toast.error("Please add at least two locations", {
+        duration: 4000,
+      });
       dispatch(setNewRouteError("Please add at least two locations"));
       return;
     }
-    console.log(locationsList, "submit");
 
     const fromLocation = locationsList[0]._id;
     const toLocation = locationsList[locationsList.length - 1]._id;
@@ -72,7 +84,12 @@ const AddRoute = ({ show, handleClose }) => {
     ]);
 
     dispatch(setNewRouteError(null));
-    if (!isNewRouteLoading) handleClose();
+    if (!isNewRouteLoading) {
+      toast.success("Route Added Successfully", {
+        duration: 4000,
+      });
+      handleClose();
+    }
   };
 
   return (
@@ -80,7 +97,7 @@ const AddRoute = ({ show, handleClose }) => {
       <Modal.Header closeButton>
         <Modal.Title>Add New Route</Modal.Title>
       </Modal.Header>
-      {newRouteError && <Alert variant="danger">{newRouteError}</Alert>}
+      {/* {newRouteError && <Alert variant="danger">{newRouteError}</Alert>} */}
       <Modal.Body>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

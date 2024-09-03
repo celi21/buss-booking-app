@@ -26,6 +26,7 @@ import {
   updateBusTypeStatus,
 } from "../../../../store/slices/BusTypeSlice";
 import EditBusType from "./components/EditBusType";
+import toast from "react-hot-toast";
 
 const BusTypes = () => {
   const [show, setShow] = useState(false);
@@ -46,10 +47,16 @@ const BusTypes = () => {
     // confirm before deleting
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     dispatch(removeBusTypeItem(id));
+    toast.success("Bus Type Removed Successfully", {
+      duration: 4000,
+    });
   };
 
   const updateStatus = (busTypeId, status) => {
     dispatch(updateBusTypeStatus({ busTypeId, status }));
+    toast.success("Status Updated Successfully", {
+      duration: 4000,
+    });
   };
 
   const editButType = (busType) => {

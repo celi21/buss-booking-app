@@ -15,9 +15,18 @@ import {
   BoxArrowRight,
 } from "react-bootstrap-icons";
 import "./admin-sidebar.css";
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { logoutUser } from "../../../../store/slices/AuthSlice";
 
 function AdminSidebar() {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    dispatch(logoutUser());
+    navigate("/");
+  };
+
   return (
     <Nav className="flex-column bg-light sidebar p-2">
       <NavLink
@@ -30,7 +39,7 @@ function AdminSidebar() {
         Dashboard
       </NavLink>
       <NavLink
-        to="/schedule"
+        to="/admin/schedule"
         className={({ isActive, isPending }) =>
           isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
@@ -39,7 +48,7 @@ function AdminSidebar() {
         Schedule
       </NavLink>
       <NavLink
-        to="/bookings"
+        to="/admin/bookings"
         className={({ isActive, isPending }) =>
           isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }
@@ -87,7 +96,7 @@ function AdminSidebar() {
         <BarChart className="me-2" />
         Reports
       </NavLink>
-      <NavLink
+      {/* <NavLink
         to="/google-sheets"
         className={({ isActive, isPending }) =>
           isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
@@ -122,9 +131,10 @@ function AdminSidebar() {
       >
         <People className="me-2" />
         Users
-      </NavLink>
+      </NavLink> */}
       <NavLink
-        to="/logout"
+        onClick={handleLogout}
+        to="/"
         className={({ isActive, isPending }) =>
           isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
         }

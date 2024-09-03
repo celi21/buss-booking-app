@@ -7,6 +7,7 @@ import {
   setEditBusTypeError,
   setEditBusTypeObject,
 } from "../../../../../store/slices/BusTypeSlice";
+import toast from "react-hot-toast";
 
 const EditBusType = ({ show, handleClose }) => {
   const { editBusTypeObject } = useSelector((state) => state.busType);
@@ -28,11 +29,17 @@ const EditBusType = ({ show, handleClose }) => {
     e.preventDefault();
     if (!name || !seats || name.trim() === "") {
       dispatch(setEditBusTypeError("Please fill all the fields"));
+      toast.error("Please fill all the fields", {
+        duration: 4000,
+      });
       return;
     }
 
     if (parseInt(seats) <= 0) {
       dispatch(setEditBusTypeError("Seats must be greater than 0"));
+      toast.error("Seats must be greater than 0", {
+        duration: 4000,
+      });
       return;
     }
     dispatch(
@@ -45,14 +52,19 @@ const EditBusType = ({ show, handleClose }) => {
     setName(null);
     setSeats(0);
     dispatch(clearEditBusTypeError());
-    if (!isEditBusTypeLoading) handleClose();
+    if (!isEditBusTypeLoading) {
+      handleClose();
+      toast.success("Bus Type Updated Successfully", {
+        duration: 4000,
+      });
+    }
   };
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Edit Bus Type</Modal.Title>
       </Modal.Header>
-      {editBusTypeError && <Alert variant="danger">{editBusTypeError}</Alert>}
+      {/* {editBusTypeError && <Alert variant="danger">{editBusTypeError}</Alert>} */}
       <Modal.Body>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

@@ -5,6 +5,7 @@ import {
   editCityItem,
   setEditCityError,
 } from "../../../../../../store/slices/RoutesSlice";
+import toast from "react-hot-toast";
 
 const EditCity = ({ show, handleClose }) => {
   const { editCityObject, isEditCityLoading, editCityError } = useSelector(
@@ -23,6 +24,9 @@ const EditCity = ({ show, handleClose }) => {
     e.preventDefault();
     if (!name || name.trim() === "") {
       dispatch(setEditCityError("Please fill all the fields"));
+      toast.error("Please fill all the fields", {
+        duration: 4000,
+      });
       return;
     }
 
@@ -34,14 +38,19 @@ const EditCity = ({ show, handleClose }) => {
     );
     setName(null);
     dispatch(setEditCityError(null));
-    if (!isEditCityLoading) handleClose();
+    if (!isEditCityLoading) {
+      handleClose();
+      toast.success("City Updated Successfully", {
+        duration: 4000,
+      });
+    }
   };
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Edit City</Modal.Title>
       </Modal.Header>
-      {editCityError && <Alert variant="danger">{editCityError}</Alert>}
+      {/* {editCityError && <Alert variant="danger">{editCityError}</Alert>} */}
       <Modal.Body>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

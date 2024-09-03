@@ -5,6 +5,7 @@ import {
   addNewCity,
   setNewCityError,
 } from "../../../../../../store/slices/RoutesSlice";
+import toast from "react-hot-toast";
 
 const AddCity = ({ show, handleClose }) => {
   const [name, setName] = useState(null);
@@ -17,20 +18,28 @@ const AddCity = ({ show, handleClose }) => {
     e.preventDefault();
     if (!name || name.trim() === "") {
       dispatch(setNewCityError("Please fill all the fields"));
+      toast.error("Please fill all the fields", {
+        duration: 4000,
+      });
       return;
     }
 
     dispatch(addNewCity({ name }));
     setName(null);
     dispatch(setNewCityError(null));
-    if (!isNewCityLoading) handleClose();
+    if (!isNewCityLoading) {
+      handleClose();
+      toast.success("City Added Successfully", {
+        duration: 4000,
+      });
+    }
   };
   return (
     <Modal show={show} onHide={handleClose} centered>
       <Modal.Header closeButton>
         <Modal.Title>Add New City</Modal.Title>
       </Modal.Header>
-      {newCityError && <Alert variant="danger">{newCityError}</Alert>}
+      {/* {newCityError && <Alert variant="danger">{newCityError}</Alert>} */}
       <Modal.Body>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">

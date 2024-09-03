@@ -26,6 +26,7 @@ import {
   setEditRouteObject,
   updateRouteStatus,
 } from "../../../../../../store/slices/RoutesSlice";
+import toast from "react-hot-toast";
 
 const AdminRoutesTab = () => {
   const [show, setShow] = useState(false);
@@ -48,6 +49,9 @@ const AdminRoutesTab = () => {
     // confirm before deleting
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     dispatch(removeRouteItem(id));
+    toast.success("Route Removed Successfully", {
+      duration: 4000,
+    });
   };
 
   const editRoute = (route) => {
@@ -57,6 +61,9 @@ const AdminRoutesTab = () => {
 
   const updateStatus = (id, status) => {
     dispatch(updateRouteStatus({ id, status }));
+    toast.success("Status Updated Successfully", {
+      duration: 4000,
+    });
   };
 
   const [statusFilter, setStatusFilter] = useState("all");

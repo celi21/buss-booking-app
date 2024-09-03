@@ -11,6 +11,7 @@ import {
 } from "../../../../../../store/slices/RoutesSlice";
 import { useDispatch, useSelector } from "react-redux";
 import EditCity from "../edit-city/EditCity";
+import toast from "react-hot-toast";
 
 const AdminCitiesTab = () => {
   const [show, setShow] = useState(false);
@@ -29,10 +30,16 @@ const AdminCitiesTab = () => {
     // confirm before deleting
     if (!window.confirm("Are you sure you want to delete this item?")) return;
     dispatch(removeCityItem(id));
+    toast.success("City Removed Successfully", {
+      duration: 4000,
+    });
   };
 
   const updateStatus = (cityId, status) => {
     dispatch(updateCityStatus({ cityId, status }));
+    toast.success("Status Updated Successfully", {
+      duration: 4000,
+    });
   };
 
   const editCity = (city) => {

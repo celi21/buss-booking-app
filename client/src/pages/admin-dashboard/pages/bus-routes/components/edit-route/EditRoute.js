@@ -7,6 +7,7 @@ import {
   fetchCities,
   setEditRouteError,
 } from "../../../../../../store/slices/RoutesSlice";
+import toast from "react-hot-toast";
 
 const EditRoute = ({ show, handleClose }) => {
   const { editRouteObject, isEditRouteLoading, editRouteError, cities } =
@@ -39,6 +40,9 @@ const EditRoute = ({ show, handleClose }) => {
   const handleSubmit = (e) => {
     if (!title || title.trim() === "") {
       dispatch(setEditRouteError("Please provide title for route"));
+      toast.error("Please provide title for route", {
+        duration: 4000,
+      });
       return;
     }
 
@@ -48,23 +52,30 @@ const EditRoute = ({ show, handleClose }) => {
         dispatch(
           setEditRouteError("Please select location for all the fields")
         );
+        toast.error("Please select location for all the fields", {
+          duration: 4000,
+        });
         return;
       } else if (!locationsList[i].routeIndex || !locationsList[i]._id) {
         dispatch(setEditRouteError("Something went wrong"));
+        toast.error("Something went wrong", {
+          duration: 4000,
+        });
         return;
       }
     }
 
     if (locationsList.length <= 0 || locationsList.length <= 1) {
       dispatch(setEditRouteError("Please add at least two locations"));
+      toast.error("Please add at least two locations", {
+        duration: 4000,
+      });
       return;
     }
 
     const fromLocation = locationsList[0]._id;
     const toLocation = locationsList[locationsList.length - 1]._id;
     const locations = locationsList.map((loc) => loc._id);
-
-    console.log(locationsList, toLocation, fromLocation, "submit");
 
     dispatch(
       editRouteItem({
@@ -86,7 +97,12 @@ const EditRoute = ({ show, handleClose }) => {
     ]);
 
     dispatch(setEditRouteError(null));
-    if (!isEditRouteLoading) handleClose();
+    if (!isEditRouteLoading) {
+      handleClose();
+      toast.success("Route Updated Successfully", {
+        duration: 4000,
+      });
+    }
   };
 
   return (
@@ -94,7 +110,7 @@ const EditRoute = ({ show, handleClose }) => {
       <Modal.Header closeButton>
         <Modal.Title>Edit Route</Modal.Title>
       </Modal.Header>
-      {editRouteError && <Alert variant="danger">{editRouteError}</Alert>}
+      {/* {editRouteError && <Alert variant="danger">{editRouteError}</Alert>} */}
       <Modal.Body>
         <form onSubmit={handleSubmit}>
           <div className="mb-3">
