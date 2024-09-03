@@ -298,7 +298,7 @@ export const fetchBus = async (req, res, next) => {
   try {
     const { busId } = req.params;
     const bus = await Bus.findById(busId).populate(
-      "route busType locations locations.city"
+      "route busType locations locations.city ticketTypes"
     );
     if (bus) {
       return res.status(200).json({
@@ -345,7 +345,7 @@ export const updateBus = async (req, res, next) => {
         {
           new: true,
         }
-      ).populate("route busType locations locations.city");
+      ).populate("route busType locations locations.city ticketTypes");
 
       if (updatedBus) {
         return res.status(200).json({
@@ -366,7 +366,7 @@ export const updateBus = async (req, res, next) => {
         {
           new: true,
         }
-      ).populate("route busType locations locations.city");
+      ).populate("route busType locations locations.city ticketTypes");
       if (updatedBus) {
         return res.status(200).json({
           success: true,
@@ -375,6 +375,27 @@ export const updateBus = async (req, res, next) => {
         });
       }
     } else if (busObject && busObject.tab === "ticket-types") {
+      const ticketTypes = busObject.ticketTypes.map((ticket) => {
+        return {
+          name: ticket.type,
+        };
+      });
+
+      const updatedBus = await Bus.findByIdAndUpdate(
+        busObject.busId,
+        {
+          ticketTypes: ticketTypes,
+        },
+        { new: true }
+      ).populate("route busType locations locations.city ticketTypes");
+
+      if (updateBus) {
+        return res.status(200).json({
+          success: true,
+          message: "Bus Updated Successfully",
+          busObject: updatedBus,
+        });
+      }
     } else if (busObject && busObject.tab === "ticket-prices") {
     }
   } catch (error) {

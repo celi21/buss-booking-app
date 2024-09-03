@@ -36,6 +36,17 @@ const DaySchema = new Schema({
   },
 });
 
+const TicketTypeSchema = new Schema(
+  {
+    name: {
+      type: String,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+
 const busSchema = new Schema(
   {
     status: {
@@ -65,6 +76,7 @@ const busSchema = new Schema(
         type: String,
       },
     ],
+    ticketTypes: [TicketTypeSchema],
   },
   {
     timestamps: true,

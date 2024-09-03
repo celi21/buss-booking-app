@@ -1,11 +1,33 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  editBus,
+  setEditBusError,
+} from "../../../../../../../store/slices/BusSlice";
+import toast from "react-hot-toast";
 
 const EditBusTicketTypes = ({ handleCancel }) => {
-  const { fetchBusObject } = useSelector((state) => state.bus);
+  const { fetchBusObject, editBusLoading, editBusError } = useSelector(
+    (state) => state.bus
+  );
   const [ticketTypes, setTicketTypes] = useState([]);
+
+  useEffect(() => {
+    if (fetchBusObject) {
+      if (fetchBusObject.ticketTypes && fetchBusObject.ticketTypes.length > 0) {
+        let savedTicketTypes = fetchBusObject.ticketTypes;
+        let newTicketTypes = savedTicketTypes.map((ticketType, index) => {
+          return {
+            type: ticketType.name,
+            id: index + 1,
+          };
+        });
+        setTicketTypes(newTicketTypes);
+      }
+    }
+  }, [fetchBusObject]);
 
   const handleAddTicketType = () => {
     let newTickets = [
@@ -36,6 +58,39 @@ const EditBusTicketTypes = ({ handleCancel }) => {
       }
     });
     setTicketTypes(newTickets);
+  };
+
+  const dispatch = useDispatch();
+  const handleSubmit = () => {
+    if (ticketTypes.length > 0) {
+      for (let i = 0; i < ticketTypes.length; i++) {
+        if (
+          !ticketTypes[i].type ||
+          ticketTypes[i].type.trim() === "" ||
+          ticketTypes[i].type === null
+        ) {
+          dispatch(setEditBusError("Please fill all the ticket type entries."));
+          toast.error("Please fill all the ticket type entries.", {
+            duration: 4000,
+          });
+          return;
+        }
+      }
+    }
+
+    const busObject = {
+      busId: fetchBusObject._id,
+      ticketTypes,
+      tab: "ticket-types",
+    };
+
+    dispatch(editBus(busObject));
+    if (!editBusLoading && !editBusError) {
+      toast.success("Bus Ticket Types Saved", {
+        duration: 4000,
+      });
+      dispatch(setEditBusError(null));
+    }
   };
 
   return (
@@ -105,11 +160,10 @@ const EditBusTicketTypes = ({ handleCancel }) => {
         </Button>
         <Button
           variant="primary"
-          // onClick={handleSubmit}
-          // disabled={addNewBusLoading}
+          onClick={handleSubmit}
+          disabled={editBusLoading}
         >
-          Update
-          {/* {addNewBusLoading ? "loading..." : "Save"} */}
+          {editBusLoading ? "loading..." : "Save"}
         </Button>
       </div>
     </Container>
