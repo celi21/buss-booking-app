@@ -3,7 +3,7 @@ import { Button, Col, Container, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 import { useSelector } from "react-redux";
 
-const EditBusTicketTypes = () => {
+const EditBusTicketTypes = ({ handleCancel }) => {
   const { fetchBusObject } = useSelector((state) => state.bus);
   const [ticketTypes, setTicketTypes] = useState([]);
 
@@ -45,7 +45,7 @@ const EditBusTicketTypes = () => {
           <div>Seats available:</div>
         </Col>
         <Col>
-          <div>{fetchBusObject.busType.seats}</div>
+          <div>{fetchBusObject?.busType?.seats}</div>
         </Col>
       </Row>
 
@@ -100,10 +100,7 @@ const EditBusTicketTypes = () => {
       <hr />
 
       <div className="w-100 d-flex flex-row gap-2">
-        <Button
-          variant="secondary"
-          // onClick={handleClose}
-        >
+        <Button variant="secondary" onClick={handleCancel}>
           Cancel
         </Button>
         <Button

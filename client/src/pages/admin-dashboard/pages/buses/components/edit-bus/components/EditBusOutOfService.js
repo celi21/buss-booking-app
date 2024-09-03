@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Button, Col, Container, ListGroup, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
 
-const EditBusOutOfService = () => {
+const EditBusOutOfService = ({ handleCancel }) => {
   const [dates, setDates] = useState([]);
   const handleAddDate = () => {
     let newDates = [
@@ -72,10 +72,7 @@ const EditBusOutOfService = () => {
       <hr />
 
       <div className="w-100 d-flex flex-row gap-2">
-        <Button
-          variant="secondary"
-          // onClick={handleClose}
-        >
+        <Button variant="secondary" onClick={handleCancel}>
           Cancel
         </Button>
         <Button

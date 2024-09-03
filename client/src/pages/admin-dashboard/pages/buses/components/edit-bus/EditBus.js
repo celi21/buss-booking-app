@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { Container, Tab, Tabs } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchBusById } from "../../../../../../store/slices/BusSlice";
 import EditBusGeneralSettings from "./components/EditBusGeneralSettings";
 import EditBusOutOfService from "./components/EditBusOutOfService";
@@ -15,6 +15,10 @@ const EditBus = () => {
   const dispatch = useDispatch();
   const { busId } = useParams();
   const { fetchBusLoading, fetchBusObject } = useSelector((state) => state.bus);
+  const navigate = useNavigate();
+  const handleCancel = () => {
+    navigate("/admin/buses");
+  };
 
   useEffect(() => {
     if (busId) {
@@ -33,16 +37,16 @@ const EditBus = () => {
       <h4 className="text-center mb-3">Route: {fetchBusObject?.route?.name}</h4>
       <Tabs defaultActiveKey="generalSettings" className="mb-3 pb-3">
         <Tab eventKey="generalSettings" title="General Settings">
-          <EditBusGeneralSettings />
+          <EditBusGeneralSettings handleCancel={handleCancel} />
         </Tab>
         <Tab eventKey="outOfService" title="Out Of Service">
-          <EditBusOutOfService />
+          <EditBusOutOfService handleCancel={handleCancel} />
         </Tab>
         <Tab eventKey="ticketTypes" title="Ticket Types">
-          <EditBusTicketTypes />
+          <EditBusTicketTypes handleCancel={handleCancel} />
         </Tab>
         <Tab eventKey="ticketPrices" title="Ticket Prices">
-          <EditBusTicketPrices />
+          <EditBusTicketPrices handleCancel={handleCancel} />
         </Tab>
       </Tabs>
     </Container>

@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Button, Container } from "react-bootstrap";
+import { Alert, Button, Container } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchRoutes } from "../../../../../../../store/slices/RoutesSlice";
-import { fetchBusTypes } from "../../../../../../../store/slices/BusTypeSlice";
 import { ArrowDown } from "react-bootstrap-icons";
+import {
+  editBus,
+  fetchBusById,
+  setEditBusError,
+} from "../../../../../../../store/slices/BusSlice";
+import toast, { Toaster } from "react-hot-toast";
 
-const EditBusGeneralSettings = () => {
-  const { fetchBusObject } = useSelector((state) => state.bus);
-  const { routes } = useSelector((state) => state.routes);
+const EditBusGeneralSettings = ({ handleCancel }) => {
+  const { fetchBusObject, editBusLoading, editBusError } = useSelector(
+    (state) => state.bus
+  );
   const { busTypes } = useSelector((state) => state.busType);
   const [selectedRoute, setSelectedRoute] = useState(null);
   const [selectedBusType, setSelectedBusType] = useState(null);
@@ -69,13 +74,12 @@ const EditBusGeneralSettings = () => {
 
   const handleTimeChange = (e, locId, index, type) => {
     if (!e.target.value || !selectedRoute || !locId) {
-      console.log("object");
       return;
     }
     let time = formatTime(e.target.value);
 
     let updatedLocations = selectedRoute.locations.map((loc, index) => {
-      if (loc._id === locId) {
+      if (loc.city._id === locId) {
         if (type == "departure") {
           return {
             ...loc,
@@ -98,9 +102,10 @@ const EditBusGeneralSettings = () => {
   };
 
   const timeInputDefaultValue = (timeString) => {
-    const [time, meridian] = timeString.includes("AM")
+    let [time, meridian] = timeString.includes("AM")
       ? timeString.split(":AM")
       : timeString.split(":PM");
+    meridian = timeString.includes("AM") ? "AM" : "PM";
     var hours = parseInt(time.split(":")[0]);
     var minutes = time.split(":")[1];
     if (meridian === "PM" && hours !== 12) {
@@ -108,12 +113,125 @@ const EditBusGeneralSettings = () => {
     } else if (meridian === "AM" && hours === 12) {
       hours = 0;
     }
-    console.log(`${hours.toString().padStart(2, "0")}:${minutes}`);
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
   };
 
+  const dispatch = useDispatch();
+  const handleSubmit = () => {
+    if (!selectedRoute) {
+      dispatch(setEditBusError("This route does not exist!"));
+      toast.error("This route does not exist!", {
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (!selectedBusType) {
+      dispatch(setEditBusError("Please choose a bus type"));
+      toast.error("Please choose a bus type", {
+        duration: 4000,
+      });
+      return;
+    }
+
+    for (let i = 0; i < selectedRoute.locations.length; i++) {
+      let loc = selectedRoute.locations[i];
+      if (i == 0) {
+        if (loc.departureTime == null || loc.departureTime == "") {
+          dispatch(
+            setEditBusError(
+              "Please select departure time for starting location"
+            )
+          );
+          toast.error("Please select departure time for starting location", {
+            duration: 4000,
+          });
+          return;
+        }
+      } else if (i == selectedRoute.locations.length - 1) {
+        if (loc.arrivalTime == null || loc.arrivalTime == "") {
+          dispatch(
+            setEditBusError("Please select arrival time for the destination")
+          );
+          toast.error("Please select arrival time for the destination", {
+            duration: 4000,
+          });
+          return;
+        }
+      } else {
+        if (
+          loc.arrivalTime == null ||
+          loc.arrivalTime == "" ||
+          loc.departureTime == null ||
+          loc.departureTime == ""
+        ) {
+          dispatch(
+            setEditBusError(
+              "Please select arrival and departure time for all locations"
+            )
+          );
+          toast.error(
+            "Please select arrival and departure time for all locations",
+            {
+              duration: 4000,
+            }
+          );
+          return;
+        }
+      }
+    }
+
+    if (
+      !periodOperatingFrom ||
+      periodOperatingFrom.trim() == "" ||
+      periodOperatingFrom == null
+    ) {
+      dispatch(setEditBusError("Please select period operating from date"));
+      toast.error("Please select period operating from date", {
+        duration: 4000,
+      });
+      return;
+    }
+
+    if (
+      !periodOperatingTo ||
+      periodOperatingTo.trim() == "" ||
+      periodOperatingTo == null
+    ) {
+      dispatch(setEditBusError("Please select period operating to date"));
+      toast.error("Please select period operating to date", {
+        duration: 4000,
+      });
+      return;
+    }
+
+    const busObject = {
+      busId: selectedRoute._id,
+      routeId: selectedRoute.route._id,
+      busTypeId: selectedBusType,
+      locations: selectedRoute.locations,
+      periodOperatingFrom,
+      periodOperatingTo,
+      recurring,
+      tab: "general-settings",
+    };
+
+    dispatch(editBus(busObject));
+    if (!editBusLoading && !editBusError) {
+      toast.success("Bus General Settings Updated", {
+        duration: 4000,
+      });
+      dispatch(setEditBusError(null));
+      // dispatch(fetchBusById(selectedRoute._id));
+    }
+  };
+
+  console.log(busTypes, selectedBusType);
+
   return (
     <Container fluid>
+      {/* {editBusError && <Alert variant="danger">{editBusError}</Alert>} */}
+
       <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
         <div className="w-50 fw-semibold">Bus Type:</div>
         <select
@@ -126,10 +244,11 @@ const EditBusGeneralSettings = () => {
           <option value="" key="">
             Choose a Bus Type
           </option>
-          {busTypes.map((busType) => (
+          {busTypes?.map((busType) => (
             <option
               value={busType._id}
               key={busType._id}
+              defaultValue={busType._id}
               selected={selectedBusType == busType._id}
             >
               {busType.name}, {busType.seats} seat(s)
@@ -316,19 +435,15 @@ const EditBusGeneralSettings = () => {
       <hr />
 
       <div className="w-100 d-flex flex-row gap-2">
-        <Button
-          variant="secondary"
-          // onClick={handleClose}
-        >
+        <Button variant="secondary" onClick={handleCancel}>
           Cancel
         </Button>
         <Button
           variant="primary"
-          // onClick={handleSubmit}
-          // disabled={addNewBusLoading}
+          onClick={handleSubmit}
+          disabled={editBusLoading}
         >
-          Update
-          {/* {addNewBusLoading ? "loading..." : "Save"} */}
+          {editBusLoading ? "loading..." : "Update"}
         </Button>
       </div>
     </Container>

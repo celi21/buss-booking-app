@@ -319,3 +319,49 @@ export const fetchBus = async (req, res, next) => {
     });
   }
 };
+
+export const updateBus = async (req, res, next) => {
+  const busObject = req.body;
+  try {
+    console.log(busObject);
+    if (busObject && busObject.tab === "general-settings") {
+      let locations = busObject.locations.map((loc) => {
+        return {
+          city: loc.city._id,
+          departureTime: loc.departureTime ? loc.departureTime : null,
+          arrivalTime: loc.arrivalTime ? loc.arrivalTime : null,
+        };
+      });
+      const updatedBus = await Bus.findByIdAndUpdate(
+        busObject.busId,
+        {
+          route: busObject.routeId,
+          busType: busObject.busTypeId,
+          periodStartDate: busObject.periodOperatingFrom,
+          periodEndDate: busObject.periodOperatingTo,
+          locations: locations,
+          recurring: busObject.recurring,
+        },
+        {
+          new: true,
+        }
+      ).populate("route busType locations locations.city");
+
+      if (updatedBus) {
+        return res.status(200).json({
+          success: true,
+          message: "Bus Updated Successfully",
+          busObject: updatedBus,
+        });
+      }
+    } else if (busObject && busObject.tab === "out-of-service") {
+    } else if (busObject && busObject.tab === "ticket-types") {
+    } else if (busObject && busObject.tab === "ticket-prices") {
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Interval Server Error",
+    });
+  }
+};

@@ -1,6 +1,6 @@
 import React from "react";
 
-const EditBusTicketPrices = () => {
+const EditBusTicketPrices = ({ handleCancel }) => {
   return <div>EditBusTicketPrices</div>;
 };
 

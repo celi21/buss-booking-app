@@ -3,6 +3,7 @@ import { Col, Container, Row } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { Navigate, Outlet } from "react-router-dom";
 import AdminSidebar from "./components/admin-side-bar/AdminSidebar";
+import { Toaster } from "react-hot-toast";
 
 const AdminDashboardLayout = () => {
   const { user, isAdmin } = useSelector((state) => state.auth);
@@ -12,6 +13,7 @@ const AdminDashboardLayout = () => {
 
   return (
     <Container fluid className="py-4">
+      <Toaster />
       <Row>
         <Col xs={4} md={3} lg={3} className="sidebar-column">
           <AdminSidebar />

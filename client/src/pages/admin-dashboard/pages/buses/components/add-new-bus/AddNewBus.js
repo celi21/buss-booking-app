@@ -215,7 +215,6 @@ const AddNewBus = ({ handleClose, show }) => {
       recurring,
     };
 
-    console.log(busObject);
     dispatch(addNewBus(busObject));
     dispatch(setAddNewBusError(null));
     setSelectedRoute(null);
