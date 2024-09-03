@@ -222,11 +222,8 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
         duration: 4000,
       });
       dispatch(setEditBusError(null));
-      // dispatch(fetchBusById(selectedRoute._id));
     }
   };
-
-  console.log(busTypes, selectedBusType);
 
   return (
     <Container fluid>

@@ -1,9 +1,37 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button, Col, Container, ListGroup, Row } from "react-bootstrap";
 import { Plus } from "react-bootstrap-icons";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  editBus,
+  setEditBusError,
+} from "../../../../../../../store/slices/BusSlice";
 
 const EditBusOutOfService = ({ handleCancel }) => {
   const [dates, setDates] = useState([]);
+  const { fetchBusObject, editBusLoading, editBusError } = useSelector(
+    (state) => state.bus
+  );
+
+  useEffect(() => {
+    if (fetchBusObject) {
+      if (
+        fetchBusObject.outOfServiceDates &&
+        fetchBusObject.outOfServiceDates.length > 0
+      ) {
+        let savedDates = fetchBusObject.outOfServiceDates;
+        let newDates = savedDates.map((date, index) => {
+          return {
+            date: date,
+            id: index + 1,
+          };
+        });
+        setDates(newDates);
+      }
+    }
+  }, [fetchBusObject]);
+
   const handleAddDate = () => {
     let newDates = [
       ...dates,
@@ -19,6 +47,56 @@ const EditBusOutOfService = ({ handleCancel }) => {
   const handleRemoveDate = (index, id) => {
     let filteredDates = dates.filter((d) => d.id !== id);
     setDates(filteredDates);
+  };
+
+  const handleDateChange = (e, id) => {
+    if (!e.target.value) return;
+
+    let updatedDates = dates.map((d) => {
+      if (d.id === id) {
+        return {
+          ...d,
+          date: e.target.value,
+        };
+      } else {
+        return d;
+      }
+    });
+
+    setDates(updatedDates);
+  };
+
+  const dispatch = useDispatch();
+  const handleSubmit = () => {
+    if (dates.length > 0) {
+      for (let i = 0; i < dates.length; i++) {
+        if (
+          !dates[i].date ||
+          dates[i].date.trim() === "" ||
+          dates[i].date === null
+        ) {
+          dispatch(setEditBusError("Please choose all the date entries."));
+          toast.error("Please choose all the date entries.", {
+            duration: 4000,
+          });
+          return;
+        }
+      }
+    }
+
+    const busObject = {
+      busId: fetchBusObject._id,
+      dates,
+      tab: "out-of-service",
+    };
+
+    dispatch(editBus(busObject));
+    if (!editBusLoading && !editBusError) {
+      toast.success("Bus Out of Service Dates Saved", {
+        duration: 4000,
+      });
+      dispatch(setEditBusError(null));
+    }
   };
 
   return (
@@ -41,8 +119,14 @@ const EditBusOutOfService = ({ handleCancel }) => {
           >
             {dates.map((date, index) => {
               return (
-                <li className="d-flex mb-2">
-                  <input type="date" className="p-1" defaultValue={date.date} />
+                <li className="d-flex mb-2" key={date.id}>
+                  <input
+                    type="date"
+                    className="p-1"
+                    defaultValue={date.date}
+                    value={date.date}
+                    onChange={(e) => handleDateChange(e, date.id)}
+                  />
                   <Button
                     className="ms-3"
                     variant="danger"
@@ -77,11 +161,10 @@ const EditBusOutOfService = ({ handleCancel }) => {
         </Button>
         <Button
           variant="primary"
-          // onClick={handleSubmit}
-          // disabled={addNewBusLoading}
+          onClick={handleSubmit}
+          disabled={editBusLoading}
         >
-          Update
-          {/* {addNewBusLoading ? "loading..." : "Save"} */}
+          {editBusLoading ? "loading..." : "Save"}
         </Button>
       </div>
     </Container>

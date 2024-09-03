@@ -355,6 +355,25 @@ export const updateBus = async (req, res, next) => {
         });
       }
     } else if (busObject && busObject.tab === "out-of-service") {
+      let outOfServiceDates = busObject.dates.map((d) => {
+        return d.date;
+      });
+      const updatedBus = await Bus.findByIdAndUpdate(
+        busObject.busId,
+        {
+          outOfServiceDates: outOfServiceDates,
+        },
+        {
+          new: true,
+        }
+      ).populate("route busType locations locations.city");
+      if (updatedBus) {
+        return res.status(200).json({
+          success: true,
+          message: "Bus Updated Successfully",
+          busObject: updatedBus,
+        });
+      }
     } else if (busObject && busObject.tab === "ticket-types") {
     } else if (busObject && busObject.tab === "ticket-prices") {
     }

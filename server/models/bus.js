@@ -60,6 +60,11 @@ const busSchema = new Schema(
       type: String,
     },
     recurring: [DaySchema],
+    outOfServiceDates: [
+      {
+        type: String,
+      },
+    ],
   },
   {
     timestamps: true,
