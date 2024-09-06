@@ -92,26 +92,30 @@ const Buses = () => {
         <Table responsive hover striped>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Route</th>
-              <th>Depart - Arrive</th>
-              <th>Operates From - To (dates)</th>
+              <th className="text-nowrap">#</th>
+              <th className="text-nowrap">Route</th>
+              <th className="text-nowrap">Bus Type (seats)</th>
+              <th className="text-nowrap">Depart - Arrive</th>
+              <th className="text-nowrap">Operates From - To (dates)</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {buses.map((bus, index) => (
               <tr key={bus._id}>
-                <td>{index + 1}</td>
-                <td>{bus.route.name}</td>
-                <td>
+                <td className="text-nowrap">{index + 1}</td>
+                <td className="text-nowrap">{bus.route.name}</td>
+                <td className="text-nowrap">
+                  {bus.busType.name} ({bus.busType.seats})
+                </td>
+                <td className="text-nowrap">
                   {bus.locations[0].departureTime} -{" "}
                   {bus.locations[bus.locations.length - 1].arrivalTime}
                 </td>
-                <td>
+                <td className="text-nowrap">
                   {bus.periodStartDate} - {bus.periodEndDate}
                 </td>
-                <td>
+                <td className="text-nowrap">
                   <Button
                     variant="primary"
                     size="sm"

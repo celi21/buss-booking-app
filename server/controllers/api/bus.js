@@ -247,12 +247,18 @@ export const AddNewBus = async (req, res, next) => {
       recurring: busObject.recurring,
     });
     await newBus.save();
-    return res.status(200).json({
-      success: true,
-      message: "Bus Added Successfully",
-      busObject: newBus,
-    });
+    if (newBus) {
+      let bus = await Bus.findById(newBus._id).populate(
+        "route busType locations locations.city ticketTypes"
+      );
+      return res.status(200).json({
+        success: true,
+        message: "Bus Added Successfully",
+        busObject: bus,
+      });
+    }
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Interval Server Error",
@@ -262,7 +268,9 @@ export const AddNewBus = async (req, res, next) => {
 
 export const fetchBuses = async (req, res, next) => {
   try {
-    const buses = await Bus.find({}).populate("route busType locations");
+    const buses = await Bus.find({}).populate(
+      "route busType locations locations.city ticketTypes"
+    );
     return res.status(200).json({
       success: true,
       message: "Buses Fetched Successfully",

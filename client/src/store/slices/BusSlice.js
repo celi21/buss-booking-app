@@ -140,11 +140,13 @@ export const removeBus = createAsyncThunk(
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
+        data: {
+          busId,
+        },
       };
       const response = await axios.delete(
         `${process.env.REACT_APP_API_BASE_URL}/bus/remove-bus`,
-        config,
-        busId
+        config
       );
       if (response.data.success) return response.data.success;
     } catch (error) {
@@ -178,6 +180,7 @@ const BusSlice = createSlice({
       .addCase(addNewBus.fulfilled, (state, action) => {
         state.addNewBusLoading = false;
         state.isBusesLoading = false;
+        state.addNewBusError = null;
         state.buses.push(action.payload);
       })
       .addCase(addNewBus.rejected, (state, action) => {

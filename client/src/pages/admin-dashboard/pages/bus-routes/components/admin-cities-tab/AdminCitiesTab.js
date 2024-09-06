@@ -70,18 +70,18 @@ const AdminCitiesTab = () => {
         <Table responsive hover striped>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Name</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th className="text-nowrap">#</th>
+              <th className="text-nowrap">Name</th>
+              <th className="text-nowrap">Status</th>
+              <th className="text-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody>
             {cities.map((city, index) => (
               <tr key={city._id}>
-                <td>{index + 1}</td>
-                <td>{city.name}</td>
-                <td>
+                <td className="text-nowrap">{index + 1}</td>
+                <td className="text-nowrap">{city.name}</td>
+                <td className="text-nowrap">
                   <div className="d-flex flex-row justify-content-start align-items-center gap-2">
                     <select
                       className="form-select form-select-sm w-auto"
@@ -107,7 +107,7 @@ const AdminCitiesTab = () => {
                     </div>
                   </div>
                 </td>
-                <td>
+                <td className="text-nowrap">
                   <Button
                     variant="primary"
                     size="sm"

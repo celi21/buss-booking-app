@@ -141,12 +141,12 @@ const AdminRoutesTab = () => {
         <Table responsive hover striped>
           <thead>
             <tr>
-              <th>#</th>
-              <th>Title</th>
-              <th>From</th>
-              <th>To</th>
-              <th>Status</th>
-              <th>Actions</th>
+              <th className="text-nowrap">#</th>
+              <th className="text-nowrap">Title</th>
+              <th className="text-nowrap">From</th>
+              <th className="text-nowrap">To</th>
+              <th className="text-nowrap">Status</th>
+              <th className="text-nowrap">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -207,7 +207,7 @@ const AdminRoutesTab = () => {
             ))}
             {routes.length === 0 && (
               <tr>
-                <td colSpan="5" className="text-center">
+                <td colSpan="6" className="text-center">
                   No data found
                 </td>
               </tr>

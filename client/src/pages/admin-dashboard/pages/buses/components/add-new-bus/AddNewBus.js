@@ -255,7 +255,7 @@ const AddNewBus = ({ handleClose, show }) => {
       { id: 6, name: "Saturday", checked: false },
       { id: 7, name: "Sunday", checked: false },
     ]);
-    if (!addNewBusLoading) {
+    if (!addNewBusLoading && !addNewBusError) {
       toast.success("New Bus Added Successfully", {
         duration: 4000,
       });
