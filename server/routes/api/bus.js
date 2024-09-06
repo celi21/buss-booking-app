@@ -1,10 +1,7 @@
 import express from "express";
 import {
   getBuses,
-  addBus,
   removeBus,
-  addReview,
-  getReview,
   addBusType,
   fetchBusTypes,
   removeBusType,
@@ -30,11 +27,6 @@ router.post("/add-new-bus", verifyAdmin, AddNewBus);
 router.post("/fetch-buses", verifyAdmin, fetchBuses);
 router.get("/fetch-bus/:busId", verifyAdmin, fetchBus);
 router.put("/edit-bus", verifyAdmin, updateBus);
-
-router.post("/add", verifyAdmin, addBus);
-router.delete("/remove/:busId", verifyAdmin, removeBus);
-
-router.post("/review/add/:busId", verifyUser, addReview);
-router.get("/review/:busId", verifyAdmin, getReview);
+router.delete("/remove-bus", verifyAdmin, removeBus);
 
 export default router;

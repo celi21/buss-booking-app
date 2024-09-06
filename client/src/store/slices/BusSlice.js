@@ -129,6 +129,34 @@ export const editBus = createAsyncThunk(
   }
 );
 
+export const removeBus = createAsyncThunk(
+  "bus/removeBus",
+  async (busId, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.delete(
+        `${process.env.REACT_APP_API_BASE_URL}/bus/remove-bus`,
+        config,
+        busId
+      );
+      if (response.data.success) return response.data.success;
+    } catch (error) {
+      if (error && error.response.data.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
 const BusSlice = createSlice({
   name: "bus",
   initialState,
@@ -196,6 +224,20 @@ const BusSlice = createSlice({
         state.editBusError = null;
         state.fetchBusLoading = false;
         state.editBusLoading = false;
+      })
+      .addCase(removeBus.pending, (state) => {
+        state.isBusesLoading = true;
+      })
+      .addCase(removeBus.fulfilled, (state, action) => {
+        state.isBusesLoading = false;
+        if (action.payload) {
+          state.buses = state.buses.filter(
+            (bus) => bus._id !== action.meta.arg
+          );
+        }
+      })
+      .addCase(removeBus.rejected, (state) => {
+        state.isBusesLoading = false;
       });
   },
 });

@@ -70,24 +70,6 @@ export const addBus = async (req, res, next) => {
   }
 };
 
-export const removeBus = async (req, res, next) => {
-  try {
-    const { busId } = req.params;
-
-    const bus = await Bus.findByIdAndDelete(busId);
-
-    return res.status(200).json({
-      success: true,
-      message: "Bus removed successfully.",
-      data: {
-        bus,
-      },
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
 export const addReview = async (req, res, next) => {
   try {
     const { busId } = req.params;
@@ -402,6 +384,24 @@ export const updateBus = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Interval Server Error",
+    });
+  }
+};
+
+export const removeBus = async (req, res, next) => {
+  const { busId } = req.body;
+  try {
+    const bus = await Bus.findByIdAndDelete(busId);
+
+    return res.status(200).json({
+      success: true,
+      message: "Bus removed successfully.",
+      bus,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Internal Server Error!",
     });
   }
 };

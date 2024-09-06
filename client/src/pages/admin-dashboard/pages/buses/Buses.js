@@ -12,8 +12,9 @@ import { PencilSquare, Plus, Search, Trash3 } from "react-bootstrap-icons";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
 import AddNewBus from "./components/add-new-bus/AddNewBus";
-import { fetchBuses } from "../../../../store/slices/BusSlice";
+import { fetchBuses, removeBus } from "../../../../store/slices/BusSlice";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Buses = () => {
   const [show, setShow] = useState(false);
@@ -33,6 +34,15 @@ const Buses = () => {
 
   const editBus = (bus) => {
     navigate(`/admin/edit-bus/${bus._id}`);
+  };
+
+  const handleRemoveBus = (busId) => {
+    // confirm before deleting
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
+    dispatch(removeBus(busId));
+    toast.success("Bus Removed Successfully", {
+      duration: 4000,
+    });
   };
 
   return (
@@ -116,7 +126,7 @@ const Buses = () => {
                     variant="danger"
                     size="sm"
                     onClick={() => {
-                      // removeBus(bus._id);
+                      handleRemoveBus(bus._id);
                     }}
                   >
                     <Trash3 />
