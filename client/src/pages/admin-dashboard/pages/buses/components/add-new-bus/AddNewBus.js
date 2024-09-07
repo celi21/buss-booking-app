@@ -285,7 +285,7 @@ const AddNewBus = ({ handleClose, show }) => {
         <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
           <div className="w-50 fw-semibold">Route:</div>
           <select
-            className="form-control"
+            className="form-select"
             onChange={(e) => handleRouteChange(e)}
           >
             <option value="" key="">
@@ -302,7 +302,7 @@ const AddNewBus = ({ handleClose, show }) => {
         <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
           <div className="w-50 fw-semibold">Bus Type:</div>
           <select
-            className="form-control"
+            className="form-select"
             onChange={(e) => {
               handleBusTypeChange(e);
             }}

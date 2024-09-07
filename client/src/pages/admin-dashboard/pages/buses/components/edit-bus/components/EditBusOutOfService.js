@@ -164,7 +164,7 @@ const EditBusOutOfService = ({ handleCancel }) => {
           onClick={handleSubmit}
           disabled={editBusLoading}
         >
-          {editBusLoading ? "loading..." : "Save"}
+          {editBusLoading ? "loading..." : "Save out of Service Dates"}
         </Button>
       </div>
     </Container>

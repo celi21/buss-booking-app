@@ -232,7 +232,7 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
       <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
         <div className="w-50 fw-semibold">Bus Type:</div>
         <select
-          className="form-control"
+          className="form-select"
           defaultValue={selectedBusType}
           onChange={(e) => {
             handleBusTypeChange(e);
@@ -440,7 +440,7 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
           onClick={handleSubmit}
           disabled={editBusLoading}
         >
-          {editBusLoading ? "loading..." : "Update"}
+          {editBusLoading ? "loading..." : "Update General Settings"}
         </Button>
       </div>
     </Container>

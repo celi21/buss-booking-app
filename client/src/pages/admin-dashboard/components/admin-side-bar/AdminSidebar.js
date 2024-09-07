@@ -28,75 +28,106 @@ function AdminSidebar() {
   };
 
   return (
-    <Nav className="flex-column bg-light sidebar p-2">
-      <NavLink
-        to="/admin/dashboard"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <House className="me-2" />
-        Dashboard
-      </NavLink>
-      <NavLink
-        to="/admin/schedule"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <Calendar className="me-2" />
-        Schedule
-      </NavLink>
-      <NavLink
-        to="/admin/bookings"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <Clipboard className="me-2" />
-        Bookings
-      </NavLink>
-      <NavLink
-        to="/admin/buses"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <BusFront className="me-2" />
-        Buses
-      </NavLink>
-      <NavLink
-        to="/admin/bus-routes"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <Diagram3 className="me-2" />
-        Routes
-      </NavLink>
-      <NavLink
-        to="/admin/bus-types"
-        className={({ isActive, isPending }) =>
-          isPending
-            ? "text-primary nav-link"
-            : isActive
-            ? "active nav-link "
-            : "nav-link"
-        }
-      >
-        <Diagram3 className="me-2" />
-        Bus Types
-      </NavLink>
-      <NavLink
-        to="/reports"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <BarChart className="me-2" />
-        Reports
-      </NavLink>
-      {/* <NavLink
+    <Nav
+      className="flex-column bg-light sidebar p-2 "
+      style={{
+        height: "100vh",
+        overflowY: "scroll",
+      }}
+    >
+      <div>
+        <NavLink
+          to="/admin/dashboard"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <House className="me-2" />
+          Dashboard
+        </NavLink>
+        <NavLink
+          to="/admin/schedule"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <Calendar className="me-2" />
+          Schedule
+        </NavLink>
+        <NavLink
+          to="/admin/bookings"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <Clipboard className="me-2" />
+          Bookings
+        </NavLink>
+        <NavLink
+          to="/admin/buses"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <BusFront className="me-2" />
+          Buses
+        </NavLink>
+        <NavLink
+          to="/admin/bus-routes"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <Diagram3 className="me-2" />
+          Routes
+        </NavLink>
+        <NavLink
+          to="/admin/bus-types"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-primary nav-link"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <Diagram3 className="me-2" />
+          Bus Types
+        </NavLink>
+        <NavLink
+          to="/reports"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <BarChart className="me-2" />
+          Reports
+        </NavLink>
+        {/* <NavLink
         to="/google-sheets"
         className={({ isActive, isPending }) =>
           isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
@@ -132,16 +163,21 @@ function AdminSidebar() {
         <People className="me-2" />
         Users
       </NavLink> */}
-      <NavLink
-        onClick={handleLogout}
-        to="/"
-        className={({ isActive, isPending }) =>
-          isPending ? "text-muted" : isActive ? "active nav-link " : "nav-link"
-        }
-      >
-        <BoxArrowRight className="me-2" />
-        Logout
-      </NavLink>
+        <NavLink
+          onClick={handleLogout}
+          to="/"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+              ? "active nav-link "
+              : "nav-link"
+          }
+        >
+          <BoxArrowRight className="me-2" />
+          Logout
+        </NavLink>
+      </div>
     </Nav>
   );
 }

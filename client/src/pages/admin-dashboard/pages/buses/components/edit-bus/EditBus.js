@@ -37,7 +37,7 @@ const EditBus = () => {
     <Container fluid>
       <div>
         <div
-          className="d-flex align-items-center flex-row gap-1 bg-light p-1 px-2 rounded border border-light text-primary"
+          className="d-flex align-items-center flex-row gap-1 bg-light p-1 px-2 rounded border border-primary text-primary"
           style={{
             width: "fit-content",
             fontSize: 14,

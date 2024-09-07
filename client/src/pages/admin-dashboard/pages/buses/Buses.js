@@ -78,7 +78,7 @@ const Buses = () => {
           <div>Filter by:</div>
           <Row className="d-flex flex-row">
             <div className="w-100">
-              <select className="form-control w-100">
+              <select className="form-select w-100">
                 <option value="all">All</option>
                 <option value="all">All All</option>
               </select>
