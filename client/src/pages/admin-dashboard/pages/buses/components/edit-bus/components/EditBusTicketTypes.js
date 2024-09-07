@@ -20,6 +20,7 @@ const EditBusTicketTypes = ({ handleCancel }) => {
         let savedTicketTypes = fetchBusObject.ticketTypes;
         let newTicketTypes = savedTicketTypes.map((ticketType, index) => {
           return {
+            ...ticketType,
             type: ticketType.name,
             id: index + 1,
           };

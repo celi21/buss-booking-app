@@ -227,8 +227,6 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
 
   return (
     <Container fluid>
-      {/* {editBusError && <Alert variant="danger">{editBusError}</Alert>} */}
-
       <div className="mb-3 d-flex justify-content-start align-items-center flex-row gap-2">
         <div className="w-50 fw-semibold">Bus Type:</div>
         <select

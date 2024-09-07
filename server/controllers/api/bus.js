@@ -367,6 +367,7 @@ export const updateBus = async (req, res, next) => {
     } else if (busObject && busObject.tab === "ticket-types") {
       const ticketTypes = busObject.ticketTypes.map((ticket) => {
         return {
+          ...ticket,
           name: ticket.type,
         };
       });
@@ -387,6 +388,25 @@ export const updateBus = async (req, res, next) => {
         });
       }
     } else if (busObject && busObject.tab === "ticket-prices") {
+      const ticketPrices = busObject.ticketPrices;
+      if (ticketPrices) {
+        const updatedBus = await Bus.findByIdAndUpdate(
+          busObject.busId,
+          {
+            ticketPrices: ticketPrices,
+          },
+          {
+            new: true,
+          }
+        ).populate("route busType locations locations.city ticketTypes");
+        if (updateBus) {
+          return res.status(200).json({
+            success: true,
+            message: "Bus Updated Successfully",
+            busObject: updatedBus,
+          });
+        }
+      }
     }
   } catch (error) {
     return res.status(500).json({

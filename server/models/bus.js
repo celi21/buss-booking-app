@@ -47,7 +47,44 @@ const TicketTypeSchema = new Schema(
   }
 );
 
-const busSchema = new Schema(
+const PriceDetailSchema = new Schema(
+  {
+    fromLocationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BusLocation",
+      required: true,
+    },
+    toLocationId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BusLocation",
+      required: true,
+    },
+    price: {
+      type: String,
+      required: true,
+    },
+  },
+  {
+    _id: false,
+    timestamps: true,
+  }
+);
+
+const TicketPriceSchema = new Schema(
+  {
+    ticketType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "TicketType",
+      required: true,
+    },
+    prices: [PriceDetailSchema],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const BusSchema = new Schema(
   {
     status: {
       type: String,
@@ -77,12 +114,13 @@ const busSchema = new Schema(
       },
     ],
     ticketTypes: [TicketTypeSchema],
+    ticketPrices: [TicketPriceSchema],
   },
   {
     timestamps: true,
   }
 );
 
-const Bus = model("Bus", busSchema);
+const Bus = model("Bus", BusSchema);
 
 export default Bus;

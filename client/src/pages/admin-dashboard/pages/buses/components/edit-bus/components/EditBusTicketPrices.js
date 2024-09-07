@@ -1,8 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { Button, Col, Container, Row, Table } from "react-bootstrap";
 import { CurrencyDollar } from "react-bootstrap-icons";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "../../../../../../../components/loading-spinner/LoadingSpinner";
+import toast from "react-hot-toast";
+import {
+  editBus,
+  setEditBusError,
+} from "../../../../../../../store/slices/BusSlice";
+import TicketPriceInput from "./TicketPriceInput";
 
 const EditBusTicketPrices = ({ handleCancel }) => {
   const { fetchBusObject, editBusLoading, editBusError } = useSelector(
@@ -24,6 +30,10 @@ const EditBusTicketPrices = ({ handleCancel }) => {
 
       if (fetchBusObject.locations.length > 0) {
         setBusLocations(fetchBusObject.locations);
+      }
+
+      if (fetchBusObject.ticketPrices) {
+        setTicketPrices(fetchBusObject.ticketPrices);
       }
     }
   }, [fetchBusObject]);
@@ -59,18 +69,33 @@ const EditBusTicketPrices = ({ handleCancel }) => {
               );
               // meaning price exist
               if (existingPriceIndex !== -1) {
+                let ticketPrices = [...ticket.prices];
                 let updatedPrice = {
-                  ...ticket.prices[existingPriceIndex],
+                  ...ticketPrices[existingPriceIndex],
                   price: price,
                 };
-                ticket.prices[existingPriceIndex] = updatedPrice;
+                ticketPrices[existingPriceIndex] = updatedPrice;
+                return {
+                  ...ticket,
+                  prices: ticketPrices,
+                };
               } else {
                 // price does not exist. add new
-                ticket.prices.push({
+                // ticket.prices.push({
+                //   fromLocationId: fromLocation._id,
+                //   toLocationId: toLocation._id,
+                //   price: price,
+                // });
+                let ticketPrices = [...ticket.prices];
+                ticketPrices.push({
                   fromLocationId: fromLocation._id,
                   toLocationId: toLocation._id,
                   price: price,
                 });
+                return {
+                  ...ticket,
+                  prices: ticketPrices,
+                };
               }
             }
 
@@ -106,10 +131,40 @@ const EditBusTicketPrices = ({ handleCancel }) => {
       let updatedTicketPrices = [...ticketPrices, newTicket];
       setTicketPrices(updatedTicketPrices);
     }
+
+    console.log(ticketPrices);
   };
 
+  const dispatch = useDispatch();
+
   const handleSubmit = () => {
-    console.log(ticketPrices);
+    if (fetchBusObject) {
+      console.log(ticketPrices);
+      const busObject = {
+        ticketPrices,
+        busId: fetchBusObject._id,
+        tab: "ticket-prices",
+      };
+
+      dispatch(editBus(busObject));
+
+      if (!editBusLoading && !editBusError) {
+        toast.success("Ticket Prices Settings Updated", {
+          duration: 4000,
+        });
+        dispatch(setEditBusError(null));
+      }
+    }
+  };
+
+  const getInputValue = (fromLocation, toLocation) => {
+    return ticketPrices
+      .find((t) => t.ticketType === selectedTicketType)
+      ?.prices.find(
+        (p) =>
+          p.fromLocationId === fromLocation._id &&
+          p.toLocationId === toLocation._id
+      )?.price;
   };
 
   return (
@@ -173,6 +228,8 @@ const EditBusTicketPrices = ({ handleCancel }) => {
                     if (i < index) {
                       render.push(<td className="bg-light" key={i}></td>);
                     } else {
+                      let inputValue =
+                        getInputValue(location, busLocations[i + 1]) || "";
                       render.push(
                         <td
                           key={`${busLocations[i]._id}-${selectedTicketType}`}
@@ -181,29 +238,11 @@ const EditBusTicketPrices = ({ handleCancel }) => {
                             <span class="input-group-text p-1">
                               <CurrencyDollar size={16} />
                             </span>
-                            <input
-                              type="number"
-                              class="form-control shadow-none"
-                              placeholder="Price"
-                              min={0}
-                              value={
-                                ticketPrices
-                                  .find(
-                                    (t) => t.ticketType === selectedTicketType
-                                  )
-                                  ?.prices.find(
-                                    (p) =>
-                                      p.fromLocationId === location._id &&
-                                      p.toLocationId === busLocations[i + 1]._id
-                                  )?.price
-                              }
-                              onChange={(e) => {
-                                handlePriceChange(
-                                  location,
-                                  busLocations[i + 1],
-                                  e.target.value
-                                );
-                              }}
+                            <TicketPriceInput
+                              handlePriceChange={handlePriceChange}
+                              fromLocation={location}
+                              toLocation={busLocations[i + 1]}
+                              inputValue={inputValue}
                             />
                           </div>
                         </td>
