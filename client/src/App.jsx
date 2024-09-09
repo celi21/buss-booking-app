@@ -17,6 +17,7 @@ import BusTypes from "./pages/admin-dashboard/pages/bus-types/BusTypes";
 import BusRoutes from "./pages/admin-dashboard/pages/bus-routes/BusRoutes";
 import Buses from "./pages/admin-dashboard/pages/buses/Buses";
 import EditBus from "./pages/admin-dashboard/pages/buses/components/edit-bus/EditBus";
+import Schedules from "./pages/admin-dashboard/pages/schedules/Schedules";
 
 function App() {
   const dispatch = useDispatch();
@@ -47,6 +48,7 @@ function App() {
           <Route path="bus-routes" element={<BusRoutes />} />
           <Route path="buses" element={<Buses />} />
           <Route path="edit-bus/:busId" element={<EditBus />} />
+          <Route path="schedules" element={<Schedules />} />
           {/* <Route path="/view-bus" element={<ViewBus />} />
           <Route path="/booking/:busId" element={<ViewBusBookings />} />
           <Route path="/booking/:busId" element={<ViewBusBookings />} /> */}

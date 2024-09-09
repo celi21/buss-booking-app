@@ -50,7 +50,7 @@ function AdminSidebar() {
           Dashboard
         </NavLink>
         <NavLink
-          to="/admin/schedule"
+          to="/admin/schedules"
           className={({ isActive, isPending }) =>
             isPending
               ? "text-muted"
