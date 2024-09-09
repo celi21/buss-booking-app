@@ -39,14 +39,12 @@ const DailySchedule = () => {
   const { routes, isRoutesLoading } = useSelector((state) => state.routes);
   const dispatch = useDispatch();
   const [date, setDate] = useState(null);
-  const [day, setDay] = useState(null);
   const [selectedRoute, setSelectedRoute] = useState(null);
 
   useEffect(() => {
     dispatch(fetchBuses());
     dispatch(fetchRoutes());
     setDate(getCurrentDate());
-    setDay(getFullDayName(new Date(date).getDay()));
   }, []);
 
   const filteredBuses = buses
@@ -55,7 +53,6 @@ const DailySchedule = () => {
       let periodEndDate = new Date(bus.periodEndDate);
       let checkDate = new Date(date);
       let checkDay = getFullDayName(checkDate.getDay());
-      let recurring = bus.recurring;
 
       // Check if checkDate is within the start and end dates
       const isDateInRange =
@@ -202,13 +199,13 @@ const DailySchedule = () => {
                     </tr>
                   );
                 })}
-                {/* {buses.length === 0 && (
-          <tr>
-            <td colSpan="5" className="text-center">
-              No data found
-            </td>
-          </tr>
-        )} */}
+                {filteredBuses.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center">
+                      No Buses found
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </Table>
           </Row>

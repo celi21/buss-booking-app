@@ -1,6 +1,9 @@
 import React from "react";
 import { Container, Tab, Tabs } from "react-bootstrap";
 import DailySchedule from "./daily-schedule/DailySchedule";
+import RouteTimetable from "./route-timetable/RouteTimetable";
+import PassengersList from "./passengers-list/PassengersList";
+import SeatsList from "./seats-list/SeatsList";
 
 const Schedules = () => {
   return (
@@ -10,7 +13,13 @@ const Schedules = () => {
           <DailySchedule />
         </Tab>
         <Tab eventKey="route-timetable" title="Route Timetable">
-          Route Timetable
+          <RouteTimetable />
+        </Tab>
+        <Tab eventKey="passengers-list" title="Passengers List">
+          <PassengersList />
+        </Tab>
+        <Tab eventKey="seats-list" title="Seats List">
+          <SeatsList />
         </Tab>
       </Tabs>
     </Container>
