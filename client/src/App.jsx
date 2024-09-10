@@ -18,6 +18,7 @@ import BusRoutes from "./pages/admin-dashboard/pages/bus-routes/BusRoutes";
 import Buses from "./pages/admin-dashboard/pages/buses/Buses";
 import EditBus from "./pages/admin-dashboard/pages/buses/components/edit-bus/EditBus";
 import Schedules from "./pages/admin-dashboard/pages/schedules/Schedules";
+import Booking from "./pages/booking/Booking";
 
 function App() {
   const dispatch = useDispatch();
@@ -31,10 +32,10 @@ function App() {
       <Navbar />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route>
-          <Route path="login" element={<Login />} />
-          <Route path="signup" element={<Signup />} />
-        </Route>
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<Signup />} />
+        <Route path="booking" element={<Booking />} />
+
         <Route
           path="admin"
           element={
@@ -49,13 +50,10 @@ function App() {
           <Route path="buses" element={<Buses />} />
           <Route path="edit-bus/:busId" element={<EditBus />} />
           <Route path="schedules" element={<Schedules />} />
-          {/* <Route path="/view-bus" element={<ViewBus />} />
-          <Route path="/booking/:busId" element={<ViewBusBookings />} />
-          <Route path="/booking/:busId" element={<ViewBusBookings />} /> */}
         </Route>
         <Route element={<ProtectedUserRoute />}>
-          <Route path="/booking" element={<SearchTickets />} />
-          <Route path="/booking/view" element={<ViewBookings />} />
+          {/* <Route path="/booking" element={<SearchTickets />} /> */}
+          {/* <Route path="/booking/view" element={<ViewBookings />} /> */}
         </Route>
       </Routes>
     </BrowserRouter>
