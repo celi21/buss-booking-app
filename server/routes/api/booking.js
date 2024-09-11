@@ -5,11 +5,16 @@ import {
   cancel,
   getUserBookings,
   getBusBookings,
+  fetchCities,
+  checkBusAvailability,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
 
 const router = express.Router();
+
+router.post("/fetch-cities", fetchCities);
+router.post("/check-bus-availability", checkBusAvailability);
 
 router.post("/search", verifyUser, search);
 router.post("/create", verifyUser, create);

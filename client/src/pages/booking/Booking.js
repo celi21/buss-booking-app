@@ -6,13 +6,25 @@ import Tickets from "./components/tickets/Tickets";
 import PersonalDetails from "./components/personal-details/PersonalDetails";
 import ConfirmBooking from "./components/confirm-booking/ConfirmBooking";
 import BookingPayment from "./components/booking-payment/BookingPayment";
+import { useDispatch, useSelector } from "react-redux";
+import { Toaster } from "react-hot-toast";
+import { fetchCities } from "../../store/slices/bookingSlice";
 
 const Booking = () => {
-  const [currentBookingStep, setCurrentBookingStep] = useState(
-    "dates-and-locations"
-  );
   const [selectedDate, setSelectedDate] = useState(null);
+  const [selectedFromCity, setSelectedFromCity] = useState(null);
+  const [selectedToCity, setSelectedToCity] = useState(null);
+  const [selectedSeats, setSelectedSeats] = useState([]);
+  const [ticketsPrice, setTicketsPrice] = useState(0);
   const [timeout, setTimeout] = useState("3:00");
+  const dispatch = useDispatch();
+  const { currentBookingStep, bookingStepsStatus } = useSelector(
+    (state) => state.booking
+  );
+
+  useEffect(() => {
+    dispatch(fetchCities());
+  }, []);
 
   useEffect(() => {
     let timeLeft = 180; // 3 minutes in seconds
@@ -36,6 +48,7 @@ const Booking = () => {
 
   return (
     <Container className="my-4">
+      <Toaster />
       <Row className="justify-content-center d-flex align-items-center">
         <Col
           xl="auto"
@@ -46,7 +59,23 @@ const Booking = () => {
           className="mb-2 p-0"
         >
           <div className="d-flex flex-row align-items-center">
-            <Button variant="primary">Dates and Locations</Button>
+            <Button
+              variant={
+                currentBookingStep == "dates-and-locations"
+                  ? "primary"
+                  : bookingStepsStatus["dates-and-locations"].isCompleted
+                  ? "success"
+                  : "secondary"
+              }
+              disabled={
+                currentBookingStep !== "dates-and-locations" &&
+                bookingStepsStatus["dates-and-locations"].isCompleted == false
+                  ? true
+                  : false
+              }
+            >
+              Dates and Locations
+            </Button>
             <ArrowRight className="mx-3" size={22} color="#aaa" />
           </div>
         </Col>
@@ -59,7 +88,21 @@ const Booking = () => {
           xs="6"
           className="mb-2 p-0"
         >
-          <Button disabled="true" variant="secondary">
+          <Button
+            variant={
+              currentBookingStep == "tickets"
+                ? "primary"
+                : bookingStepsStatus["tickets"].isCompleted
+                ? "success"
+                : "secondary"
+            }
+            disabled={
+              currentBookingStep !== "tickets" &&
+              bookingStepsStatus["tickets"].isCompleted == false
+                ? true
+                : false
+            }
+          >
             Tickets
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
@@ -73,7 +116,21 @@ const Booking = () => {
           xs="6"
           className="mb-2 p-0"
         >
-          <Button disabled="true" variant="secondary">
+          <Button
+            variant={
+              currentBookingStep == "details"
+                ? "primary"
+                : bookingStepsStatus["details"].isCompleted
+                ? "success"
+                : "secondary"
+            }
+            disabled={
+              currentBookingStep !== "details" &&
+              bookingStepsStatus["details"].isCompleted == false
+                ? true
+                : false
+            }
+          >
             Details
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
@@ -87,7 +144,21 @@ const Booking = () => {
           xs="6"
           className="mb-2 p-0"
         >
-          <Button disabled="true" variant="secondary">
+          <Button
+            variant={
+              currentBookingStep == "confirm"
+                ? "primary"
+                : bookingStepsStatus["confirm"].isCompleted
+                ? "success"
+                : "secondary"
+            }
+            disabled={
+              currentBookingStep !== "confirm" &&
+              bookingStepsStatus["confirm"].isCompleted == false
+                ? true
+                : false
+            }
+          >
             Confirm
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
@@ -101,7 +172,21 @@ const Booking = () => {
           xs="6"
           className="mb-2 p-0"
         >
-          <Button disabled="true" variant="secondary">
+          <Button
+            variant={
+              currentBookingStep == "payment"
+                ? "primary"
+                : bookingStepsStatus["payment"].isCompleted
+                ? "success"
+                : "secondary"
+            }
+            disabled={
+              currentBookingStep !== "payment" &&
+              bookingStepsStatus["payment"].isCompleted == false
+                ? true
+                : false
+            }
+          >
             Payment
           </Button>
         </Col>
@@ -125,25 +210,41 @@ const Booking = () => {
 
       <div className="my-4">
         {/* 1. Dates and Locations */}
-        {/* <DatesAndLocations
-          selectedDate={selectedDate}
-          setSelectedDate={setSelectedDate}
-        /> */}
+        {currentBookingStep == "dates-and-locations" && (
+          <DatesAndLocations
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            selectedFromCity={selectedFromCity}
+            setSelectedFromCity={setSelectedFromCity}
+            selectedToCity={selectedToCity}
+            setSelectedToCity={setSelectedToCity}
+          />
+        )}
 
         {/* 2. Tickets */}
-        {/* <Tickets /> */}
+        {currentBookingStep == "tickets" && (
+          <Tickets
+            selectedFromCity={selectedFromCity}
+            selectedToCity={selectedToCity}
+            selectedDate={selectedDate}
+            selectedSeats={selectedSeats}
+            setSelectedSeats={setSelectedSeats}
+            ticketsPrice={ticketsPrice}
+            setTicketsPrice={setTicketsPrice}
+          />
+        )}
 
         {/* 3. Details */}
-        {/* <PersonalDetails /> */}
+        {currentBookingStep == "details" && <PersonalDetails />}
 
         {/* 4. Confirm */}
-        {/* <ConfirmBooking /> */}
+        {currentBookingStep == "confirm" && <ConfirmBooking />}
 
         {/* We are sorry, but your booking failed. The available seat(s) for the selected bus have finished while you were placing your order. You can start over searching for other buses or dates.
          */}
 
         {/* 5. Payment */}
-        <BookingPayment />
+        {currentBookingStep == "payment" && <BookingPayment />}
       </div>
     </Container>
   );

@@ -5,37 +5,53 @@ const bookingSchema = new Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
     },
     bus: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Bus",
       required: true,
     },
+    busType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BusType",
+      required: true,
+    },
+    route: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Route",
+      required: true,
+    },
     from: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "City",
       required: true,
     },
     to: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "City",
+      required: true,
+    },
+    bookingDate: {
       type: String,
-      required: true,
     },
-    date: {
-      type: Date,
-      required: true,
-    },
-    seatNumbers: {
+    bookedSeats: {
       type: [Number],
-      required: true,
+      default: [],
     },
-    fare: {
+    availableSeats: {
       type: Number,
       required: true,
     },
-    cancelled: {
-      type: Boolean,
-      default: false,
-    },
+    // payment:{
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "Payment",
+    //   required: true,
+    // },
+    // personalDetails:{
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "PersonalDetails",
+    //   required: true,
+    // }
   },
   {
     timestamps: true,
