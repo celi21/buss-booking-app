@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
 import {
   CreditCard2BackFill,
@@ -7,7 +7,18 @@ import {
   PersonFill,
 } from "react-bootstrap-icons";
 
-const BookingPayment = () => {
+const BookingPayment = ({
+  selectedSeats,
+  ticketsPrice,
+  paymentDetails,
+  setPaymentDetails,
+}) => {
+  const [fullName, setFullName] = useState(paymentDetails.fullName);
+  const [cardNumber, setCardNumber] = useState(paymentDetails.cardNumber);
+  const [expiryMonth, setExpiryMonth] = useState(paymentDetails.expiryMonth);
+  const [expiryYear, setExpiryYear] = useState(paymentDetails.expiryYear);
+  const [cvv, setCvv] = useState(paymentDetails.cvv);
+
   return (
     <div className="bg-light border p-5 rounded w-100">
       <Row className="shadow bg-white rounded">
@@ -65,8 +76,13 @@ const BookingPayment = () => {
                         fontSize: 14,
                       }}
                     >
-                      <span>2 ADULT(S) x $55.00</span>
-                      <span>2 INFANTE (0-1 YR) x $40.00</span>
+                      {selectedSeats.map((seat) => {
+                        return (
+                          <span>
+                            {`${seat.seats} ${seat.name} x $${seat.price}`}
+                          </span>
+                        );
+                      })}
                     </Col>
                   </Row>
 
@@ -92,7 +108,7 @@ const BookingPayment = () => {
                           fontSize: 14,
                         }}
                       >
-                        $190.00
+                        $0.00
                       </span>
                     </Col>
                   </Row>
@@ -125,7 +141,7 @@ const BookingPayment = () => {
                           fontSize: 14,
                         }}
                       >
-                        $190.00
+                        ${ticketsPrice}
                       </span>
                     </Col>
                   </Row>
@@ -150,12 +166,35 @@ const BookingPayment = () => {
                     color: "#1a1a1ab3",
                   }}
                 >
-                  <span>Pay Via Credit/Debit Card</span>
+                  <div className="text-start">Pay Via Credit/Debit Card</div>
                   <div class="icons">
-                    <img src="https://i.imgur.com/2ISgYja.png" width="30" />
-                    <img src="https://i.imgur.com/W1vtnOV.png" width="30" />
-                    <img src="https://i.imgur.com/35tC99g.png" width="30" />
-                    <img src="https://i.imgur.com/2ISgYja.png" width="30" />
+                    <img
+                      src="https://i.imgur.com/2ISgYja.png"
+                      width="30"
+                      alt="mastercard"
+                    />
+                    <img
+                      src="https://i.imgur.com/W1vtnOV.png"
+                      width="30"
+                      alt="visa"
+                    />
+                    <img
+                      src="https://1000logos.net/wp-content/uploads/2020/11/Discover-Logo-500x313.jpg"
+                      width="40"
+                      alt="Discover"
+                    />
+                    <img
+                      src="https://1000logos.net/wp-content/uploads/2016/10/American-Express-Color-500x281.png"
+                      width="40"
+                      alt="American express"
+                    />
+                    <img
+                      src="https://1000logos.net/wp-content/uploads/2020/07/Maestro-Logo-1996-500x333.png"
+                      width="40"
+                      alt="Maestro"
+                    />
+                    {/* <img src="https://i.imgur.com/35tC99g.png" width="30" /> */}
+                    {/* <img src="https://i.imgur.com/2ISgYja.png" width="30" /> */}
                   </div>
                 </div>
               </h2>
@@ -195,6 +234,10 @@ const BookingPayment = () => {
                         borderColor: "#E0E0E0",
                         borderWidth: 2,
                       }}
+                      value={fullName}
+                      onChange={(e) => {
+                        setFullName(e.target.value);
+                      }}
                     />
                   </InputGroup>
                 </Form.Group>
@@ -226,6 +269,10 @@ const BookingPayment = () => {
                         borderColor: "#E0E0E0",
                         borderWidth: 2,
                       }}
+                      value={cardNumber}
+                      onChange={(e) => {
+                        setCardNumber(e.target.value);
+                      }}
                     />
                   </InputGroup>
                 </Form.Group>
@@ -253,6 +300,10 @@ const BookingPayment = () => {
                         <Form.Control
                           placeholder="MM"
                           className="border-0 text-center shadow-none"
+                          value={expiryMonth}
+                          onChange={(e) => {
+                            setExpiryMonth(e.target.value);
+                          }}
                         />
                         <div
                           style={{
@@ -265,6 +316,10 @@ const BookingPayment = () => {
                         <Form.Control
                           placeholder="YY"
                           className="border-0 text-center shadow-none"
+                          value={expiryYear}
+                          onChange={(e) => {
+                            setExpiryYear(e.target.value);
+                          }}
                         />
                       </div>
                     </Form.Group>
@@ -297,6 +352,10 @@ const BookingPayment = () => {
                           style={{
                             borderColor: "#E0E0E0",
                             borderWidth: 2,
+                          }}
+                          value={cvv}
+                          onChange={(e) => {
+                            setCvv(e.target.value);
                           }}
                         />
                       </InputGroup>

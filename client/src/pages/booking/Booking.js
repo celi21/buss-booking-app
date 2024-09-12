@@ -21,6 +21,27 @@ const Booking = () => {
   const { currentBookingStep, bookingStepsStatus } = useSelector(
     (state) => state.booking
   );
+  const [totalDuration, setTotalDuration] = useState(null);
+  const [departureTime, setDepartureTime] = useState(null);
+  const [arrivalTime, setArrivalTime] = useState(null);
+  const [personalDetails, setPersonalDetails] = useState({
+    firstName: null,
+    lastName: null,
+    phone: null,
+    email: null,
+    pickupAddress: null,
+    dropoffAddress: null,
+    notes: null,
+    suitcases: 0,
+    captcha: null,
+  });
+  const [paymentDetails, setPaymentDetails] = useState({
+    fullName: null,
+    cardNumber: null,
+    expiryMonth: null,
+    expiryYear: null,
+    cvv: null,
+  });
 
   useEffect(() => {
     dispatch(fetchCities());
@@ -231,20 +252,69 @@ const Booking = () => {
             setSelectedSeats={setSelectedSeats}
             ticketsPrice={ticketsPrice}
             setTicketsPrice={setTicketsPrice}
+            totalDuration={totalDuration}
+            setTotalDuration={setTotalDuration}
+            departureTime={departureTime}
+            setDepartureTime={setDepartureTime}
+            arrivalTime={arrivalTime}
+            setArrivalTime={setArrivalTime}
           />
         )}
 
         {/* 3. Details */}
-        {currentBookingStep == "details" && <PersonalDetails />}
+        {currentBookingStep == "details" && (
+          <PersonalDetails
+            selectedFromCity={selectedFromCity}
+            selectedToCity={selectedToCity}
+            selectedDate={selectedDate}
+            selectedSeats={selectedSeats}
+            setSelectedSeats={setSelectedSeats}
+            ticketsPrice={ticketsPrice}
+            setTicketsPrice={setTicketsPrice}
+            totalDuration={totalDuration}
+            setTotalDuration={setTotalDuration}
+            departureTime={departureTime}
+            setDepartureTime={setDepartureTime}
+            arrivalTime={arrivalTime}
+            setArrivalTime={setArrivalTime}
+            personalDetails={personalDetails}
+            setPersonalDetails={setPersonalDetails}
+          />
+        )}
 
         {/* 4. Confirm */}
-        {currentBookingStep == "confirm" && <ConfirmBooking />}
+        {currentBookingStep == "confirm" && (
+          <ConfirmBooking
+            selectedFromCity={selectedFromCity}
+            selectedToCity={selectedToCity}
+            selectedDate={selectedDate}
+            selectedSeats={selectedSeats}
+            setSelectedSeats={setSelectedSeats}
+            ticketsPrice={ticketsPrice}
+            setTicketsPrice={setTicketsPrice}
+            totalDuration={totalDuration}
+            setTotalDuration={setTotalDuration}
+            departureTime={departureTime}
+            setDepartureTime={setDepartureTime}
+            arrivalTime={arrivalTime}
+            setArrivalTime={setArrivalTime}
+            personalDetails={personalDetails}
+            setPersonalDetails={setPersonalDetails}
+          />
+        )}
 
         {/* We are sorry, but your booking failed. The available seat(s) for the selected bus have finished while you were placing your order. You can start over searching for other buses or dates.
          */}
 
         {/* 5. Payment */}
-        {currentBookingStep == "payment" && <BookingPayment />}
+        {currentBookingStep == "payment" && (
+          <BookingPayment
+            selectedSeats={selectedSeats}
+            ticketsPrice={ticketsPrice}
+            paymentDetails={paymentDetails}
+            setPaymentDetails={setPaymentDetails}
+          />
+        )}
       </div>
     </Container>
   );

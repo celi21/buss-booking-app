@@ -30,12 +30,15 @@ const Tickets = ({
   setSelectedSeats,
   ticketsPrice,
   setTicketsPrice,
+  totalDuration,
+  setTotalDuration,
+  departureTime,
+  setDepartureTime,
+  arrivalTime,
+  setArrivalTime,
 }) => {
   const { availableBus, isBusAvailableLoading, busAvailabilityData } =
     useSelector((state) => state.booking);
-  const [totalDuration, setTotalDuration] = useState(null);
-  const [departureTime, setDepartureTime] = useState(null);
-  const [arrivalTime, setArrivalTime] = useState(null);
   const dispatch = useDispatch();
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [localError, setLocalError] = useState(null);
@@ -75,10 +78,12 @@ const Tickets = ({
 
   useEffect(() => {
     if (availableBus) {
-      let ticketTypes = availableBus.ticketTypes.map((t) => {
-        return { name: t.name, _id: t._id, seats: 0, price: 0 };
-      });
-      setSelectedSeats(ticketTypes);
+      if (selectedSeats.length <= 0) {
+        let ticketTypes = availableBus.ticketTypes.map((t) => {
+          return { name: t.name, _id: t._id, seats: 0, price: 0 };
+        });
+        setSelectedSeats(ticketTypes);
+      }
 
       let departureCity = availableBus.locations.find(
         (loc) => loc.city._id === selectedFromCity
@@ -140,6 +145,7 @@ const Tickets = ({
         isCompleted: true,
       })
     );
+    setLocalError(null);
   };
 
   const handleSeatSelection = (ticketTypeId, event, price) => {
@@ -278,10 +284,10 @@ const Tickets = ({
                         );
                         let ticketPriceInfo = price.prices.find(
                           (p) =>
-                            fromLocationCity.city._id === selectedFromCity &&
-                            toLocationCity.city._id === selectedToCity &&
-                            fromLocationCity._id === p.fromLocationId &&
-                            toLocationCity._id === p.toLocationId
+                            fromLocationCity?.city._id === selectedFromCity &&
+                            toLocationCity?.city._id === selectedToCity &&
+                            fromLocationCity?._id === p.fromLocationId &&
+                            toLocationCity?._id === p.toLocationId
                         );
 
                         if (ticketInfo && ticketPriceInfo) {
@@ -290,6 +296,11 @@ const Tickets = ({
                             { length: totalAvailableSeats + 1 },
                             (_, i) => i
                           );
+                          let seats = selectedSeats?.find(
+                            (seat) => seat.name === ticketInfo.name
+                          )?.seats;
+                          console.log(seats);
+
                           return (
                             <td>
                               <Form.Label
@@ -301,11 +312,7 @@ const Tickets = ({
                               <InputGroup className="mb-3">
                                 <Form.Select
                                   id={`${ticketInfo.name}-seats`}
-                                  value={
-                                    selectedSeats?.find(
-                                      (seat) => seat.name === ticketInfo.name
-                                    )?.seats || 0
-                                  }
+                                  value={seats || 0}
                                   onChange={(e) =>
                                     handleSeatSelection(
                                       ticketInfo._id,
@@ -320,14 +327,15 @@ const Tickets = ({
                                       0,
                                       totalAvailableSeats -
                                         seatsTaken +
-                                        (selectedSeats?.find(
-                                          (seat) =>
-                                            seat.name === ticketInfo.name
-                                        )?.seats || 0) +
+                                        (seats || 0) +
                                         1
                                     )
                                     .map((option) => (
-                                      <option key={option} value={option}>
+                                      <option
+                                        key={option}
+                                        value={option}
+                                        selected={seats === option}
+                                      >
                                         {option}
                                       </option>
                                     ))}
@@ -346,11 +354,10 @@ const Tickets = ({
               </Table>
             </Row>
 
-            {(!busAvailabilityData ||
-              totalAvailableSeats <= 0 ||
-              localError) && (
+            {(!busAvailabilityData || totalAvailableSeats <= 0) && (
               <Alert variant="danger">All Seats are booked/reserved.</Alert>
             )}
+            {localError && <Alert variant="danger">{localError}</Alert>}
 
             <Row>
               <div className="d-flex justify-content-end flex-row align-items-center gap-1">
