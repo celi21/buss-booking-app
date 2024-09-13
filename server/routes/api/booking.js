@@ -9,6 +9,7 @@ import {
   checkBusAvailability,
   confirmBusSeatsAvailability,
   confirmBooking,
+  searchBooking,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -19,6 +20,7 @@ router.post("/fetch-cities", fetchCities);
 router.post("/check-bus-availability", checkBusAvailability);
 router.post("/confirm-bus-seats-availability", confirmBusSeatsAvailability);
 router.post("/confirm-booking", confirmBooking);
+router.get("/search-booking/:bookingId", searchBooking);
 
 router.post("/search", verifyUser, search);
 router.post("/create", verifyUser, create);

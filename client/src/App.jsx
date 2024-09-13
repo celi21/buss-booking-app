@@ -19,6 +19,7 @@ import Buses from "./pages/admin-dashboard/pages/buses/Buses";
 import EditBus from "./pages/admin-dashboard/pages/buses/components/edit-bus/EditBus";
 import Schedules from "./pages/admin-dashboard/pages/schedules/Schedules";
 import Booking from "./pages/booking/Booking";
+import SearchBooking from "./pages/search-booking/SearchBooking";
 
 function App() {
   const dispatch = useDispatch();
@@ -35,6 +36,7 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
         <Route path="booking" element={<Booking />} />
+        <Route path="booking/:bookingId" element={<SearchBooking />} />
 
         <Route
           path="admin"

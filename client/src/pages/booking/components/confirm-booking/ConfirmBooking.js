@@ -40,6 +40,31 @@ const ConfirmBooking = ({
     );
   };
 
+  const handleDateButton = () => {
+    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    dispatch(setCurrentBookingStep("dates-and-locations"));
+    stepsToUpdate.forEach((step) => {
+      dispatch(
+        updateBookingStepStatus({
+          step: step,
+          isCompleted: false,
+        })
+      );
+    });
+  };
+  const handleSeatsButton = () => {
+    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    dispatch(setCurrentBookingStep("tickets"));
+    stepsToUpdate.forEach((step) => {
+      dispatch(
+        updateBookingStepStatus({
+          step: step,
+          isCompleted: false,
+        })
+      );
+    });
+  };
+
   return (
     <div className="bg-light border p-3 rounded w-100">
       <p className="fs-4 fw-semibold text-center border-bottom pb-3">
@@ -55,6 +80,8 @@ const ConfirmBooking = ({
         ticketsPrice={ticketsPrice}
         selectedFromCity={selectedFromCity}
         selectedToCity={selectedToCity}
+        handleSeatsButton={handleSeatsButton}
+        handleDateButton={handleDateButton}
       />
 
       <div className="mt-4">

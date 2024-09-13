@@ -1,6 +1,7 @@
 import React from "react";
 import { Button, Col, Row } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { updateBookingStepStatus } from "../../../../store/slices/bookingSlice";
 
 const BookingDetailsRow = ({
   selectedDate,
@@ -10,9 +11,10 @@ const BookingDetailsRow = ({
   ticketsPrice,
   selectedFromCity,
   selectedToCity,
+  handleDateButton,
+  handleSeatsButton,
 }) => {
-  const { availableBus, isBusAvailableLoading, busAvailabilityData } =
-    useSelector((state) => state.booking);
+  const { availableBus } = useSelector((state) => state.booking);
 
   return (
     <Row className="d-flex align-items-stretch">
@@ -32,7 +34,10 @@ const BookingDetailsRow = ({
               xs="10"
             >
               <span className="fw-semibold">{selectedDate}</span>
-              <Button className="p-0 bg-transparent border-0 outline-none text-primary">
+              <Button
+                className="p-0 bg-transparent border-0 outline-none text-primary"
+                onClick={() => handleDateButton()}
+              >
                 Change date
               </Button>
             </Col>
@@ -103,7 +108,10 @@ const BookingDetailsRow = ({
                   </span>
                 );
               })}
-              <Button className="p-0 bg-transparent border-0 outline-none text-primary">
+              <Button
+                className="p-0 bg-transparent border-0 outline-none text-primary"
+                onClick={() => handleSeatsButton()}
+              >
                 Change seats
               </Button>
             </Col>

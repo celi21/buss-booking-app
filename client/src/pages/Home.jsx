@@ -3,13 +3,24 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import busStopImage from "../assets/busstop.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/esm/Button";
 import GuestRegisterModal from "./components/GuestRegisterModal";
+import { useSelector } from "react-redux";
 
 function Home() {
   const [showModal, setShowModal] = useState(false);
   const handleClose = () => setShowModal(false);
+  const { user } = useSelector((state) => state.auth);
+
+  const navigate = useNavigate();
+  const handleBookNow = () => {
+    if (user) {
+      navigate("/booking");
+      return;
+    }
+    setShowModal(true);
+  };
 
   return (
     <Container>
@@ -25,7 +36,7 @@ function Home() {
               variant="primary"
               type="submit"
               className="p-2 px-4 w-auto"
-              onClick={() => setShowModal(true)}
+              onClick={() => handleBookNow()}
             >
               Book Now
             </Button>

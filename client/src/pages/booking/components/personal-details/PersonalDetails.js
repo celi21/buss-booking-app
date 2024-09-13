@@ -164,6 +164,31 @@ const PersonalDetails = ({
     setLocalError(null);
   };
 
+  const handleDateButton = () => {
+    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    dispatch(setCurrentBookingStep("dates-and-locations"));
+    stepsToUpdate.forEach((step) => {
+      dispatch(
+        updateBookingStepStatus({
+          step: step,
+          isCompleted: false,
+        })
+      );
+    });
+  };
+  const handleSeatsButton = () => {
+    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    dispatch(setCurrentBookingStep("tickets"));
+    stepsToUpdate.forEach((step) => {
+      dispatch(
+        updateBookingStepStatus({
+          step: step,
+          isCompleted: false,
+        })
+      );
+    });
+  };
+
   return (
     <div className="bg-light border p-3 rounded w-100">
       <p className="fs-4 fw-bold">Booking Details</p>
@@ -176,6 +201,8 @@ const PersonalDetails = ({
         ticketsPrice={ticketsPrice}
         selectedFromCity={selectedFromCity}
         selectedToCity={selectedToCity}
+        handleSeatsButton={handleSeatsButton}
+        handleDateButton={handleDateButton}
       />
 
       <div className="mt-4">
@@ -423,6 +450,10 @@ const PersonalDetails = ({
                   placeholder="Enter Captcha Code"
                   value={captcha}
                   onChange={(e) => setCaptcha(e.target.value)}
+                  style={{
+                    fontFamily: "Courier New, Courier, monospace",
+                  }}
+                  className="fw-bold"
                 />
               </Form.Group>
             </Col>

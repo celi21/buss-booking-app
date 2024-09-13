@@ -104,6 +104,17 @@ const Booking = () => {
     });
   };
 
+  const handleTabClick = (tabName) => {
+    if (tabName === "payment") {
+      dispatch(setCurrentBookingStep(tabName));
+      return;
+    }
+
+    if (bookingStepsStatus[tabName]?.isCompleted) {
+      dispatch(setCurrentBookingStep(tabName));
+    }
+  };
+
   return (
     <Container className="my-4">
       <Toaster />
@@ -140,6 +151,7 @@ const Booking = () => {
                   ? true
                   : false
               }
+              onClick={() => handleTabClick("dates-and-locations")}
             >
               Dates and Locations
             </Button>
@@ -169,6 +181,7 @@ const Booking = () => {
                 ? true
                 : false
             }
+            onClick={() => handleTabClick("tickets")}
           >
             Tickets
           </Button>
@@ -197,6 +210,7 @@ const Booking = () => {
                 ? true
                 : false
             }
+            onClick={() => handleTabClick("details")}
           >
             Details
           </Button>
@@ -225,6 +239,7 @@ const Booking = () => {
                 ? true
                 : false
             }
+            onClick={() => handleTabClick("confirm")}
           >
             Confirm
           </Button>
@@ -253,6 +268,7 @@ const Booking = () => {
                 ? true
                 : false
             }
+            onClick={() => handleTabClick("payment")}
           >
             Payment
           </Button>
@@ -304,6 +320,7 @@ const Booking = () => {
             setDepartureTime={setDepartureTime}
             arrivalTime={arrivalTime}
             setArrivalTime={setArrivalTime}
+            setSelectedDate={setSelectedDate}
           />
         )}
 

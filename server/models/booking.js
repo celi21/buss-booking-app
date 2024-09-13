@@ -1,5 +1,21 @@
 import mongoose, { Schema, model } from "mongoose";
 
+// Define a sub-schema for seat details
+const seatDetailsSchema = new Schema({
+  name: {
+    type: String,
+    required: true,
+  },
+  seats: {
+    type: Number,
+    required: true,
+  },
+  price: {
+    type: Number,
+    required: true,
+  },
+});
+
 const bookingSchema = new Schema(
   {
     user: {
@@ -55,6 +71,7 @@ const bookingSchema = new Schema(
     bookingId: {
       type: String,
     },
+    seatDetails: [seatDetailsSchema],
   },
   {
     timestamps: true,

@@ -189,12 +189,14 @@ const filterBus = (
   recurring,
   locations,
   selectedFromCity,
-  selectedToCity
+  selectedToCity,
+  outOfServiceDates
 ) => {
   let StartDate = new Date(periodStartDate);
   let EndDate = new Date(periodEndDate);
   let checkDate = new Date(date);
   const day = checkDate.getDay();
+  console.log(day, getFullDayName(day), checkDate);
 
   // Check if checkDate is within the start and end dates
   const isDateInRange = checkDate >= StartDate && checkDate <= EndDate;
@@ -222,8 +224,17 @@ const filterBus = (
     }
   }
 
+  const isOutOfService = outOfServiceDates.includes(
+    checkDate.toISOString().split("T")[0]
+  );
+
   // Return true if conditions are met
-  return isDateInRange && isOperatingOnDay && areCitiesInRightOrder;
+  return (
+    isDateInRange &&
+    isOperatingOnDay &&
+    areCitiesInRightOrder &&
+    !isOutOfService
+  );
 };
 
 export const checkBusAvailability = async (req, res, next) => {
@@ -271,7 +282,8 @@ export const checkBusAvailability = async (req, res, next) => {
           bus.recurring,
           bus.locations,
           queryObject.selectedFromCity,
-          queryObject.selectedToCity
+          queryObject.selectedToCity,
+          bus.outOfServiceDates
         )
       ) {
         return bus;
@@ -497,6 +509,7 @@ export const confirmBooking = async (req, res, next) => {
     let ticketsPrice = 0;
     let requestedSeats = 0;
     console.log(bookingData.selectedSeats);
+    const seatsDetails = [];
 
     bookingData.selectedSeats.forEach((seat) => {
       let ticketPrice = foundBus.ticketPrices.find(
@@ -529,7 +542,7 @@ export const confirmBooking = async (req, res, next) => {
       if (seat.seats > 0) {
         ticketsPrice += Number(ticketPriceInfo?.price) * seat.seats;
       }
-      console.log(ticketsPrice);
+      seatsDetails.push(seat);
       requestedSeats += parseInt(seat.seats);
     });
 
@@ -602,6 +615,7 @@ export const confirmBooking = async (req, res, next) => {
           cvv: bookingData.paymentDetails.cvv,
           transactionId: decodedObject.transactionid,
           amount: ticketsPrice,
+          user: bookingData.user.id,
         });
 
         // if pay success then save the personal details
@@ -614,6 +628,7 @@ export const confirmBooking = async (req, res, next) => {
           dropoffAddress: bookingData.personalDetails.dropoffAddress,
           notes: bookingData.personalDetails.notes,
           suitcases: bookingData.personalDetails.suitcases,
+          user: bookingData.user.id,
         });
 
         await personalDetails.save();
@@ -632,6 +647,8 @@ export const confirmBooking = async (req, res, next) => {
           bookingDate: bookingData.selectedDate,
           transaction_session_id: transaction_session_id,
           bookingId: bookingId,
+          user: bookingData.user.id,
+          seatDetails: seatsDetails,
         });
 
         let busAvailability = await BusAvailability.findOne({
@@ -656,6 +673,52 @@ export const confirmBooking = async (req, res, next) => {
       return res.status(200).json({
         success: false,
         message: "Payment Failed. Please try again later.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const searchBooking = async (req, res, next) => {
+  const { bookingId } = req.params;
+  try {
+    if (!bookingId) {
+      return res.status(404).json({
+        success: false,
+        message: "Please provide booking Id.",
+      });
+    }
+    const booking = await Booking.findOne({
+      bookingId: bookingId,
+    })
+      .populate("user", "name email")
+      .populate("busType", "name seats")
+      .populate("from", "name")
+      .populate("to", "name")
+      .populate("personalDetails", "-user")
+      .populate("bus", "locations")
+      .populate(
+        "payment",
+        "firstName lastName transactionId amount tax currency"
+      );
+
+    // .populate("user bus busType route from to payment personalDetails");
+
+    if (booking) {
+      return res.status(200).json({
+        success: true,
+        message: "Booking found successfully.",
+        booking,
+      });
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "Booking with this ID was not found!",
       });
     }
   } catch (error) {

@@ -52,6 +52,7 @@ const BookingPayment = ({
   const handleBackButton = () => {
     dispatch(setCurrentBookingStep("confirm"));
   };
+  const { user } = useSelector((state) => state.auth);
 
   const confirmBusAvailable = async (queryObject) => {
     try {
@@ -194,6 +195,7 @@ const BookingPayment = ({
           personalDetails: personalDetails,
           selectedSeats: selectedSeats,
           requestedSeats: requestedSeats,
+          user: user,
         };
         console.log(requestedSeats);
         console.log(payment);
@@ -204,6 +206,7 @@ const BookingPayment = ({
           setShowConfirmationModal(true);
           toast.success("Your booking has been completed Successfully.", {
             duration: 4000,
+            position: "top-right",
           });
         }
       }
@@ -577,6 +580,7 @@ const BookingPayment = ({
                       fontSize: "18px",
                     }}
                     onClick={handlePayButton}
+                    disabled={loading}
                   >
                     {loading ? (
                       <div className="d-flex align-items-center justify-content-center">
