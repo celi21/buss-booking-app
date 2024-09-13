@@ -2,9 +2,14 @@ import mongoose, { Mongoose } from "mongoose";
 import Booking from "../../models/booking.js";
 import Bus from "../../models/bus.js";
 import City from "../../models/City.js";
+import querystring from "querystring";
+import axios from "axios";
 
 import { getDateTimeFromDate, getDayFromDate } from "./../../utils/datetime.js";
 import BusAvailability from "../../models/busAvailability.js";
+import PersonalDetails from "../../models/personalDetails.js";
+import Payment from "../../models/payment.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const getUserBookings = async (req, res, next) => {
   try {
@@ -320,5 +325,344 @@ export const checkBusAvailability = async (req, res, next) => {
       message: "Internal server error",
     });
   }
-  console.log(queryObject);
+};
+
+export const confirmBusSeatsAvailability = async (req, res, next) => {
+  const queryObject = req.body;
+  try {
+    if (
+      !queryObject.selectedDate ||
+      !queryObject.busId ||
+      !queryObject.requestedSeats
+    ) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete booking data.",
+      });
+    }
+
+    let busAvailability = await BusAvailability.findOne({
+      bus: queryObject.busId,
+      date: queryObject.selectedDate,
+    });
+
+    // If no availability record exists, create one
+    if (!busAvailability) {
+      return res.status(200).json({
+        success: false,
+        message: "No Bus Found!",
+      });
+    } else {
+      // check if seats are available. check if available < 0
+      if (busAvailability.availableSeats < 0) {
+        return res.status(200).json({
+          success: false,
+          message:
+            "It looks like the seats for this trip have been fully booked while you were filling out the form. We're sorry for the inconvenience. You can try selecting another date for booking.",
+        });
+      }
+
+      if (
+        parseInt(queryObject.requestedSeats) > busAvailability.availableSeats
+      ) {
+        return res.status(200).json({
+          success: false,
+          message: `It looks like the number of seats you selected is no longer available. Another booking was made while you were filling out the form, and only ${busAvailability.availableSeats} seat(s) remain for this trip. Please adjust your seat selection and try again. We apologize for the inconvenience.`,
+        });
+      }
+
+      return res.status(200).json({
+        success: true,
+        message: "Bus Seats are available",
+        busAvailability: busAvailability,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+const merchantOneResultCodeTable = {
+  100: "Transaction was approved. Your payment was successful.",
+  200: "Transaction was declined by the processor. Please contact your card issuer.",
+  201: "Do not honor. The bank has refused the transaction. Try another payment method.",
+  202: "Insufficient funds. You don’t have enough funds in your account.",
+  203: "Over limit. The transaction amount exceeds your credit limit.",
+  204: "Transaction not allowed. This type of transaction is not allowed for your account.",
+  220: "Incorrect payment information. Please check the card details and try again.",
+  221: "No such card issuer. The card issuer could not be identified.",
+  222: "No card number on file with issuer. The card number is not recognized by the bank.",
+  223: "Expired card. Your card has expired, please use a valid card.",
+  224: "Invalid expiration date. The expiration date entered is incorrect.",
+  225: "Invalid card security code. The security code (CVV) entered is incorrect.",
+  226: "Invalid PIN. The PIN entered is incorrect.",
+  240: "Call issuer for further information. Contact your card issuer for more details.",
+  250: "Pick up card. The card has been flagged by the issuer, typically for fraud prevention.",
+  251: "Lost card. The card has been reported as lost.",
+  252: "Stolen card. The card has been reported as stolen.",
+  253: "Fraudulent card. The card has been flagged for fraudulent use.",
+  260: "Declined with further instructions available. Please refer to the response text for more details.",
+  261: "Declined - Stop all recurring payments. The cardholder has requested to stop recurring payments.",
+  262: "Declined - Stop this recurring program. The recurring program has been stopped as per cardholder request.",
+  263: "Declined - Update cardholder data available. Updated card information is available, please update the card details.",
+  264: "Declined - Retry in a few days. The bank has requested to try again later.",
+  300: "Transaction was rejected by the gateway. The payment gateway rejected the transaction, try again.",
+  400: "Transaction error returned by processor. An error occurred during transaction processing, try again.",
+  410: "Invalid merchant configuration. The merchant's account is not properly set up.",
+  411: "Merchant account is inactive. The merchant account is currently inactive.",
+  420: "Communication error. There was an error in communication during the transaction, try again.",
+  421: "Communication error with issuer. There was an issue communicating with the card issuer.",
+  430: "Duplicate transaction at processor. This transaction has already been processed.",
+  440: "Processor format error. There was an error in the transaction format.",
+  441: "Invalid transaction information. Some details of the transaction are incorrect.",
+  460: "Processor feature not available. The feature you are trying to use is not supported.",
+  461: "Unsupported card type. This type of card is not supported by the merchant.",
+};
+
+const makePayment = async (
+  amount,
+  ccnumber,
+  expiryMonth,
+  expiryYear,
+  cvv,
+  first_name,
+  last_name,
+  transaction_session_id,
+  currency = "USD"
+) => {
+  var data = querystring.stringify({
+    type: "sale",
+    amount: amount,
+    ccnumber: ccnumber,
+    security_key: process.env.MERCHANT_ONE_SECRET_KEY,
+    ccexp: `${expiryMonth}/${expiryYear}`,
+    cvv: cvv,
+    first_name: first_name,
+    last_name: last_name,
+    currency: currency,
+    transaction_session_id: transaction_session_id,
+  });
+
+  const response = await axios.post(
+    "https://secure.merchantonegateway.com/api/transact.php",
+    data,
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const confirmBooking = async (req, res, next) => {
+  const bookingData = req.body;
+  try {
+    if (
+      !bookingData.bus ||
+      !bookingData.busType ||
+      !bookingData.route ||
+      !bookingData.from ||
+      !bookingData.to ||
+      !bookingData.selectedDate ||
+      !bookingData.personalDetails ||
+      !bookingData.paymentDetails ||
+      !bookingData.selectedSeats ||
+      !bookingData.requestedSeats
+    ) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete booking data.",
+      });
+    }
+
+    // first confirm the ticket pricing
+    const busId = bookingData.bus;
+    const foundBus = await Bus.findById(busId).populate(
+      "route busType locations locations.city ticketTypes ticketPrices"
+    );
+
+    if (!foundBus) {
+      return res.status(200).json({
+        success: false,
+        message: "This Bus is not available. Please try again later.",
+      });
+    }
+
+    let ticketsPrice = 0;
+    let requestedSeats = 0;
+    console.log(bookingData.selectedSeats);
+
+    bookingData.selectedSeats.forEach((seat) => {
+      let ticketPrice = foundBus.ticketPrices.find(
+        (ticket) =>
+          new mongoose.Types.ObjectId(seat._id).toString() ===
+          ticket.ticketType.toString()
+      );
+
+      let fromLocationCity = foundBus.locations.find(
+        (loc) =>
+          loc.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.from).toString()
+      );
+      let toLocationCity = foundBus.locations.find(
+        (loc) =>
+          loc.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.to).toString()
+      );
+
+      let ticketPriceInfo = ticketPrice.prices.find(
+        (p) =>
+          fromLocationCity?.city._id.toString() ===
+            new mongoose.Types.ObjectId(bookingData.from).toString() &&
+          toLocationCity?.city._id.toString() ===
+            new mongoose.Types.ObjectId(bookingData.to).toString() &&
+          fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
+          toLocationCity?._id.toString() === p.toLocationId.toString()
+      );
+
+      if (seat.seats > 0) {
+        ticketsPrice += Number(ticketPriceInfo?.price) * seat.seats;
+      }
+      console.log(ticketsPrice);
+      requestedSeats += parseInt(seat.seats);
+    });
+
+    console.log(ticketsPrice, requestedSeats);
+
+    // make the payment to merchant one
+    let cardNumber = bookingData.paymentDetails.cardNumber;
+    let expiryMonth = bookingData.paymentDetails.expiryMonth;
+    let expiryYear = bookingData.paymentDetails.expiryYear;
+    let cvv = bookingData.paymentDetails.cvv;
+    let fullName = bookingData.paymentDetails.fullName;
+
+    let first_name = fullName.split(" ")[0];
+    let last_name =
+      fullName.split(" ").length > 1 ? fullName.split(" ")[1] : "";
+    let transaction_session_id = uuidv4();
+
+    let paymentResponse = await makePayment(
+      ticketsPrice,
+      cardNumber,
+      expiryMonth,
+      expiryYear,
+      cvv,
+      first_name,
+      last_name,
+      transaction_session_id
+    );
+    // console.log(paymentResponse);
+    if (paymentResponse) {
+      console.log(paymentResponse);
+      const decodedObject = paymentResponse.split("&").reduce((acc, curr) => {
+        const [key, value] = curr.split("=");
+        acc[key] = value || null;
+        return acc;
+      }, {});
+
+      console.log(decodedObject);
+
+      if (
+        decodedObject.response_code &&
+        decodedObject.response_code !== "100" &&
+        decodedObject.response &&
+        decodedObject.response !== "1"
+      ) {
+        return res.status(200).json({
+          success: false,
+          message:
+            decodedObject.responsetext +
+            ". " +
+            merchantOneResultCodeTable[decodedObject.response_code],
+        });
+      }
+
+      // check if pay success
+      if (
+        decodedObject.response_code &&
+        decodedObject.response_code === "100" &&
+        decodedObject.response &&
+        decodedObject.response === "1" &&
+        decodedObject.transactionid &&
+        decodedObject.transactionid !== null
+      ) {
+        // create/save payment schema
+        const paymentDetails = new Payment({
+          firstName: first_name,
+          lastName: last_name,
+          cardNumber: bookingData.paymentDetails.cardNumber,
+          expiryMonth: bookingData.paymentDetails.expiryMonth,
+          expiryYear: bookingData.paymentDetails.expiryYear,
+          cvv: bookingData.paymentDetails.cvv,
+          transactionId: decodedObject.transactionid,
+          amount: ticketsPrice,
+        });
+
+        // if pay success then save the personal details
+        const personalDetails = new PersonalDetails({
+          firstName: bookingData.personalDetails.firstName,
+          lastName: bookingData.personalDetails.lastName,
+          phone: bookingData.personalDetails.phone,
+          email: bookingData.personalDetails.email,
+          pickupAddress: bookingData.personalDetails.pickupAddress,
+          dropoffAddress: bookingData.personalDetails.dropoffAddress,
+          notes: bookingData.personalDetails.notes,
+          suitcases: bookingData.personalDetails.suitcases,
+        });
+
+        await personalDetails.save();
+        await paymentDetails.save();
+
+        // finally save the booking data and send the booking id as well as confirm message
+        const bookingId = Date.now();
+        const newBooking = new Booking({
+          bus: foundBus._id,
+          busType: foundBus.busType._id,
+          from: bookingData.from,
+          to: bookingData.to,
+          payment: paymentDetails._id,
+          personalDetails: personalDetails._id,
+          route: foundBus.route._id,
+          bookingDate: bookingData.selectedDate,
+          transaction_session_id: transaction_session_id,
+          bookingId: bookingId,
+        });
+
+        let busAvailability = await BusAvailability.findOne({
+          bus: foundBus._id,
+          date: bookingData.selectedDate,
+        });
+
+        busAvailability.availableSeats -= requestedSeats;
+
+        await newBooking.save();
+        await busAvailability.save();
+
+        if (newBooking) {
+          return res.status(200).json({
+            success: true,
+            message: "Booking Successfully added",
+            booking: newBooking,
+          });
+        }
+      }
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "Payment Failed. Please try again later.",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
 };

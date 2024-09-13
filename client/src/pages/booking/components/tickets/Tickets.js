@@ -79,6 +79,7 @@ const Tickets = ({
   useEffect(() => {
     if (availableBus) {
       if (selectedSeats.length <= 0) {
+        console.log("Seting selecetdseats");
         let ticketTypes = availableBus.ticketTypes.map((t) => {
           return { name: t.name, _id: t._id, seats: 0, price: 0 };
         });
@@ -110,6 +111,7 @@ const Tickets = ({
 
   const handleBackButton = () => {
     dispatch(setCurrentBookingStep("dates-and-locations"));
+    setSelectedSeats([]);
   };
 
   const handleCheckoutButton = () => {
@@ -169,7 +171,6 @@ const Tickets = ({
       0
     );
 
-    console.log(priceSum);
     setTicketsPrice(priceSum);
   };
 
@@ -179,7 +180,6 @@ const Tickets = ({
     (total, seatType) => (total += seatType.seats),
     0
   );
-  const remainingSeats = totalAvailableSeats - seatsTaken;
 
   return (
     <div className="bg-light border p-3 rounded w-100">
@@ -392,7 +392,7 @@ const Tickets = ({
                   }}
                   disabled={!busAvailabilityData || totalAvailableSeats <= 0}
                 >
-                  Checkout
+                  Proceed to Details
                 </Button>
               </Col>
             </Row>

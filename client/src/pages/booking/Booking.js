@@ -8,7 +8,12 @@ import ConfirmBooking from "./components/confirm-booking/ConfirmBooking";
 import BookingPayment from "./components/booking-payment/BookingPayment";
 import { useDispatch, useSelector } from "react-redux";
 import { Toaster } from "react-hot-toast";
-import { fetchCities } from "../../store/slices/bookingSlice";
+import {
+  fetchCities,
+  resetBookingForm,
+  setCurrentBookingStep,
+} from "../../store/slices/bookingSlice";
+import BookingConfirmationModal from "./components/booking-payment/booking-confirmation-modal/BookingConfirmationModal";
 
 const Booking = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -24,6 +29,8 @@ const Booking = () => {
   const [totalDuration, setTotalDuration] = useState(null);
   const [departureTime, setDepartureTime] = useState(null);
   const [arrivalTime, setArrivalTime] = useState(null);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [booking, SetBooking] = useState(null);
   const [personalDetails, setPersonalDetails] = useState({
     firstName: null,
     lastName: null,
@@ -67,9 +74,48 @@ const Booking = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const resetForm = () => {
+    dispatch(resetBookingForm());
+    setSelectedDate(null);
+    setSelectedFromCity(null);
+    setSelectedToCity(null);
+    setSelectedSeats([]);
+    setTicketsPrice(0);
+    setTotalDuration(null);
+    setDepartureTime(null);
+    setArrivalTime(null);
+    setPersonalDetails({
+      firstName: null,
+      lastName: null,
+      phone: null,
+      email: null,
+      pickupAddress: null,
+      dropoffAddress: null,
+      notes: null,
+      suitcases: 0,
+      captcha: null,
+    });
+    setPaymentDetails({
+      fullName: null,
+      cardNumber: null,
+      expiryMonth: null,
+      expiryYear: null,
+      cvv: null,
+    });
+  };
+
   return (
     <Container className="my-4">
       <Toaster />
+
+      {showConfirmationModal && (
+        <BookingConfirmationModal
+          booking={booking}
+          showModal={showConfirmationModal}
+          setShowModal={setShowConfirmationModal}
+        />
+      )}
+
       <Row className="justify-content-center d-flex align-items-center">
         <Col
           xl="auto"
@@ -313,6 +359,18 @@ const Booking = () => {
             ticketsPrice={ticketsPrice}
             paymentDetails={paymentDetails}
             setPaymentDetails={setPaymentDetails}
+            personalDetails={personalDetails}
+            selectedFromCity={selectedFromCity}
+            selectedToCity={selectedToCity}
+            totalDuration={totalDuration}
+            departureTime={departureTime}
+            arrivalTime={arrivalTime}
+            selectedDate={selectedDate}
+            resetForm={resetForm}
+            showConfirmationModal={showConfirmationModal}
+            setShowConfirmationModal={setShowConfirmationModal}
+            booking={booking}
+            SetBooking={SetBooking}
           />
         )}
       </div>

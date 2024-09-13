@@ -5,6 +5,7 @@ const bookingSchema = new Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
     },
     bus: {
       type: mongoose.Schema.Types.ObjectId,
@@ -38,20 +39,22 @@ const bookingSchema = new Schema(
       type: [Number],
       default: [],
     },
-    availableSeats: {
-      type: Number,
+    payment: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Payment",
       required: true,
     },
-    // payment:{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "Payment",
-    //   required: true,
-    // },
-    // personalDetails:{
-    //   type: mongoose.Schema.Types.ObjectId,
-    //   ref: "PersonalDetails",
-    //   required: true,
-    // }
+    personalDetails: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PersonalDetails",
+      required: true,
+    },
+    transaction_session_id: {
+      type: String,
+    },
+    bookingId: {
+      type: String,
+    },
   },
   {
     timestamps: true,

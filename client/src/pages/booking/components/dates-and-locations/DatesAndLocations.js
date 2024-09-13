@@ -83,7 +83,6 @@ const DatesAndLocations = ({
       selectedFromCity,
       selectedToCity,
     };
-    console.log(cities, queryObject);
 
     // dispatch(checkIfBusAvailable(queryObject));
     const resultAction = await dispatch(checkIfBusAvailable(queryObject));

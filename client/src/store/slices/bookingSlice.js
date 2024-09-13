@@ -102,6 +102,9 @@ const bookingSlice = createSlice({
         state.bookingStepsStatus[step].isCompleted = isCompleted;
       }
     },
+    resetBookingForm: (state) => {
+      Object.assign(state, initialState);
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -133,7 +136,10 @@ const bookingSlice = createSlice({
   },
 });
 
-export const { setCurrentBookingStep, updateBookingStepStatus } =
-  bookingSlice.actions;
+export const {
+  setCurrentBookingStep,
+  updateBookingStepStatus,
+  resetBookingForm,
+} = bookingSlice.actions;
 
 export default bookingSlice.reducer;

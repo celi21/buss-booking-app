@@ -1,23 +1,219 @@
+import axios from "axios";
 import React, { useState } from "react";
-import { Button, Col, Form, InputGroup, Row } from "react-bootstrap";
+import {
+  Alert,
+  Button,
+  Col,
+  Form,
+  InputGroup,
+  Row,
+  Spinner,
+} from "react-bootstrap";
 import {
   CreditCard2BackFill,
   CreditCardFill,
   LockFill,
   PersonFill,
 } from "react-bootstrap-icons";
+import toast from "react-hot-toast";
+import { useDispatch, useSelector } from "react-redux";
+import { setCurrentBookingStep } from "../../../../store/slices/bookingSlice";
+import BookingConfirmationModal from "./booking-confirmation-modal/BookingConfirmationModal";
 
 const BookingPayment = ({
   selectedSeats,
   ticketsPrice,
   paymentDetails,
   setPaymentDetails,
+  personalDetails,
+  selectedFromCity,
+  selectedToCity,
+  totalDuration,
+  departureTime,
+  arrivalTime,
+  selectedDate,
+  resetForm,
+  showConfirmationModal,
+  setShowConfirmationModal,
+  booking,
+  SetBooking,
 }) => {
   const [fullName, setFullName] = useState(paymentDetails.fullName);
   const [cardNumber, setCardNumber] = useState(paymentDetails.cardNumber);
   const [expiryMonth, setExpiryMonth] = useState(paymentDetails.expiryMonth);
   const [expiryYear, setExpiryYear] = useState(paymentDetails.expiryYear);
   const [cvv, setCvv] = useState(paymentDetails.cvv);
+  const [localError, setLocalError] = useState(null);
+  const { availableBus, busAvailabilityData } = useSelector(
+    (state) => state.booking
+  );
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const handleBackButton = () => {
+    dispatch(setCurrentBookingStep("confirm"));
+  };
+
+  const confirmBusAvailable = async (queryObject) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-bus-seats-availability`,
+        queryObject,
+        config
+      );
+      if (
+        response.data &&
+        response.data.success &&
+        response.data.success == true
+      ) {
+        return true;
+      } else {
+        setLocalError(response.data.message);
+        return false;
+      }
+    } catch (error) {
+      setLocalError(error.message);
+      return false;
+    }
+  };
+
+  const confirmBooking = async (bookingData) => {
+    // /confirm-booking
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-booking`,
+        bookingData,
+        config
+      );
+      if (
+        response.data &&
+        response.data.success &&
+        response.data.success == true
+      ) {
+        SetBooking(response.data.booking);
+        return true;
+      } else {
+        setLocalError(response.data.message);
+        return false;
+      }
+    } catch (error) {
+      setLocalError(error.message);
+      return false;
+    }
+  };
+
+  const handlePayButton = async () => {
+    console.log({
+      user: null,
+      bus: availableBus._id,
+      busType: availableBus.busType._id,
+      route: availableBus.route._id,
+      from: selectedFromCity,
+      to: selectedToCity,
+      selectedDate: selectedDate,
+      personalDetails: personalDetails,
+      selectedSeats: selectedSeats,
+    });
+    if (!fullName || fullName.trim() == "") {
+      toast.error("Please provide your Full Name", {
+        duration: 4000,
+      });
+      setLocalError("Please provide your Full Name");
+      return;
+    }
+    if (!cardNumber || cardNumber.trim() == "") {
+      toast.error("Please provide your Card Number", {
+        duration: 4000,
+      });
+      setLocalError("Please provide your Card Number");
+      return;
+    }
+    if (!expiryMonth || expiryMonth.trim() == "") {
+      toast.error("Please provide card Expiry Month", {
+        duration: 4000,
+      });
+      setLocalError("Please provide card Expiry Month");
+      return;
+    }
+    if (!expiryYear || expiryYear.trim() == "") {
+      toast.error("Please provide card Expiry Year", {
+        duration: 4000,
+      });
+      setLocalError("Please provide card Expiry Year");
+      return;
+    }
+    if (!cvv || cvv.trim() == "") {
+      toast.error("Please provide card CVV/CVC number", {
+        duration: 4000,
+      });
+      setLocalError("Please provide card CVV/CVC number");
+      return;
+    }
+    setLoading(true);
+
+    try {
+      const payment = {
+        fullName: fullName,
+        cardNumber: cardNumber,
+        expiryMonth: expiryMonth,
+        expiryYear: expiryYear,
+        cvv: cvv,
+      };
+      setPaymentDetails(payment);
+      setLocalError(null);
+
+      const requestedSeats = selectedSeats.reduce(
+        (total, seat) => total + seat.seats
+      );
+
+      const queryObject = {
+        selectedDate,
+        busId: availableBus?._id,
+        requestedSeats: requestedSeats,
+      };
+      const doesBusSeatsExists = await confirmBusAvailable(queryObject);
+      if (doesBusSeatsExists === true) {
+        let bookingData = {
+          user: null,
+          bus: availableBus._id,
+          busType: availableBus.busType._id,
+          route: availableBus.route._id,
+          from: selectedFromCity,
+          to: selectedToCity,
+          selectedDate: selectedDate,
+          paymentDetails: payment,
+          personalDetails: personalDetails,
+          selectedSeats: selectedSeats,
+          requestedSeats: requestedSeats,
+        };
+        console.log(requestedSeats);
+        console.log(payment);
+
+        const confirm = await confirmBooking(bookingData);
+        if (confirm === true) {
+          resetForm();
+          setShowConfirmationModal(true);
+          toast.success("Your booking has been completed Successfully.", {
+            duration: 4000,
+          });
+        }
+      }
+    } catch (error) {
+      setLocalError(error.message);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="bg-light border p-5 rounded w-100">
@@ -237,6 +433,7 @@ const BookingPayment = ({
                       value={fullName}
                       onChange={(e) => {
                         setFullName(e.target.value);
+                        setLocalError(null);
                       }}
                     />
                   </InputGroup>
@@ -272,6 +469,7 @@ const BookingPayment = ({
                       value={cardNumber}
                       onChange={(e) => {
                         setCardNumber(e.target.value);
+                        setLocalError(null);
                       }}
                     />
                   </InputGroup>
@@ -301,8 +499,10 @@ const BookingPayment = ({
                           placeholder="MM"
                           className="border-0 text-center shadow-none"
                           value={expiryMonth}
+                          maxLength={2}
                           onChange={(e) => {
                             setExpiryMonth(e.target.value);
+                            setLocalError(null);
                           }}
                         />
                         <div
@@ -317,8 +517,10 @@ const BookingPayment = ({
                           placeholder="YY"
                           className="border-0 text-center shadow-none"
                           value={expiryYear}
+                          maxLength={2}
                           onChange={(e) => {
                             setExpiryYear(e.target.value);
+                            setLocalError(null);
                           }}
                         />
                       </div>
@@ -356,6 +558,7 @@ const BookingPayment = ({
                           value={cvv}
                           onChange={(e) => {
                             setCvv(e.target.value);
+                            setLocalError(null);
                           }}
                         />
                       </InputGroup>
@@ -363,16 +566,25 @@ const BookingPayment = ({
                   </div>
                 </div>
 
+                {localError && <Alert variant="danger">{localError}</Alert>}
+
                 <div className="w-100 mt-4">
                   <Button
                     variant="primary"
-                    className="w-100 fw-bold"
+                    className="w-100 fw-bold py-2"
                     style={{
                       letterSpacing: "1px",
                       fontSize: "18px",
                     }}
+                    onClick={handlePayButton}
                   >
-                    Pay
+                    {loading ? (
+                      <div className="d-flex align-items-center justify-content-center">
+                        <Spinner size="small" />
+                      </div>
+                    ) : (
+                      "Pay"
+                    )}
                   </Button>
                 </div>
 
@@ -394,7 +606,11 @@ const BookingPayment = ({
 
       <Row className="mt-5">
         <Col>
-          <Button variant="dark" className="px-3 py-2 fw-semibold">
+          <Button
+            variant="dark"
+            className="px-3 py-2 fw-semibold"
+            onClick={handleBackButton}
+          >
             Back
           </Button>
         </Col>
