@@ -1,18 +1,20 @@
-import React, { useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import useAuthContext from "../hooks/useAuthContext";
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import LoadingSpinner from "./loading-spinner/LoadingSpinner";
 
-function ProtectedUserRoute() {
-  const { user, isAdmin } = useAuthContext();
+function ProtectedUserRoute({ children }) {
+  const { user, isAdmin, loading } = useSelector((state) => state.auth);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!user) return navigate("/login");
+  if (loading) {
+    return <LoadingSpinner />;
+  }
 
-    if (isAdmin) return navigate("/");
-  }, [navigate, user, isAdmin]);
-
-  return <Outlet />;
+  if (user && !isAdmin) {
+    return children;
+  }
+  navigate("/");
 }
 
 export default ProtectedUserRoute;

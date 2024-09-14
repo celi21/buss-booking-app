@@ -3,7 +3,9 @@ import axios from "axios";
 
 const initialState = {
   cities: [],
+  userBookings: [],
   isCitiesLoading: false,
+  isUserBookingsLoading: false,
   routes: [],
   isRoutesLoading: false,
   buses: [],
@@ -89,6 +91,30 @@ export const checkIfBusAvailable = createAsyncThunk(
   }
 );
 
+export const fetchUserBookings = createAsyncThunk(
+  "booking/fetchUserBookings",
+  async (_, { getState, rejectWithValue }) => {
+    const { user, token } = getState().auth;
+    if (!user || !token) return rejectWithValue("Unauthorized");
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/user-bookings`,
+        {},
+        config
+      );
+      return response.data.bookings;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const bookingSlice = createSlice({
   name: "booking",
   initialState: initialState,
@@ -132,6 +158,16 @@ const bookingSlice = createSlice({
         state.isBusAvailableLoading = false;
         state.availableBusError = action.payload;
         state.availableBus = null;
+      })
+      .addCase(fetchUserBookings.pending, (state) => {
+        state.isUserBookingsLoading = true;
+      })
+      .addCase(fetchUserBookings.fulfilled, (state, action) => {
+        state.isUserBookingsLoading = false;
+        state.userBookings = action.payload;
+      })
+      .addCase(fetchUserBookings.rejected, (state, action) => {
+        state.isUserBookingsLoading = false;
       });
   },
 });

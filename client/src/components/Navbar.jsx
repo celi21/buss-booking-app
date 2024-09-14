@@ -59,10 +59,7 @@ function Header() {
             {user && !isAdmin && (
               <>
                 <Navbar.Text style={{ marginRight: "1rem" }}>
-                  <Link to="/booking">Book Tickets</Link>
-                </Navbar.Text>
-                <Navbar.Text style={{ marginRight: "1rem" }}>
-                  <Link to="/booking/view">View Bookings</Link>
+                  <Link to="/user/dashboard">Dashboard</Link>
                 </Navbar.Text>
               </>
             )}

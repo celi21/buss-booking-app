@@ -729,3 +729,27 @@ export const searchBooking = async (req, res, next) => {
     });
   }
 };
+
+export const fetchUserBookings = async (req, res, nex) => {
+  const user = req.user;
+  try {
+    const bookings = await Booking.find({
+      user: user.id,
+    })
+      .populate("busType", "name")
+      .populate("from", "name")
+      .populate("to", "name")
+      .populate("bus", "locations")
+      .populate("payment", "amount tax currency");
+
+    return res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

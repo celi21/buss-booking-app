@@ -10,9 +10,12 @@ import ProtectedUserRoute from "./components/ProtectedUserRoute";
 import ViewBookings from "./pages/ViewBookings";
 import SearchTickets from "./pages/SearchTickets";
 import AdminHome from "./pages/admin-dashboard/pages/admin-home/AdminHome";
+import UserHome from "./pages/user-dashboard/pages/user-home/UserHome";
+import UserBookings from "./pages/user-dashboard/pages/user-bookings/UserBookings";
 import { useDispatch } from "react-redux";
 import { retrieveUser } from "./store/slices/AuthSlice";
 import AdminDashboardLayout from "./pages/admin-dashboard/AdminDashboardLayout";
+import UserDashboardLayout from "./pages/user-dashboard/UserDashboardLayout";
 import BusTypes from "./pages/admin-dashboard/pages/bus-types/BusTypes";
 import BusRoutes from "./pages/admin-dashboard/pages/bus-routes/BusRoutes";
 import Buses from "./pages/admin-dashboard/pages/buses/Buses";
@@ -53,9 +56,17 @@ function App() {
           <Route path="edit-bus/:busId" element={<EditBus />} />
           <Route path="schedules" element={<Schedules />} />
         </Route>
-        <Route element={<ProtectedUserRoute />}>
-          {/* <Route path="/booking" element={<SearchTickets />} /> */}
-          {/* <Route path="/booking/view" element={<ViewBookings />} /> */}
+
+        <Route
+          path="user"
+          element={
+            <ProtectedUserRoute>
+              <UserDashboardLayout />
+            </ProtectedUserRoute>
+          }
+        >
+          <Route path="dashboard" element={<UserHome />} />
+          <Route path="bookings" element={<UserBookings />} />
         </Route>
       </Routes>
     </BrowserRouter>
