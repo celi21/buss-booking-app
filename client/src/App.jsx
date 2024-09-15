@@ -21,6 +21,8 @@ import BusRoutes from "./pages/admin-dashboard/pages/bus-routes/BusRoutes";
 import Buses from "./pages/admin-dashboard/pages/buses/Buses";
 import EditBus from "./pages/admin-dashboard/pages/buses/components/edit-bus/EditBus";
 import Schedules from "./pages/admin-dashboard/pages/schedules/Schedules";
+import Bookings from "./pages/admin-dashboard/pages/bookings/Bookings";
+import AddBooking from "./pages/admin-dashboard/pages/add-booking/AddBooking";
 import Booking from "./pages/booking/Booking";
 import SearchBooking from "./pages/search-booking/SearchBooking";
 
@@ -55,6 +57,8 @@ function App() {
           <Route path="buses" element={<Buses />} />
           <Route path="edit-bus/:busId" element={<EditBus />} />
           <Route path="schedules" element={<Schedules />} />
+          <Route path="bookings" element={<Bookings />} />
+          <Route path="add-booking" element={<AddBooking />} />
         </Route>
 
         <Route

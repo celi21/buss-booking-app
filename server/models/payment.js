@@ -16,23 +16,18 @@ const paymentSchema = new Schema(
     },
     cardNumber: {
       type: String,
-      required: true,
     },
     expiryMonth: {
       type: String,
-      required: true,
     },
     expiryYear: {
       type: String,
-      required: true,
     },
     cvv: {
       type: String,
-      required: true,
     },
     transactionId: {
       type: String,
-      required: true,
     },
     amount: {
       type: Number,

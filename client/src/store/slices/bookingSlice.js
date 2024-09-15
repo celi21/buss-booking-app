@@ -119,6 +119,10 @@ const bookingSlice = createSlice({
   name: "booking",
   initialState: initialState,
   reducers: {
+    resetBusAvailabilityData: (state, action) => {
+      state.busAvailabilityData = null;
+      state.availableBus = null;
+    },
     setCurrentBookingStep: (state, action) => {
       state.currentBookingStep = action.payload;
     },
@@ -176,6 +180,7 @@ export const {
   setCurrentBookingStep,
   updateBookingStepStatus,
   resetBookingForm,
+  resetBusAvailabilityData,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

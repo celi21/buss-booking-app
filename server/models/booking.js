@@ -72,6 +72,10 @@ const bookingSchema = new Schema(
       type: String,
     },
     seatDetails: [seatDetailsSchema],
+    status: {
+      type: String,
+      default: "confirmed", //confirmed,pending,cancelled
+    },
   },
   {
     timestamps: true,
