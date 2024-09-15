@@ -184,7 +184,6 @@ const BookingPayment = ({
       const doesBusSeatsExists = await confirmBusAvailable(queryObject);
       if (doesBusSeatsExists === true) {
         let bookingData = {
-          user: null,
           bus: availableBus._id,
           busType: availableBus.busType._id,
           route: availableBus.route._id,
@@ -197,8 +196,6 @@ const BookingPayment = ({
           requestedSeats: requestedSeats,
           user: user,
         };
-        console.log(requestedSeats);
-        console.log(payment);
 
         const confirm = await confirmBooking(bookingData);
         if (confirm === true) {

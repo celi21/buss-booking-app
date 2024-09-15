@@ -83,12 +83,37 @@ const BookingDetailsTab = ({
     dispatch(fetchCities());
   }, []);
 
-  const handleDateChange = (e) => {
+  const handleDateChange = async (e) => {
     const newDate = e.target.value;
     if (new Date(newDate) < new Date(minCurrentDate)) {
       setSelectedDate(minCurrentDate);
     } else {
       setSelectedDate(newDate);
+    }
+
+    if (!selectedDate || !selectedFromCity || !selectedToCity) {
+      return;
+    }
+
+    const queryObject = {
+      selectedDate,
+      selectedFromCity,
+      selectedToCity,
+    };
+    const resultAction = await dispatch(checkIfBusAvailable(queryObject));
+
+    // Check if the bus availability was successful
+    if (checkIfBusAvailable.fulfilled.match(resultAction)) {
+      const availableBus = resultAction.payload;
+
+      // If bus is available, update the state and proceed to the next step
+      if (availableBus) {
+      }
+    } else if (checkIfBusAvailable.rejected.match(resultAction)) {
+      toast.error(resultAction.payload || "No bus available.", {
+        duration: 4000,
+      });
+      setTicketsPrice(0);
     }
   };
 
@@ -295,7 +320,7 @@ const BookingDetailsTab = ({
           <div className="d-flex flex-column align-items-start gap-2">
             {busAvailabilityData && totalAvailableSeats > 0 && (
               <>
-                {availableBus.ticketPrices.map((price) => {
+                {availableBus?.ticketPrices.map((price) => {
                   let ticketInfo = availableBus.ticketTypes.find(
                     (t) => t._id === price.ticketType
                   );

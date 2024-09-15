@@ -753,3 +753,138 @@ export const fetchUserBookings = async (req, res, nex) => {
     });
   }
 };
+
+export const addBooking = async (req, res, next) => {
+  const bookingData = req.body;
+  try {
+    if (
+      !bookingData.bus ||
+      !bookingData.busType ||
+      !bookingData.route ||
+      !bookingData.from ||
+      !bookingData.to ||
+      !bookingData.selectedDate ||
+      !bookingData.personalDetails ||
+      !bookingData.selectedSeats ||
+      !bookingData.requestedSeats
+    ) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete booking data.",
+      });
+    }
+
+    // first confirm the ticket pricing
+    const busId = bookingData.bus;
+    const foundBus = await Bus.findById(busId).populate(
+      "route busType locations locations.city ticketTypes ticketPrices"
+    );
+
+    if (!foundBus) {
+      return res.status(200).json({
+        success: false,
+        message: "This Bus is not available. Please try again later.",
+      });
+    }
+
+    let ticketsPrice = 0;
+    let requestedSeats = 0;
+    const seatsDetails = [];
+
+    bookingData.selectedSeats.forEach((seat) => {
+      let ticketPrice = foundBus.ticketPrices.find(
+        (ticket) =>
+          new mongoose.Types.ObjectId(seat._id).toString() ===
+          ticket.ticketType.toString()
+      );
+
+      let fromLocationCity = foundBus.locations.find(
+        (loc) =>
+          loc.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.from).toString()
+      );
+      let toLocationCity = foundBus.locations.find(
+        (loc) =>
+          loc.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.to).toString()
+      );
+
+      let ticketPriceInfo = ticketPrice.prices.find(
+        (p) =>
+          fromLocationCity?.city._id.toString() ===
+            new mongoose.Types.ObjectId(bookingData.from).toString() &&
+          toLocationCity?.city._id.toString() ===
+            new mongoose.Types.ObjectId(bookingData.to).toString() &&
+          fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
+          toLocationCity?._id.toString() === p.toLocationId.toString()
+      );
+
+      if (seat.seats > 0) {
+        ticketsPrice += Number(ticketPriceInfo?.price) * seat.seats;
+      }
+      seatsDetails.push(seat);
+      requestedSeats += parseInt(seat.seats);
+    });
+
+    // create/save payment schema
+    const paymentDetails = new Payment({
+      firstName: bookingData.personalDetails.firstName,
+      lastName: bookingData.personalDetails?.lastName,
+      amount: ticketsPrice,
+    });
+
+    // if pay success then save the personal details
+    const personalDetails = new PersonalDetails({
+      firstName: bookingData.personalDetails.firstName,
+      lastName: bookingData.personalDetails.lastName,
+      phone: bookingData.personalDetails.phone,
+      email: bookingData.personalDetails.email,
+      pickupAddress: bookingData.personalDetails.pickupAddress,
+      dropoffAddress: bookingData.personalDetails.dropoffAddress,
+      notes: bookingData.personalDetails.notes,
+      suitcases: bookingData.personalDetails.suitcases,
+    });
+
+    await personalDetails.save();
+    await paymentDetails.save();
+
+    // finally save the booking data and send the booking id as well as confirm message
+    const bookingId = Date.now();
+    const newBooking = new Booking({
+      bus: foundBus._id,
+      busType: foundBus.busType._id,
+      from: bookingData.from,
+      to: bookingData.to,
+      payment: paymentDetails._id,
+      personalDetails: personalDetails._id,
+      route: foundBus.route._id,
+      bookingDate: bookingData.selectedDate,
+      bookingId: bookingId,
+      seatDetails: seatsDetails,
+    });
+
+    let busAvailability = await BusAvailability.findOne({
+      bus: foundBus._id,
+      date: bookingData.selectedDate,
+    });
+
+    busAvailability.availableSeats -= requestedSeats;
+
+    await newBooking.save();
+    await busAvailability.save();
+
+    if (newBooking) {
+      return res.status(200).json({
+        success: true,
+        message: "Booking Successfully added",
+        booking: newBooking,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
