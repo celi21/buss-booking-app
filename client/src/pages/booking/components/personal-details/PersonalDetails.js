@@ -9,6 +9,7 @@ import {
 import Autocomplete from "react-google-autocomplete";
 import toast from "react-hot-toast";
 import BookingDetailsRow from "../booking-details-row/BookingDetailsRow";
+import BookingPayment from "../booking-payment/BookingPayment";
 
 const PersonalDetails = ({
   selectedFromCity,
@@ -26,6 +27,13 @@ const PersonalDetails = ({
   setArrivalTime,
   personalDetails,
   setPersonalDetails,
+  paymentDetails,
+  setPaymentDetails,
+  resetForm,
+  showConfirmationModal,
+  setShowConfirmationModal,
+  booking,
+  SetBooking,
 }) => {
   const dispatch = useDispatch();
   const handleBackButton = () => {
@@ -50,6 +58,13 @@ const PersonalDetails = ({
   const [captcha, setCaptcha] = useState(personalDetails.captcha);
   const [captchaCode, setCaptchaCode] = useState(null);
   const [localError, setLocalError] = useState(null);
+
+  // card details
+  const [fullName, setFullName] = useState(paymentDetails.fullName);
+  const [cardNumber, setCardNumber] = useState(paymentDetails.cardNumber);
+  const [expiryMonth, setExpiryMonth] = useState(paymentDetails.expiryMonth);
+  const [expiryYear, setExpiryYear] = useState(paymentDetails.expiryYear);
+  const [cvv, setCvv] = useState(paymentDetails.cvv);
 
   const generateCaptcha = (length) => {
     const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ123456789";
@@ -81,6 +96,31 @@ const PersonalDetails = ({
       setCaptchaCode(generateCaptcha(7));
     }
   }, []);
+
+  const handleDateButton = () => {
+    const stepsToUpdate = ["details", "confirm", "tickets"];
+    dispatch(setCurrentBookingStep("dates-and-locations"));
+    stepsToUpdate.forEach((step) => {
+      dispatch(
+        updateBookingStepStatus({
+          step: step,
+          isCompleted: false,
+        })
+      );
+    });
+  };
+  const handleSeatsButton = () => {
+    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    dispatch(setCurrentBookingStep("tickets"));
+    stepsToUpdate.forEach((step) => {
+      dispatch(
+        updateBookingStepStatus({
+          step: step,
+          isCompleted: false,
+        })
+      );
+    });
+  };
 
   const handleProceedButton = () => {
     if (!firstName || firstName.trim() == "") {
@@ -125,6 +165,41 @@ const PersonalDetails = ({
       setLocalError("Please provide your Dropoff Address");
       return;
     }
+    if (!fullName || fullName.trim() == "") {
+      toast.error("Please provide your Full Name on Card Details.", {
+        duration: 4000,
+      });
+      setLocalError("Please provide your Full Name on Card Details.");
+      return;
+    }
+    if (!cardNumber || cardNumber.trim() == "") {
+      toast.error("Please provide your Card Number on Card Details.", {
+        duration: 4000,
+      });
+      setLocalError("Please provide your Card Number on Card Details.");
+      return;
+    }
+    if (!expiryMonth || expiryMonth.trim() == "") {
+      toast.error("Please provide card Expiry Month on Card Details.", {
+        duration: 4000,
+      });
+      setLocalError("Please provide card Expiry Month on Card Details.");
+      return;
+    }
+    if (!expiryYear || expiryYear.trim() == "") {
+      toast.error("Please provide card Expiry Year on Card Details.", {
+        duration: 4000,
+      });
+      setLocalError("Please provide card Expiry Year on Card Details.");
+      return;
+    }
+    if (!cvv || cvv.trim() == "") {
+      toast.error("Please provide card CVV/CVC number on Card Details.", {
+        duration: 4000,
+      });
+      setLocalError("Please provide card CVV/CVC number on Card Details.");
+      return;
+    }
     if (!captcha || captcha.trim() == "") {
       toast.error("Please enter the Captcha code.", {
         duration: 4000,
@@ -153,7 +228,16 @@ const PersonalDetails = ({
       captcha,
     };
 
+    const payment = {
+      fullName: fullName,
+      cardNumber: cardNumber,
+      expiryMonth: expiryMonth,
+      expiryYear: expiryYear,
+      cvv: cvv,
+    };
+    setPaymentDetails(payment);
     setPersonalDetails(details);
+
     dispatch(setCurrentBookingStep("confirm"));
     dispatch(
       updateBookingStepStatus({
@@ -162,31 +246,6 @@ const PersonalDetails = ({
       })
     );
     setLocalError(null);
-  };
-
-  const handleDateButton = () => {
-    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
-    dispatch(setCurrentBookingStep("dates-and-locations"));
-    stepsToUpdate.forEach((step) => {
-      dispatch(
-        updateBookingStepStatus({
-          step: step,
-          isCompleted: false,
-        })
-      );
-    });
-  };
-  const handleSeatsButton = () => {
-    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
-    dispatch(setCurrentBookingStep("tickets"));
-    stepsToUpdate.forEach((step) => {
-      dispatch(
-        updateBookingStepStatus({
-          step: step,
-          isCompleted: false,
-        })
-      );
-    });
   };
 
   return (
@@ -205,7 +264,7 @@ const PersonalDetails = ({
         handleDateButton={handleDateButton}
       />
 
-      <div className="mt-4">
+      <div className="my-4">
         <p className="fs-4 fw-bold">Personal Details</p>
         <Form>
           <Row className="mb-3">
@@ -219,7 +278,10 @@ const PersonalDetails = ({
                   id="firstName"
                   placeholder="Enter First Name"
                   value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    setLocalError(null);
+                  }}
                 />
               </Form.Group>
             </Col>
@@ -233,7 +295,10 @@ const PersonalDetails = ({
                   id="lastName"
                   placeholder="Enter Last Name"
                   value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    setLocalError(null);
+                  }}
                 />
               </Form.Group>
             </Col>
@@ -250,7 +315,10 @@ const PersonalDetails = ({
                   id="phone"
                   placeholder="Enter Phone"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onChange={(e) => {
+                    setPhone(e.target.value);
+                    setLocalError(null);
+                  }}
                 />
               </Form.Group>
             </Col>
@@ -264,7 +332,10 @@ const PersonalDetails = ({
                   id="email"
                   placeholder="Enter Email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setLocalError(null);
+                  }}
                 />
               </Form.Group>
             </Col>
@@ -287,6 +358,7 @@ const PersonalDetails = ({
                   }
                   onChange={(e) => {
                     setPickupAddress(e.target.value);
+                    setLocalError(null);
                   }}
                   className="form-control"
                 />
@@ -308,6 +380,7 @@ const PersonalDetails = ({
                   }
                   onChange={(e) => {
                     setDropoffAddress(e.target.value);
+                    setLocalError(null);
                   }}
                   className="form-control"
                 />
@@ -353,113 +426,135 @@ const PersonalDetails = ({
               </Form.Group>
             </Col>
           </Row>
+        </Form>
+      </div>
 
-          <Row className="mb-3">
-            <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-              <Form.Group>
-                <div className="d-flex align-items-center gap-3 mb-1">
-                  <Form.Label className="m-0 fw-semibold" htmlFor="Captcha">
-                    Captcha:<span className="text-danger ms-1">*</span>
-                  </Form.Label>
-                  <div
-                    className="bg-secondary p-3 py-1 text-white"
-                    style={{
-                      position: "relative",
-                      display: "inline-block",
-                      padding: "0.5rem",
-                      backgroundColor: "#6c757d",
-                      color: "#fff",
-                      fontSize: "1.25rem",
-                      fontWeight: "bold",
-                      userSelect: "none",
-                      cursor: "default",
-                      pointerEvents: "none",
-                      overflow: "hidden",
-                    }}
-                  >
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "10%",
-                        left: "40%",
-                        transform: "rotate(-10deg)",
-                        color: "rgba(255,255,255,0.3)",
-                        fontSize: "1.5rem",
-                      }}
-                    >
-                      |
-                    </span>
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "-20%",
-                        left: "10%",
-                        transform: "rotate(-40deg)",
-                        color: "rgba(255,255,255,0.3)",
-                        fontSize: "2.5rem",
-                      }}
-                    >
-                      |
-                    </span>
-                    <span
-                      style={{
-                        position: "absolute",
-                        top: "-20%",
-                        right: "10%",
-                        transform: "rotate(-40deg)",
-                        color: "rgba(255,255,255,0.3)",
-                        fontSize: "2.5rem",
-                      }}
-                    >
-                      |
-                    </span>
-                    <span
-                      style={{
-                        position: "absolute",
-                        bottom: "20%",
-                        right: "20%",
-                        transform: "rotate(15deg)",
-                        color: "rgba(255,255,255,0.4)",
-                        fontSize: "1.5rem",
-                      }}
-                    >
-                      /
-                    </span>
-                    <span
-                      style={{
-                        fontFamily: "Courier New, Courier, monospace",
-                      }}
-                    >
-                      {captchaCode}
-                    </span>
-                  </div>
+      <hr />
 
-                  <Button
-                    className="p-0 bg-transparent border-0 outline-none text-primary"
-                    title="Generate New Captcha Code"
-                    onClick={() => {
-                      setCaptchaCode(generateCaptcha(7));
-                    }}
-                  >
-                    <ArrowRepeat size={24} />
-                  </Button>
-                </div>
-                <Form.Control
-                  type="text"
-                  id="Captcha"
-                  placeholder="Enter Captcha Code"
-                  value={captcha}
-                  onChange={(e) => setCaptcha(e.target.value)}
+      <p className="fs-4 fw-bold">Payment Details</p>
+      <BookingPayment
+        selectedSeats={selectedSeats}
+        ticketsPrice={ticketsPrice}
+        fullName={fullName}
+        setFullName={setFullName}
+        cardNumber={cardNumber}
+        setCardNumber={setCardNumber}
+        expiryMonth={expiryMonth}
+        setExpiryMonth={setExpiryMonth}
+        expiryYear={expiryYear}
+        setExpiryYear={setExpiryYear}
+        cvv={cvv}
+        setCvv={setCvv}
+        setLocalError={setLocalError}
+      />
+
+      <Row className="mb-3">
+        <Col lg={6} xl={6} md={12} sm={12} xs={12}>
+          <Form.Group>
+            <div className="d-flex align-items-center gap-3 mb-1">
+              <Form.Label className="m-0 fw-semibold" htmlFor="Captcha">
+                Captcha:<span className="text-danger ms-1">*</span>
+              </Form.Label>
+              <div
+                className="bg-secondary p-3 py-1 text-white"
+                style={{
+                  position: "relative",
+                  display: "inline-block",
+                  padding: "0.5rem",
+                  backgroundColor: "#6c757d",
+                  color: "#fff",
+                  fontSize: "1.25rem",
+                  fontWeight: "bold",
+                  userSelect: "none",
+                  cursor: "default",
+                  pointerEvents: "none",
+                  overflow: "hidden",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "10%",
+                    left: "40%",
+                    transform: "rotate(-10deg)",
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "1.5rem",
+                  }}
+                >
+                  |
+                </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-20%",
+                    left: "10%",
+                    transform: "rotate(-40deg)",
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "2.5rem",
+                  }}
+                >
+                  |
+                </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "-20%",
+                    right: "10%",
+                    transform: "rotate(-40deg)",
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "2.5rem",
+                  }}
+                >
+                  |
+                </span>
+                <span
+                  style={{
+                    position: "absolute",
+                    bottom: "20%",
+                    right: "20%",
+                    transform: "rotate(15deg)",
+                    color: "rgba(255,255,255,0.4)",
+                    fontSize: "1.5rem",
+                  }}
+                >
+                  /
+                </span>
+                <span
                   style={{
                     fontFamily: "Courier New, Courier, monospace",
                   }}
-                  className="fw-bold"
-                />
-              </Form.Group>
-            </Col>
-          </Row>
-        </Form>
-      </div>
+                >
+                  {captchaCode}
+                </span>
+              </div>
+
+              <Button
+                className="p-0 bg-transparent border-0 outline-none text-primary"
+                title="Generate New Captcha Code"
+                onClick={() => {
+                  setCaptchaCode(generateCaptcha(7));
+                }}
+              >
+                <ArrowRepeat size={24} />
+              </Button>
+            </div>
+            <Form.Control
+              type="text"
+              id="Captcha"
+              placeholder="Enter Captcha Code"
+              value={captcha}
+              onChange={(e) => {
+                setCaptcha(e.target.value);
+                setLocalError(null);
+              }}
+              style={{
+                fontFamily: "Courier New, Courier, monospace",
+              }}
+              className="fw-bold"
+            />
+          </Form.Group>
+        </Col>
+      </Row>
 
       {localError && <Alert variant="danger">{localError}</Alert>}
 

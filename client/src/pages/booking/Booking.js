@@ -243,10 +243,9 @@ const Booking = () => {
           >
             Confirm
           </Button>
-          <ArrowRight className="mx-3" size={22} color="#aaa" />
         </Col>
 
-        <Col
+        {/* <Col
           xl="auto"
           lg="auto"
           md="auto"
@@ -272,7 +271,7 @@ const Booking = () => {
           >
             Payment
           </Button>
-        </Col>
+        </Col> */}
       </Row>
 
       <div
@@ -342,8 +341,40 @@ const Booking = () => {
             setArrivalTime={setArrivalTime}
             personalDetails={personalDetails}
             setPersonalDetails={setPersonalDetails}
+            paymentDetails={paymentDetails}
+            setPaymentDetails={setPaymentDetails}
+            resetForm={resetForm}
+            showConfirmationModal={showConfirmationModal}
+            setShowConfirmationModal={setShowConfirmationModal}
+            booking={booking}
+            SetBooking={SetBooking}
           />
         )}
+
+        {/* We are sorry, but your booking failed. The available seat(s) for the selected bus have finished while you were placing your order. You can start over searching for other buses or dates.
+         */}
+
+        {/* 5. Payment */}
+        {/* {currentBookingStep == "payment" && (
+          <BookingPayment
+            selectedSeats={selectedSeats}
+            ticketsPrice={ticketsPrice}
+            paymentDetails={paymentDetails}
+            setPaymentDetails={setPaymentDetails}
+            personalDetails={personalDetails}
+            selectedFromCity={selectedFromCity}
+            selectedToCity={selectedToCity}
+            totalDuration={totalDuration}
+            departureTime={departureTime}
+            arrivalTime={arrivalTime}
+            selectedDate={selectedDate}
+            resetForm={resetForm}
+            showConfirmationModal={showConfirmationModal}
+            setShowConfirmationModal={setShowConfirmationModal}
+            booking={booking}
+            SetBooking={SetBooking}
+          />
+        )} */}
 
         {/* 4. Confirm */}
         {currentBookingStep == "confirm" && (
@@ -363,31 +394,12 @@ const Booking = () => {
             setArrivalTime={setArrivalTime}
             personalDetails={personalDetails}
             setPersonalDetails={setPersonalDetails}
-          />
-        )}
-
-        {/* We are sorry, but your booking failed. The available seat(s) for the selected bus have finished while you were placing your order. You can start over searching for other buses or dates.
-         */}
-
-        {/* 5. Payment */}
-        {currentBookingStep == "payment" && (
-          <BookingPayment
-            selectedSeats={selectedSeats}
-            ticketsPrice={ticketsPrice}
             paymentDetails={paymentDetails}
-            setPaymentDetails={setPaymentDetails}
-            personalDetails={personalDetails}
-            selectedFromCity={selectedFromCity}
-            selectedToCity={selectedToCity}
-            totalDuration={totalDuration}
-            departureTime={departureTime}
-            arrivalTime={arrivalTime}
-            selectedDate={selectedDate}
-            resetForm={resetForm}
             showConfirmationModal={showConfirmationModal}
             setShowConfirmationModal={setShowConfirmationModal}
             booking={booking}
             SetBooking={SetBooking}
+            resetForm={resetForm}
           />
         )}
       </div>

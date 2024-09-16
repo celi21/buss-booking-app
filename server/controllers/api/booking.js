@@ -615,7 +615,7 @@ export const confirmBooking = async (req, res, next) => {
           cvv: bookingData.paymentDetails.cvv,
           transactionId: decodedObject.transactionid,
           amount: ticketsPrice,
-          user: bookingData.user.id,
+          user: bookingData.user ? bookingData.user?.id : null,
         });
 
         // if pay success then save the personal details
@@ -628,7 +628,7 @@ export const confirmBooking = async (req, res, next) => {
           dropoffAddress: bookingData.personalDetails.dropoffAddress,
           notes: bookingData.personalDetails.notes,
           suitcases: bookingData.personalDetails.suitcases,
-          user: bookingData.user.id,
+          user: bookingData.user ? bookingData.user?.id : null,
         });
 
         await personalDetails.save();
@@ -647,7 +647,7 @@ export const confirmBooking = async (req, res, next) => {
           bookingDate: bookingData.selectedDate,
           transaction_session_id: transaction_session_id,
           bookingId: bookingId,
-          user: bookingData.user.id,
+          user: bookingData.user ? bookingData.user?.id : null,
           seatDetails: seatsDetails,
         });
 

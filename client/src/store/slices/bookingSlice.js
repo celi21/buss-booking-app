@@ -28,9 +28,9 @@ const initialState = {
     confirm: {
       isCompleted: false,
     },
-    payment: {
-      isCompleted: false,
-    },
+    // payment: {
+    //   isCompleted: false,
+    // },
   },
 };
 

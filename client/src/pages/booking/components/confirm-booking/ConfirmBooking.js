@@ -1,12 +1,14 @@
-import React from "react";
-import { Button, Col, Form, Row } from "react-bootstrap";
+import React, { useState } from "react";
+import { Alert, Button, Col, Form, Row, Spinner } from "react-bootstrap";
 import { ArrowRepeat } from "react-bootstrap-icons";
 import BookingDetailsRow from "../booking-details-row/BookingDetailsRow";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import {
   setCurrentBookingStep,
   updateBookingStepStatus,
 } from "../../../../store/slices/bookingSlice";
+import axios from "axios";
+import toast from "react-hot-toast";
 
 const ConfirmBooking = ({
   selectedFromCity,
@@ -24,24 +26,30 @@ const ConfirmBooking = ({
   setArrivalTime,
   personalDetails,
   setPersonalDetails,
+  paymentDetails,
+  booking,
+  SetBooking,
+  showConfirmationModal,
+  setShowConfirmationModal,
+  resetForm,
 }) => {
+  const [localError, setLocalError] = useState(null);
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.auth);
+
   const handleBackButton = () => {
     dispatch(setCurrentBookingStep("details"));
-  };
-
-  const handlePaymentButton = () => {
-    dispatch(setCurrentBookingStep("payment"));
     dispatch(
       updateBookingStepStatus({
         step: "confirm",
-        isCompleted: true,
+        isCompleted: false,
       })
     );
   };
 
   const handleDateButton = () => {
-    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    const stepsToUpdate = ["details", "confirm", "tickets"];
     dispatch(setCurrentBookingStep("dates-and-locations"));
     stepsToUpdate.forEach((step) => {
       dispatch(
@@ -52,8 +60,9 @@ const ConfirmBooking = ({
       );
     });
   };
+
   const handleSeatsButton = () => {
-    const stepsToUpdate = ["details", "confirm", "payment", "tickets"];
+    const stepsToUpdate = ["details", "confirm", "tickets"];
     dispatch(setCurrentBookingStep("tickets"));
     stepsToUpdate.forEach((step) => {
       dispatch(
@@ -63,6 +72,115 @@ const ConfirmBooking = ({
         })
       );
     });
+  };
+
+  const { availableBus, busAvailabilityData } = useSelector(
+    (state) => state.booking
+  );
+
+  const confirmBusAvailable = async (queryObject) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-bus-seats-availability`,
+        queryObject,
+        config
+      );
+      if (
+        response.data &&
+        response.data.success &&
+        response.data.success == true
+      ) {
+        return true;
+      } else {
+        setLocalError(response.data.message);
+        return false;
+      }
+    } catch (error) {
+      setLocalError(error.message);
+      return false;
+    }
+  };
+
+  const confirmBooking = async (bookingData) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-booking`,
+        bookingData,
+        config
+      );
+      if (
+        response.data &&
+        response.data.success &&
+        response.data.success == true
+      ) {
+        SetBooking(response.data.booking);
+        return true;
+      } else {
+        setLocalError(response.data.message);
+        return false;
+      }
+    } catch (error) {
+      setLocalError(error.message);
+      return false;
+    }
+  };
+
+  const handleConfirmButton = async () => {
+    setLoading(true);
+    try {
+      const requestedSeats = selectedSeats.reduce(
+        (total, seat) => total + seat.seats
+      );
+
+      const queryObject = {
+        selectedDate,
+        busId: availableBus?._id,
+        requestedSeats: requestedSeats,
+      };
+      // confirm if bus/seats is still available
+      const doesBusSeatsExists = await confirmBusAvailable(queryObject);
+
+      if (doesBusSeatsExists === true) {
+        let bookingData = {
+          bus: availableBus._id,
+          busType: availableBus.busType._id,
+          route: availableBus.route._id,
+          from: selectedFromCity,
+          to: selectedToCity,
+          selectedDate: selectedDate,
+          paymentDetails: paymentDetails,
+          personalDetails: personalDetails,
+          selectedSeats: selectedSeats,
+          requestedSeats: requestedSeats,
+          user: user,
+        };
+
+        const confirm = await confirmBooking(bookingData);
+        if (confirm === true) {
+          resetForm();
+          setShowConfirmationModal(true);
+          toast.success("Your booking has been completed Successfully.", {
+            duration: 4000,
+            position: "top-right",
+          });
+        }
+      }
+    } catch (error) {
+      setLocalError(error.message);
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -84,8 +202,17 @@ const ConfirmBooking = ({
         handleDateButton={handleDateButton}
       />
 
-      <div className="mt-4">
-        <p className="fs-4 fw-bold">Personal Details</p>
+      <div className="my-4">
+        <div className="d-flex flex-row align-items-center gap-2 mb-4">
+          <p className="fs-4 fw-bold m-0 p-0">Personal Details</p>
+          <Button
+            className="p-0 m-0 bg-transparent border-0 outline-none text-primary"
+            onClick={() => handleBackButton()}
+          >
+            Change details
+          </Button>
+        </div>
+
         {personalDetails && (
           <div>
             <Row className="mb-3">
@@ -171,6 +298,63 @@ const ConfirmBooking = ({
         )}
       </div>
 
+      <div className="my-4">
+        <div className="d-flex flex-row align-items-center gap-2 mb-4">
+          <p className="fs-4 fw-bold m-0 p-0">Payment Details</p>
+          <Button
+            className="p-0 m-0 bg-transparent border-0 outline-none text-primary"
+            onClick={() => handleBackButton()}
+          >
+            Change details
+          </Button>
+        </div>
+        {paymentDetails && (
+          <div>
+            <Row className="mb-3">
+              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
+                <div>
+                  <Form.Label className="m-0" htmlFor="firstName">
+                    Full Name on Card:
+                  </Form.Label>
+                  <div className="fw-semibold">{paymentDetails.fullName}</div>
+                </div>
+              </Col>
+              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
+                <div>
+                  <Form.Label className="m-0" htmlFor="lastName">
+                    Card Number:
+                  </Form.Label>
+                  <div className="fw-semibold">{paymentDetails.cardNumber}</div>
+                </div>
+              </Col>
+            </Row>
+
+            <Row className="mb-3">
+              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
+                <div>
+                  <Form.Label className="m-0" htmlFor="phone">
+                    Card Expiry (MM/YY):
+                  </Form.Label>
+                  <div className="fw-semibold">
+                    {paymentDetails.expiryMonth}/{paymentDetails.expiryYear}
+                  </div>
+                </div>
+              </Col>
+              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
+                <div>
+                  <Form.Label className="m-0" htmlFor="email">
+                    CVV/CVC Number:
+                  </Form.Label>
+                  <div className="fw-semibold">{paymentDetails.cvv}</div>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        )}
+      </div>
+
+      {localError && <Alert variant="danger">{localError}</Alert>}
+
       <Row className="mt-5">
         <Col>
           <Button
@@ -183,10 +367,21 @@ const ConfirmBooking = ({
         </Col>
         <Col className="justify-content-end d-flex">
           <Button
-            className="px-3 py-2 fw-semibold"
-            onClick={handlePaymentButton}
+            variant="primary"
+            className="fw-bold py-2"
+            style={{
+              fontSize: "18px",
+            }}
+            onClick={handleConfirmButton}
+            disabled={loading}
           >
-            Go to Payment
+            {loading ? (
+              <div className="d-flex align-items-center justify-content-center">
+                <Spinner size="small" />
+              </div>
+            ) : (
+              "Confirm Booking"
+            )}
           </Button>
         </Col>
       </Row>
