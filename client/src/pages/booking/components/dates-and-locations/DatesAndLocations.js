@@ -17,6 +17,9 @@ const DatesAndLocations = ({
   setSelectedFromCity,
   selectedToCity,
   setSelectedToCity,
+  cheapestLocations = [],
+  personalDetails,
+  setPersonalDetails,
 }) => {
   const getCurrentDate = () => {
     var now = new Date();
@@ -52,10 +55,26 @@ const DatesAndLocations = ({
   const handleFromCityChange = (cityId) => {
     setSelectedFromCity(cityId);
     setSelectedToCity(null);
+    if (cheapestLocations.includes(cityId)) {
+      let updatedPersonalDetails = {
+        ...personalDetails,
+      };
+      let cityName = cities.find((city) => city._id === cityId).name;
+      updatedPersonalDetails["pickupAddress"] = cityName;
+      setPersonalDetails(updatedPersonalDetails);
+    }
   };
 
   const handleToCityChange = (cityId) => {
     setSelectedToCity(cityId);
+    if (cheapestLocations.includes(cityId)) {
+      let updatedPersonalDetails = {
+        ...personalDetails,
+      };
+      let cityName = cities.find((city) => city._id === cityId).name;
+      updatedPersonalDetails["dropoffAddress"] = cityName;
+      setPersonalDetails(updatedPersonalDetails);
+    }
   };
 
   const checkAvailability = async () => {
@@ -102,6 +121,12 @@ const DatesAndLocations = ({
         );
       }
     } else if (checkIfBusAvailable.rejected.match(resultAction)) {
+      let updatedPersonalDetails = {
+        ...personalDetails,
+      };
+      updatedPersonalDetails["dropoffAddress"] = null;
+      updatedPersonalDetails["pickupAddress"] = null;
+      setPersonalDetails(updatedPersonalDetails);
       // Handle error, if bus is not available or an error occurred
       toast.error(resultAction.payload || "No bus available.", {
         duration: 4000,
@@ -174,6 +199,9 @@ const DatesAndLocations = ({
                               selected={selectedFromCity === city._id}
                             >
                               {city.name}
+                              {cheapestLocations.includes(city._id)
+                                ? " (Cheapest)"
+                                : ""}
                             </option>
                           )
                         );
@@ -212,6 +240,9 @@ const DatesAndLocations = ({
                               selected={selectedToCity === city._id}
                             >
                               {city.name}
+                              {cheapestLocations.includes(city._id)
+                                ? " (Cheapest)"
+                                : ""}
                             </option>
                           )
                         );

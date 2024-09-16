@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Row } from "react-bootstrap";
+import React, { useEffect, useRef, useState } from "react";
+import { Button, Col, Container, Modal, Row } from "react-bootstrap";
 import { ArrowRight } from "react-bootstrap-icons";
 import DatesAndLocations from "./components/dates-and-locations/DatesAndLocations";
 import Tickets from "./components/tickets/Tickets";
@@ -7,7 +7,7 @@ import PersonalDetails from "./components/personal-details/PersonalDetails";
 import ConfirmBooking from "./components/confirm-booking/ConfirmBooking";
 import BookingPayment from "./components/booking-payment/BookingPayment";
 import { useDispatch, useSelector } from "react-redux";
-import { Toaster } from "react-hot-toast";
+import toast, { Toaster } from "react-hot-toast";
 import {
   fetchCities,
   resetBookingForm,
@@ -49,13 +49,22 @@ const Booking = () => {
     expiryYear: null,
     cvv: null,
   });
+  const [isTimerStarted, setIsTimerStarted] = useState(false);
+  const cheapestLocations = [
+    "66da9290114dd9be8eaf8a59",
+    "66da9249114dd9be8eaf8a4a",
+    "66da9269114dd9be8eaf8a50",
+  ];
 
   useEffect(() => {
     dispatch(fetchCities());
   }, []);
 
-  useEffect(() => {
-    let timeLeft = 180; // 3 minutes in seconds
+  // toast.custom("Pl")
+
+  const timerRef = useRef(null);
+  const startTimer = () => {
+    let timeLeft = 240; // 3 minutes in seconds
 
     const interval = setInterval(() => {
       const minutes = Math.floor(timeLeft / 60);
@@ -65,14 +74,26 @@ const Booking = () => {
 
       if (timeLeft <= 0) {
         clearInterval(interval); // Stop the interval after 3 minutes
+        timerRef.current = null; // Reset the timer reference
+        toast.error("Your Booking Timeout has been ended!", {
+          duration: 4000,
+        });
+        setTimeout(() => {
+          window.location.reload();
+        }, 4000);
       } else {
         timeLeft -= 1;
       }
     }, 1000);
 
-    // Clean up the interval when the component unmounts
-    return () => clearInterval(interval);
-  }, []);
+    timerRef.current = interval; // Store the interval ID
+  };
+
+  useEffect(() => {
+    if (currentBookingStep === "details" && !timerRef.current) {
+      startTimer();
+    }
+  }, [currentBookingStep]);
 
   const resetForm = () => {
     dispatch(resetBookingForm());
@@ -274,21 +295,23 @@ const Booking = () => {
         </Col> */}
       </Row>
 
-      <div
-        className="position-fixed bg-white shadow-sm p-3 rounded-circle d-flex align-items-center justify-content-center flex-column"
-        style={{
-          right: "0px",
-          top: "55px",
-          width: "90px",
-          height: "90px",
-          borderColor: "#0D6EFD",
-          borderStyle: "solid",
-          borderWidth: "5px!important",
-        }}
-      >
-        <span className="fw-bold text-primary">Time</span>
-        <span className="fw-bold text-primary">{timeout}</span>
-      </div>
+      {isTimerStarted && (
+        <div
+          className="position-fixed bg-white shadow-sm p-3 rounded-circle d-flex align-items-center justify-content-center flex-column"
+          style={{
+            right: "0px",
+            top: "55px",
+            width: "90px",
+            height: "90px",
+            borderColor: "#0D6EFD",
+            borderStyle: "solid",
+            borderWidth: "5px!important",
+          }}
+        >
+          <span className="fw-bold text-primary">Time</span>
+          <span className="fw-bold text-primary">{timeout}</span>
+        </div>
+      )}
 
       <div className="my-4">
         {/* 1. Dates and Locations */}
@@ -300,6 +323,9 @@ const Booking = () => {
             setSelectedFromCity={setSelectedFromCity}
             selectedToCity={selectedToCity}
             setSelectedToCity={setSelectedToCity}
+            cheapestLocations={cheapestLocations}
+            personalDetails={personalDetails}
+            setPersonalDetails={setPersonalDetails}
           />
         )}
 
@@ -348,6 +374,8 @@ const Booking = () => {
             setShowConfirmationModal={setShowConfirmationModal}
             booking={booking}
             SetBooking={SetBooking}
+            isTimerStarted={isTimerStarted}
+            setIsTimerStarted={setIsTimerStarted}
           />
         )}
 

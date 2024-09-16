@@ -9,6 +9,8 @@ const SearchBooking = () => {
   const [bookingData, setBookingData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [bookingStatus, setBookingStatus] = useState(null);
+  const [statusColor, setStatusColor] = useState(null);
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -65,6 +67,30 @@ const SearchBooking = () => {
     }
   }, [bookingId]);
 
+  useEffect(() => {
+    if (bookingData) {
+      setBookingStatus(bookingData.status);
+
+      switch (bookingData.status) {
+        case "confirmed":
+          setStatusColor("bg-success");
+          break;
+        case "pending":
+          setStatusColor("bg-warning");
+          break;
+        case "refunded":
+          setStatusColor("bg-secondary");
+          break;
+        case "cancelled":
+          setStatusColor("bg-danger");
+          break;
+        default:
+          setStatusColor("bg-primary");
+          break;
+      }
+    }
+  }, [bookingData]);
+
   if (!bookingId) {
     return (
       <div className="d-flex align-items-center justify-content-center p-3">
@@ -90,11 +116,16 @@ const SearchBooking = () => {
           <Row className="mb-4 mx-auto border-bottom">
             <h4 className="fw-bold text-center">Booking Details</h4>
             <div className="mx-auto text-center">
-              <div className="fw-bold mb-0 d-flex flex-row justify-content-center align-items-center">
+              <div className="fw-bold mb-0 d-flex flex-row justify-content-center align-items-center gap-2">
                 <div className="bg-primary text-white p-2 px-3 rounded">
-                  Booking ID: {bookingId}
+                  ID: {bookingId}
+                </div>
+                <div className={`text-white p-2 px-3 rounded ${statusColor}`}>
+                  Status:{" "}
+                  <span className="text-uppercase">{bookingData.status}</span>
                 </div>
               </div>
+
               <p>
                 This booking was done on{" "}
                 <span className="fw-semibold">

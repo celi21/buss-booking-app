@@ -34,6 +34,8 @@ const PersonalDetails = ({
   setShowConfirmationModal,
   booking,
   SetBooking,
+  setIsTimerStarted,
+  isTimerStarted,
 }) => {
   const dispatch = useDispatch();
   const handleBackButton = () => {
@@ -92,6 +94,7 @@ const PersonalDetails = ({
   };
 
   useEffect(() => {
+    setIsTimerStarted(true);
     if (!captchaCode) {
       setCaptchaCode(generateCaptcha(7));
     }
@@ -250,6 +253,15 @@ const PersonalDetails = ({
 
   return (
     <div className="bg-light border p-3 rounded w-100">
+      {isTimerStarted && (
+        <Alert variant="warning">
+          <div className="fw-bold">Booking Timeout Alert!</div>
+          Please Note: You have 4 minutes to complete your booking process. If
+          the time runs out, your current booking information will be reset. The
+          remaining time is displayed at the top right side of the screen. We
+          appreciate your prompt attention.
+        </Alert>
+      )}
       <p className="fs-4 fw-bold">Booking Details</p>
 
       <BookingDetailsRow
