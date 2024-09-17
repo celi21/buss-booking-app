@@ -888,3 +888,24 @@ export const addBooking = async (req, res, next) => {
     });
   }
 };
+
+export const fetchAdminBookings = async (req, res, nex) => {
+  try {
+    const bookings = await Booking.find()
+      .populate("busType", "name")
+      .populate("from", "name")
+      .populate("to", "name")
+      .populate("bus", "")
+      .populate("personalDetails", "firstName lastName email");
+
+    return res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};

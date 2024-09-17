@@ -10,6 +10,8 @@ const initialState = {
   isRoutesLoading: false,
   buses: [],
   isBusesLoading: false,
+  adminBookings: [],
+  isAdminBookingsLoading: false,
   isBusAvailableLoading: false,
   busAvailabilityData: null,
   availableBus: null,
@@ -115,6 +117,31 @@ export const fetchUserBookings = createAsyncThunk(
   }
 );
 
+export const fetchAdminBookings = createAsyncThunk(
+  "booking/fetchAdminBookings",
+  async (_, { getState, rejectWithValue }) => {
+    const { isAdmin, token } = getState().auth;
+    if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/fetch-admin-bookings`,
+        {},
+        config
+      );
+      return response.data.bookings;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const bookingSlice = createSlice({
   name: "booking",
   initialState: initialState,
@@ -172,6 +199,17 @@ const bookingSlice = createSlice({
       })
       .addCase(fetchUserBookings.rejected, (state, action) => {
         state.isUserBookingsLoading = false;
+      })
+      .addCase(fetchAdminBookings.pending, (state) => {
+        state.isAdminBookingsLoading = true;
+      })
+      .addCase(fetchAdminBookings.fulfilled, (state, action) => {
+        state.isAdminBookingsLoading = false;
+        state.adminBookings = action.payload;
+      })
+      .addCase(fetchAdminBookings.rejected, (state, action) => {
+        state.isAdminBookingsLoading = false;
+        state.adminBookings = [];
       });
   },
 });
