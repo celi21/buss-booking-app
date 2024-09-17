@@ -895,7 +895,8 @@ export const fetchAdminBookings = async (req, res, nex) => {
       .populate("busType", "name")
       .populate("from", "name")
       .populate("to", "name")
-      .populate("bus", "")
+      .populate("route", "name _id")
+      .populate("bus", "locations _id")
       .populate("personalDetails", "firstName lastName email");
 
     return res.status(200).json({

@@ -81,10 +81,25 @@ const Bookings = () => {
     const matchesStatus =
       filterStatus === "all" || booking.status === filterStatus;
 
-    // const matchesRoute = filterRoute === "" || booking.route === filterRoute;
-    // const matchesBus = filterBus === "" || booking.bus._id === filterBus;
+    const matchesRoute =
+      filterRoute === "" || booking.route._id === filterRoute;
+    const matchesBus = filterBus === "" || booking.bus._id === filterBus;
 
-    return matchesSearch && matchesStatus;
+    let isDateInRange = true;
+    if (filterFromDate !== "" && filterToDate !== "") {
+      let StartDate = new Date(filterFromDate);
+      let EndDate = new Date(filterToDate);
+      let checkDate = new Date(booking.bookingDate);
+      isDateInRange = checkDate >= StartDate && checkDate <= EndDate;
+    }
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesRoute &&
+      matchesBus &&
+      isDateInRange
+    );
   });
 
   return (
@@ -176,6 +191,7 @@ const Bookings = () => {
                       type="date"
                       value={filterToDate}
                       onChange={(e) => setFilterToDate(e.target.value)}
+                      min={filterFromDate}
                     />
                   </Col>
                 </Row>
@@ -292,7 +308,7 @@ const Bookings = () => {
                     }
                   </td>
                   <td>
-                    {booking.busType.name},{" "}
+                    {booking.route.name},{" "}
                     {booking.bus.locations[0].departureTime} -{" "}
                     {
                       booking.bus.locations[booking.bus.locations.length - 1]
