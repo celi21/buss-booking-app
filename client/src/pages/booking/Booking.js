@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Modal, Row } from "react-bootstrap";
-import { ArrowRight } from "react-bootstrap-icons";
+import { ArrowRight, ChevronUp } from "react-bootstrap-icons";
 import DatesAndLocations from "./components/dates-and-locations/DatesAndLocations";
 import Tickets from "./components/tickets/Tickets";
 import PersonalDetails from "./components/personal-details/PersonalDetails";
@@ -21,7 +21,7 @@ const Booking = () => {
   const [selectedToCity, setSelectedToCity] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [ticketsPrice, setTicketsPrice] = useState(0);
-  const [timeout, setTimeout] = useState("3:00");
+  const [bookingTimeout, setBookingTimeout] = useState("3:00");
   const dispatch = useDispatch();
   const { currentBookingStep, bookingStepsStatus } = useSelector(
     (state) => state.booking
@@ -70,7 +70,7 @@ const Booking = () => {
       const minutes = Math.floor(timeLeft / 60);
       const seconds = timeLeft % 60;
 
-      setTimeout(`${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`);
+      setBookingTimeout(`${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`);
 
       if (timeLeft <= 0) {
         clearInterval(interval); // Stop the interval after 3 minutes
@@ -136,6 +136,19 @@ const Booking = () => {
     }
   };
 
+  let currentStepSVG = (
+    <svg
+      width="1em"
+      height="1em"
+      viewBox="0 0 16 16"
+      class="position-absolute top-100 start-50 translate-middle mt-1 bi bi-caret-down-fill"
+      fill="#0D6EFD"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M7.247 11.14L2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z" />
+    </svg>
+  );
+
   return (
     <Container className="my-4">
       <Toaster />
@@ -173,8 +186,10 @@ const Booking = () => {
                   : false
               }
               onClick={() => handleTabClick("dates-and-locations")}
+              className="position-relative"
             >
               Dates and Locations
+              {currentBookingStep == "dates-and-locations" && currentStepSVG}
             </Button>
             <ArrowRight className="mx-3" size={22} color="#aaa" />
           </div>
@@ -203,8 +218,10 @@ const Booking = () => {
                 : false
             }
             onClick={() => handleTabClick("tickets")}
+            className="position-relative"
           >
             Tickets
+            {currentBookingStep == "tickets" && currentStepSVG}
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
         </Col>
@@ -232,8 +249,10 @@ const Booking = () => {
                 : false
             }
             onClick={() => handleTabClick("details")}
+            className="position-relative"
           >
             Details
+            {currentBookingStep == "details" && currentStepSVG}
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
         </Col>
@@ -261,8 +280,10 @@ const Booking = () => {
                 : false
             }
             onClick={() => handleTabClick("confirm")}
+            className="position-relative"
           >
             Confirm
+            {currentBookingStep == "confirm" && currentStepSVG}
           </Button>
         </Col>
 
@@ -309,7 +330,7 @@ const Booking = () => {
           }}
         >
           <span className="fw-bold text-primary">Time</span>
-          <span className="fw-bold text-primary">{timeout}</span>
+          <span className="fw-bold text-primary">{bookingTimeout}</span>
         </div>
       )}
 
