@@ -328,7 +328,7 @@ const SearchBooking = () => {
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
                         <div className="fw-semibold">Dropoff Address</div>
-                        <div>{bookingData.personalDetails.dropoffaddress}</div>
+                        <div>{bookingData.personalDetails.dropoffAddress}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">

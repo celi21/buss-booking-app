@@ -291,11 +291,9 @@ const Bookings = () => {
                   <td>{index + 1}</td>
                   <td className="text-nowrap">
                     {booking.personalDetails?.firstName +
-                      " " +
-                      booking.personalDetails?.lastName ==
-                    null
-                      ? ""
-                      : booking.personalDetails?.lastName}
+                      (" " + booking.personalDetails?.lastName == null
+                        ? ""
+                        : booking.personalDetails?.lastName)}
                     <br />
                     {booking.personalDetails?.email}
                   </td>

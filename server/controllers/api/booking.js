@@ -910,3 +910,31 @@ export const fetchAdminBookings = async (req, res, nex) => {
     });
   }
 };
+
+export const fetchPassengersList = async (req, res, nex) => {
+  const { busId } = req.body;
+  try {
+    var now = new Date();
+    var day = ("0" + now.getDate()).slice(-2);
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+    var today = now.getFullYear() + "-" + month + "-" + day;
+
+    const bookings = await Booking.find({
+      bus: busId,
+      bookingDate: today,
+    })
+      .populate("personalDetails", "firstName lastName email phone")
+      .populate("from", "name")
+      .populate("to", "name");
+
+    return res.status(200).json({
+      success: true,
+      bookings,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
