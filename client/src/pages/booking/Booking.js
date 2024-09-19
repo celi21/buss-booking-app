@@ -372,6 +372,7 @@ const Booking = () => {
             arrivalTime={arrivalTime}
             setArrivalTime={setArrivalTime}
             setSelectedDate={setSelectedDate}
+            cheapestLocations={cheapestLocations}
           />
         )}
 

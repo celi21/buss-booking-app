@@ -215,7 +215,7 @@ const SearchBooking = () => {
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
                         <div className="fw-semibold">Name</div>
-                        <div>{bookingData.busType.name}</div>
+                        <div>{bookingData.route.name}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">

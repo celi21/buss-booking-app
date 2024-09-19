@@ -702,12 +702,11 @@ export const searchBooking = async (req, res, next) => {
       .populate("to", "name")
       .populate("personalDetails", "-user")
       .populate("bus", "locations")
+      .populate("route", "name")
       .populate(
         "payment",
         "firstName lastName transactionId amount tax currency"
       );
-
-    // .populate("user bus busType route from to payment personalDetails");
 
     if (booking) {
       return res.status(200).json({
@@ -740,6 +739,7 @@ export const fetchUserBookings = async (req, res, nex) => {
       .populate("from", "name")
       .populate("to", "name")
       .populate("bus", "locations")
+      .populate("route", "name")
       .populate("payment", "amount tax currency");
 
     return res.status(200).json({
