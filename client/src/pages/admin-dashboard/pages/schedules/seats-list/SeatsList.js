@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Col, Container, Row, Table } from "react-bootstrap";
+import {
+  Button,
+  Col,
+  Container,
+  Overlay,
+  Row,
+  Table,
+  Tooltip,
+} from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchPassengersList } from "../../../../../store/slices/bookingSlice";
 import LoadingSpinner from "../../../../../components/loading-spinner/LoadingSpinner";
+import SeatRow from "./components/SeatRow";
 
 const SeatsList = () => {
   const [selectedBus, setSelectedBus] = useState(null);
@@ -83,7 +92,14 @@ const SeatsList = () => {
                 {busLocations.map((loc, index) => {
                   return (
                     <th key={loc._id} className="border bg-light">
-                      {loc.city.name}
+                      {loc.city.name} <br />
+                      <div className="fw-normal text-nowrap">
+                        {index === busLocations.length - 1 ? (
+                          <div>Arrive: {loc.arrivalTime}</div>
+                        ) : (
+                          <div>Departure: {loc.departureTime}</div>
+                        )}
+                      </div>
                     </th>
                   );
                 })}
@@ -109,14 +125,12 @@ const SeatsList = () => {
                       // Check if the current location is within the from-to range
                       if (index >= fromIndex && index <= toIndex) {
                         return (
-                          <td
-                            key={loc.city._id}
-                            className="bg-primary text-white text-center"
-                          >
-                            {index === middleIndex
-                              ? booking.personalDetails.firstName
-                              : ""}
-                          </td>
+                          <SeatRow
+                            loc={loc}
+                            index={index}
+                            middleIndex={middleIndex}
+                            booking={booking}
+                          />
                         );
                       } else {
                         return <td key={loc.city._id} className="border"></td>;
@@ -126,6 +140,9 @@ const SeatsList = () => {
                 );
               })}
             </tbody>
+            {passengersList.length == 0 && (
+              <div className="text-center w-100 my-3">No Data Found</div>
+            )}
           </Table>
         </Row>
       )}
