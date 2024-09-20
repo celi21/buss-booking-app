@@ -63,18 +63,17 @@ const Booking = () => {
   // toast.custom("Pl")
 
   const timerRef = useRef(null);
-  let timeInterval = null;
   const startTimer = () => {
     let timeLeft = 240; // 3 minutes in seconds
 
-    timeInterval = setInterval(() => {
+    timerRef.current = setInterval(() => {
       const minutes = Math.floor(timeLeft / 60);
       const seconds = timeLeft % 60;
 
       setBookingTimeout(`${minutes}:${seconds < 10 ? `0${seconds}` : seconds}`);
 
       if (timeLeft <= 0) {
-        clearInterval(timeInterval); // Stop the interval after 3 minutes
+        clearInterval(timerRef.current);
         timerRef.current = null; // Reset the timer reference
         toast.error("Your Booking Timeout has been ended!", {
           duration: 4000,
@@ -86,12 +85,10 @@ const Booking = () => {
         timeLeft -= 1;
       }
     }, 1000);
-
-    timerRef.current = timeInterval; // Store the interval ID
   };
 
   useEffect(() => {
-    if (currentBookingStep === "details" && !timerRef.current) {
+    if (currentBookingStep == "details" && timerRef.current == null) {
       startTimer();
     }
   }, [currentBookingStep]);
@@ -124,7 +121,7 @@ const Booking = () => {
       expiryYear: null,
       cvv: null,
     });
-    clearInterval(timeInterval); // Stop the interval after 3 minutes
+    clearInterval(timerRef.current); // Stop the interval after 3 minutes
     timerRef.current = null; // Reset the timer reference
     setIsTimerStarted(false);
     setBookingTimeout("");

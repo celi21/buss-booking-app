@@ -400,7 +400,7 @@ const Tickets = ({
                   ?.city?.name.toUpperCase()}
               </p>
               <p className="h5 text-center">
-                {selectedDate} {departureTime}
+                {new Date(selectedDate).toDateString()} {departureTime}
               </p>
             </Col>
 
@@ -416,7 +416,7 @@ const Tickets = ({
                   ?.city?.name.toUpperCase()}
               </p>
               <p className="h5 text-center">
-                {selectedDate}, {arrivalTime}
+                {new Date(selectedDate).toDateString()}, {arrivalTime}
               </p>
             </Col>
           </Row>
@@ -505,6 +505,8 @@ const Tickets = ({
               </h3>
             </Col>
           </Row>
+
+          {localError && <Alert variant="danger">{localError}</Alert>}
 
           <Row className="mt-3">
             <Col>

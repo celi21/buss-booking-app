@@ -19,7 +19,7 @@ const UserBookingRow = ({ booking }) => {
     }
   };
 
-  const checkIfDateValid = (booking) => {
+  const handleCancelBooking = () => {
     // Find the departure time for the 'from' city
     const fromLocation = booking.bus.locations.find(
       (loc) => loc.city === booking.from._id
@@ -29,47 +29,24 @@ const UserBookingRow = ({ booking }) => {
       return false; // No departure time available
     }
 
-    // Combine bookingDate and departureTime into a valid Date object
-    const departureDateTime = new Date(booking.bookingDate); // Booking date
-    const [departureHour, departureMin, departurePeriod] =
-      fromLocation.departureTime.split(/[:\s]+/);
+    let bookingDate = booking.bookingDate;
+    let departureTime = fromLocation.departureTime;
+    let bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
+    let currentDateTime = Date.now();
 
-    // Convert 12-hour time to 24-hour format
-    let hour = parseInt(departureHour);
-    if (departurePeriod === "PM" && hour !== 12) {
-      hour += 12;
-    } else if (departurePeriod === "AM" && hour === 12) {
-      hour = 0;
-    }
+    let timeDifference = bookingDateTime - currentDateTime;
+    let hoursDifference = timeDifference / (1000 * 60 * 60);
 
-    departureDateTime.setHours(hour);
-    departureDateTime.setMinutes(parseInt(departureMin));
-
-    // Get the current time
-    const currentTime = new Date();
-
-    // Check if it's still more than 24 hours before departure
-    const timeDiff = departureDateTime - currentTime; // Time difference in milliseconds
-
-    const hoursDiff = timeDiff / (1000 * 60 * 60); // Convert to hours
-
-    if (hoursDiff > 24) {
-      return true; // Can cancel as more than 24 hours remain
-    }
-
-    // If it's after the departure time, cancellation should be disallowed
-    if (currentTime > departureDateTime) {
-      return false; // Bus already departed, cannot cancel
-    }
-
-    return false; // Less than 24 hours remain, cannot cancel
-  };
-
-  const handleCancelBooking = () => {
-    if (checkIfDateValid(booking)) {
-      alert("You can cancel");
+    if (hoursDifference < 0) {
+      alert(
+        "Your booking cannot be canceled as the departure date and time have already passed."
+      );
+    } else if (hoursDifference <= 24) {
+      alert(
+        "Your booking cannot be canceled as it is within 24 hours of the departure time. You can only cancel 24 hours before the booking."
+      );
     } else {
-      alert("You cannot cancel");
+      alert("You can cancel.");
     }
   };
 
