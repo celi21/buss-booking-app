@@ -14,6 +14,7 @@ import {
   addBooking,
   fetchAdminBookings,
   fetchPassengersList,
+  cancelBooking,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -29,6 +30,7 @@ router.post("/user-bookings", verifyUser, fetchUserBookings);
 router.post("/add-booking", verifyAdmin, addBooking);
 router.post("/fetch-admin-bookings", verifyAdmin, fetchAdminBookings);
 router.post("/fetch-passengers-list", verifyAdmin, fetchPassengersList);
+router.post("/cancel-booking", verifyUser, cancelBooking);
 
 router.post("/search", verifyUser, search);
 router.post("/create", verifyUser, create);

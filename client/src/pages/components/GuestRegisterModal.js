@@ -11,8 +11,8 @@ const GuestRegisterModal = ({ showModal, handleClose }) => {
       <Modal.Body>
         <p>
           You can proceed with booking without creating an account, but you
-          won't be able to view your booking history or manage your bookings
-          later.
+          won't be able to view your booking history, cancel/refund bookings or
+          manage your bookings later.
         </p>
         <p>
           If you register, you can track your bookings and have a more

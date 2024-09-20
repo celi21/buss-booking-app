@@ -609,10 +609,6 @@ export const confirmBooking = async (req, res, next) => {
         const paymentDetails = new Payment({
           firstName: first_name,
           lastName: last_name,
-          cardNumber: bookingData.paymentDetails.cardNumber,
-          expiryMonth: bookingData.paymentDetails.expiryMonth,
-          expiryYear: bookingData.paymentDetails.expiryYear,
-          cvv: bookingData.paymentDetails.cvv,
           transactionId: decodedObject.transactionid,
           amount: ticketsPrice,
           user: bookingData.user ? bookingData.user?.id : null,
@@ -941,6 +937,193 @@ export const fetchPassengersList = async (req, res, nex) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error",
+    });
+  }
+};
+
+const isBookingCancelPossible = (booking) => {
+  if (booking.status === "refunded" || booking.status === "cancelled") {
+    return false;
+  }
+  // Find the departure time for the 'from' city
+  const fromLocation = booking.bus.locations.find(
+    (loc) =>
+      new mongoose.Types.ObjectId(loc.city).toString() ===
+      new mongoose.Types.ObjectId(booking.from).toString()
+  );
+
+  if (!fromLocation || !fromLocation.departureTime) {
+    console.log("fromlocation");
+    return false;
+  }
+
+  let bookingDate = booking.bookingDate;
+  let departureTime = fromLocation.departureTime;
+  let bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
+  let currentDateTime = Date.now();
+
+  let timeDifference = bookingDateTime - currentDateTime;
+  let hoursDifference = timeDifference / (1000 * 60 * 60);
+
+  if (hoursDifference < 0) {
+    console.log("hour 0");
+    return false;
+  } else if (hoursDifference <= 24) {
+    console.log("hour 24");
+    return false;
+  } else {
+    return true;
+  }
+};
+
+const makeRefund = async (amount, transactionId, currency = "USD") => {
+  var data = querystring.stringify({
+    type: "refund",
+    amount: amount,
+    security_key: process.env.MERCHANT_ONE_SECRET_KEY,
+    transaction_id: transactionId,
+    currency: currency,
+  });
+
+  const response = await axios.post(
+    "https://secure.merchantonegateway.com/api/transact.php",
+    data,
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
+
+  return response.data;
+};
+
+export const cancelBooking = async (req, res, nex) => {
+  const { bookingId } = req.body;
+  const user = req.user;
+  try {
+    const booking = await Booking.findOne({
+      bookingId: bookingId,
+      user: user.id,
+    }).populate("bus", "locations");
+
+    if (!booking) {
+      return res.status(200).json({
+        success: false,
+        message: "Booking with this ID does not exist!",
+      });
+    }
+
+    console.log(booking);
+    console.log(booking.bus.locations);
+
+    if (!isBookingCancelPossible(booking)) {
+      return res.status(200).json({
+        success: false,
+        message: "This booking cannot be cancelled",
+      });
+    }
+
+    const payment = await Payment.findById(booking.payment);
+    if (!payment) {
+      return res.status(200).json({
+        success: false,
+        message: "Payment for this booking cannot be found!",
+      });
+    }
+
+    if (!payment.transactionId) {
+      return res.status(200).json({
+        success: false,
+        message: "Transaction ID for this Payment cannot be found!",
+      });
+    }
+
+    // first make the refund from merchant api
+    let paymentResponse = await makeRefund(
+      payment.amount,
+      payment.transactionId
+    );
+
+    if (paymentResponse) {
+      console.log(paymentResponse);
+      const decodedObject = paymentResponse.split("&").reduce((acc, curr) => {
+        const [key, value] = curr.split("=");
+        acc[key] = value || null;
+        return acc;
+      }, {});
+
+      if (
+        decodedObject.response_code &&
+        decodedObject.response_code !== "100" &&
+        decodedObject.response &&
+        decodedObject.response !== "1"
+      ) {
+        return res.status(200).json({
+          success: false,
+          message: decodedObject.responsetext,
+        });
+      }
+
+      // check if refund success
+      if (
+        decodedObject.response_code &&
+        decodedObject.response_code === "100" &&
+        decodedObject.response &&
+        decodedObject.response === "1" &&
+        decodedObject.transactionid &&
+        decodedObject.transactionid !== null
+      ) {
+        // update the booking schema
+        booking.status = "cancelled";
+        // update the availability schema
+        let busAvailability = await BusAvailability.findOne({
+          bus: booking.bus._id,
+        });
+
+        let seatsDetails = booking.seatDetails;
+        let seatsToCancel = 0;
+        seatsDetails.map((seat) => {
+          seatsToCancel += seat.seats;
+        });
+
+        busAvailability.availableSeats += seatsToCancel;
+
+        await booking.save();
+        await busAvailability.save();
+
+        return res.status(200).json({
+          success: true,
+          message: "Your Booking has been cancelled successfully!",
+        });
+      }
+    } else {
+      return res.status(200).json({
+        success: false,
+        message: "Payment Refund Failed. Please try again later.",
+      });
+    }
+
+    /* 
+        let busAvailability = await BusAvailability.findOne({
+          bus: foundBus._id,
+          date: bookingData.selectedDate,
+        });
+
+        busAvailability.availableSeats -= requestedSeats;
+
+        await newBooking.save();
+        await busAvailability.save();
+    */
+
+    return res.status(200).json({
+      success: true,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
     });
   }
 };
