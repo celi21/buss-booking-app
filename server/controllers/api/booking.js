@@ -735,6 +735,9 @@ export const fetchUserBookings = async (req, res, nex) => {
     const bookings = await Booking.find({
       user: user.id,
     })
+      .sort({
+        updatedAt: -1,
+      })
       .populate("busType", "name")
       .populate("from", "name")
       .populate("to", "name")
@@ -892,6 +895,9 @@ export const addBooking = async (req, res, next) => {
 export const fetchAdminBookings = async (req, res, nex) => {
   try {
     const bookings = await Booking.find()
+      .sort({
+        updatedAt: -1,
+      })
       .populate("busType", "name")
       .populate("from", "name")
       .populate("to", "name")

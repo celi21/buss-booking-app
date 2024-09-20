@@ -155,7 +155,7 @@ const Booking = () => {
   );
 
   return (
-    <Container className="my-4">
+    <Container className="my-4" fluid>
       <Toaster />
 
       {showConfirmationModal && (
@@ -166,7 +166,7 @@ const Booking = () => {
         />
       )}
 
-      <Row className="justify-content-center d-flex align-items-center">
+      <Row className="justify-content-center d-flex align-items-center px-3">
         <Col
           xl="auto"
           lg="auto"
@@ -332,6 +332,7 @@ const Booking = () => {
             borderColor: "#0D6EFD",
             borderStyle: "solid",
             borderWidth: "5px!important",
+            zIndex: 100,
           }}
         >
           <span className="fw-bold text-primary">Time</span>
