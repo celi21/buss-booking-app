@@ -7,6 +7,11 @@ const busAvailabilitySchema = new Schema(
       ref: "Bus",
       required: true,
     },
+    busType: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "BusType",
+      required: true,
+    },
     date: {
       type: String,
       required: true, // Store the date as a string (or Date type) to track each day's availability

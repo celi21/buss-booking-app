@@ -1,4 +1,6 @@
+import mongoose from "mongoose";
 import Bus from "../../models/bus.js";
+import BusAvailability from "../../models/busAvailability.js";
 import BusType from "../../models/BusType.js";
 
 import { getDateTimeFromTime } from "./../../utils/datetime.js";
@@ -208,19 +210,53 @@ export const updateBusTypeStatus = async (req, res, next) => {
 
 export const updateBusType = async (req, res, next) => {
   const { _id, name, seats } = req.body;
+
   try {
+    // Update the bus type with the new name and seat count
     const busType = await BusType.findByIdAndUpdate(
       _id,
       { name, seats },
       { new: true }
     );
 
+    // Find all buses that use this busType
+    const buses = await Bus.find({ busType: busType._id });
+
+    console.log("busType", busType._id);
+    console.log("buses", buses);
+
+    // Loop through all buses that use this busType
+    await Promise.all(
+      buses.map(async (bus) => {
+        // Find all availability records associated with the bus
+        const availabilities = await BusAvailability.find({ bus: bus._id });
+
+        console.log(`Bus ${bus._id} availabilities:`, availabilities);
+
+        // Update totalSeats and availableSeats for each availability record
+        await Promise.all(
+          availabilities.map(async (availability) => {
+            const bookedSeats =
+              availability.totalSeats - availability.availableSeats;
+            const newAvailableSeats = seats - bookedSeats;
+
+            // Update availability with new totalSeats and availableSeats
+            await BusAvailability.findByIdAndUpdate(availability._id, {
+              totalSeats: seats,
+              availableSeats: newAvailableSeats,
+            });
+          })
+        );
+      })
+    );
+
     return res.status(200).json({
       success: true,
-      message: "Bus type updated successfully.",
+      message: "Bus type and availabilities updated successfully.",
       busType,
     });
   } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",

@@ -309,6 +309,7 @@ export const checkBusAvailability = async (req, res, next) => {
         date: queryObject.selectedDate,
         totalSeats: filteredBus.busType.seats, // Assuming totalSeats is stored in the Bus schema
         availableSeats: filteredBus.busType.seats,
+        busType: filteredBus.busType._id,
         bookedSeats: [],
       });
       await busAvailability.save();
@@ -1077,20 +1078,38 @@ export const cancelBooking = async (req, res, nex) => {
         // update the booking schema
         booking.status = "cancelled";
         // update the availability schema
-        let busAvailability = await BusAvailability.findOne({
+        const busAvailability = await BusAvailability.findOne({
           bus: booking.bus._id,
+          date: booking.bookingDate,
         });
+
+        console.log(busAvailability);
+        console.log(booking.seatDetails);
 
         let seatsDetails = booking.seatDetails;
         let seatsToCancel = 0;
+
+        // --------------------fix the seat add thing. its not adding up to availale seats
+        // --------------------fix the seat add thing. its not adding up to availale seats
+        // --------------------fix the seat add thing. its not adding up to availale seats
+        // --------------------fix the seat add thing. its not adding up to availale seats
+        // --------------------fix the seat add thing. its not adding up to availale seats
         seatsDetails.map((seat) => {
           seatsToCancel += seat.seats;
         });
 
-        busAvailability.availableSeats += seatsToCancel;
+        console.log(seatsToCancel);
+
+        if (busAvailability.availableSeats >= busAvailability.totalSeats) {
+          busAvailability.availableSeats = busAvailability.totalSeats;
+        } else {
+          busAvailability.availableSeats += seatsToCancel;
+        }
 
         await booking.save();
         await busAvailability.save();
+
+        console.log(busAvailability);
 
         return res.status(200).json({
           success: true,
