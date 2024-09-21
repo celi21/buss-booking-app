@@ -7,6 +7,10 @@ const paymentSchema = new Schema(
       ref: "User",
       default: null,
     },
+    isRefunded: {
+      type: Boolean,
+      default: false,
+    },
     firstName: {
       type: String,
       required: true,

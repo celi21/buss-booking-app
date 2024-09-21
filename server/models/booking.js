@@ -76,6 +76,10 @@ const bookingSchema = new Schema(
       type: String,
       default: "confirmed", //confirmed,pending,cancelled
     },
+    isAddedByAdmin: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

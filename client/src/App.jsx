@@ -23,6 +23,7 @@ import EditBus from "./pages/admin-dashboard/pages/buses/components/edit-bus/Edi
 import Schedules from "./pages/admin-dashboard/pages/schedules/Schedules";
 import Bookings from "./pages/admin-dashboard/pages/bookings/Bookings";
 import AddBooking from "./pages/admin-dashboard/pages/add-booking/AddBooking";
+import EditBooking from "./pages/admin-dashboard/pages/edit-booking/EditBooking";
 import Booking from "./pages/booking/Booking";
 import SearchBooking from "./pages/search-booking/SearchBooking";
 
@@ -59,6 +60,7 @@ function App() {
           <Route path="schedules" element={<Schedules />} />
           <Route path="bookings" element={<Bookings />} />
           <Route path="add-booking" element={<AddBooking />} />
+          <Route path="edit-booking/:bookingId" element={<EditBooking />} />
         </Route>
 
         <Route

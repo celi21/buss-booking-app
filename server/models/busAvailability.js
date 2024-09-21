@@ -10,7 +10,6 @@ const busAvailabilitySchema = new Schema(
     busType: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "BusType",
-      required: true,
     },
     date: {
       type: String,

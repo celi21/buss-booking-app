@@ -861,6 +861,8 @@ export const addBooking = async (req, res, next) => {
       bookingDate: bookingData.selectedDate,
       bookingId: bookingId,
       seatDetails: seatsDetails,
+      status: bookingData.status ? bookingData.status : "confirmed",
+      isAddedByAdmin: true,
     });
 
     let busAvailability = await BusAvailability.findOne({
@@ -907,6 +909,7 @@ export const fetchAdminBookings = async (req, res, nex) => {
       bookings,
     });
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error",
@@ -925,6 +928,9 @@ export const fetchPassengersList = async (req, res, nex) => {
     const bookings = await Booking.find({
       bus: busId,
       bookingDate: today,
+      status: {
+        $in: ["pending", "confirmed"],
+      },
     })
       .populate("personalDetails", "firstName lastName email phone")
       .populate("from", "name")
@@ -954,7 +960,6 @@ const isBookingCancelPossible = (booking) => {
   );
 
   if (!fromLocation || !fromLocation.departureTime) {
-    console.log("fromlocation");
     return false;
   }
 
@@ -967,10 +972,8 @@ const isBookingCancelPossible = (booking) => {
   let hoursDifference = timeDifference / (1000 * 60 * 60);
 
   if (hoursDifference < 0) {
-    console.log("hour 0");
     return false;
   } else if (hoursDifference <= 24) {
-    console.log("hour 24");
     return false;
   } else {
     return true;
@@ -1014,9 +1017,6 @@ export const cancelBooking = async (req, res, nex) => {
         message: "Booking with this ID does not exist!",
       });
     }
-
-    console.log(booking);
-    console.log(booking.bus.locations);
 
     if (!isBookingCancelPossible(booking)) {
       return res.status(200).json({
@@ -1077,28 +1077,18 @@ export const cancelBooking = async (req, res, nex) => {
       ) {
         // update the booking schema
         booking.status = "cancelled";
+        payment.isRefunded = true;
         // update the availability schema
         const busAvailability = await BusAvailability.findOne({
           bus: booking.bus._id,
           date: booking.bookingDate,
         });
 
-        console.log(busAvailability);
-        console.log(booking.seatDetails);
-
         let seatsDetails = booking.seatDetails;
         let seatsToCancel = 0;
-
-        // --------------------fix the seat add thing. its not adding up to availale seats
-        // --------------------fix the seat add thing. its not adding up to availale seats
-        // --------------------fix the seat add thing. its not adding up to availale seats
-        // --------------------fix the seat add thing. its not adding up to availale seats
-        // --------------------fix the seat add thing. its not adding up to availale seats
         seatsDetails.map((seat) => {
           seatsToCancel += seat.seats;
         });
-
-        console.log(seatsToCancel);
 
         if (busAvailability.availableSeats >= busAvailability.totalSeats) {
           busAvailability.availableSeats = busAvailability.totalSeats;
@@ -1108,8 +1098,7 @@ export const cancelBooking = async (req, res, nex) => {
 
         await booking.save();
         await busAvailability.save();
-
-        console.log(busAvailability);
+        await payment.save();
 
         return res.status(200).json({
           success: true,
@@ -1123,21 +1112,217 @@ export const cancelBooking = async (req, res, nex) => {
       });
     }
 
-    /* 
-        let busAvailability = await BusAvailability.findOne({
-          bus: foundBus._id,
-          date: bookingData.selectedDate,
-        });
-
-        busAvailability.availableSeats -= requestedSeats;
-
-        await newBooking.save();
-        await busAvailability.save();
-    */
-
     return res.status(200).json({
       success: true,
     });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const changeBookingStatus = async (req, res, next) => {
+  let { bookingId, status } = req.body;
+  try {
+    if (!bookingId || !status) {
+      return res.status(404).json({
+        success: false,
+        message: "Please provide booking Id and status.",
+      });
+    }
+    status = status.toLowerCase();
+
+    // find booking
+    const booking = await Booking.findById(bookingId);
+
+    if (!booking) {
+      return res.status(200).json({
+        success: false,
+        message: `Booking with ID: ${bookingId} was not found!`,
+      });
+    }
+
+    // if status is confirmed or pending then just update the status
+    if (status === "pending") {
+      booking.status = "pending";
+      await booking.save();
+      return res.status(200).json({
+        success: true,
+        message: `Booking status updated to pending.`,
+      });
+    } else if (status === "confirmed") {
+      // if new status is confirm and if it was already cancel or refund then update to confirm and decrement the availability available seats
+      if (booking.status === "cancelled" || booking.status === "refunded") {
+        const busAvailability = await BusAvailability.findOne({
+          bus: booking.bus,
+          date: booking.bookingDate,
+        });
+
+        let seatsDetails = booking.seatDetails;
+        let seatsToConfirm = 0;
+        seatsDetails.map((seat) => {
+          seatsToConfirm += seat.seats;
+        });
+        busAvailability.availableSeats -= seatsToConfirm;
+        booking.status = status;
+        await booking.save();
+        await busAvailability.save();
+      } else if (
+        booking.status === "confirmed" ||
+        booking.status === "pending"
+      ) {
+        booking.status = status;
+        await booking.save();
+      }
+      return res.status(200).json({
+        success: true,
+        message: `Booking status updated to ${status}.`,
+      });
+    } else if (status === "cancelled" || status === "refunded") {
+      if (booking.status === "pending" || booking.status === "confirmed") {
+        // if current status is pending or confirmed then first check if booking is added by admin.
+        // if booking added by admin then just update the status and available seats
+        if (booking.isAddedByAdmin === true) {
+          booking.status = status;
+          const busAvailability = await BusAvailability.findOne({
+            bus: booking.bus,
+            date: booking.bookingDate,
+          });
+
+          let seatsDetails = booking.seatDetails;
+          let seatsToCancel = 0;
+          seatsDetails.map((seat) => {
+            seatsToCancel += seat.seats;
+          });
+          busAvailability.availableSeats += seatsToCancel;
+          await booking.save();
+          await busAvailability.save();
+
+          return res.status(200).json({
+            success: true,
+            message: `Booking status updated to ${status}.`,
+          });
+        } else {
+          // if its not added by admin then check if it is refunded.
+          // if its refunded then just update the status as well as the seats
+          const payment = await Payment.findById(booking.payment);
+
+          if (payment.isRefunded === true) {
+            booking.status = status;
+            const busAvailability = await BusAvailability.findOne({
+              bus: booking.bus,
+              date: booking.bookingDate,
+            });
+
+            let seatsDetails = booking.seatDetails;
+            let seatsToCancel = 0;
+            seatsDetails.map((seat) => {
+              seatsToCancel += seat.seats;
+            });
+            busAvailability.availableSeats += seatsToCancel;
+            await booking.save();
+            await busAvailability.save();
+
+            return res.status(200).json({
+              success: true,
+              message: `Booking status updated to ${status}. Payment has already been refunded.`,
+            });
+          } else {
+            // if not refunded then run the makeRefund function to refund to user
+            // and update the status as well as seats
+            // first make the refund from merchant api
+            let paymentResponse = await makeRefund(
+              payment.amount,
+              payment.transactionId
+            );
+
+            if (paymentResponse) {
+              console.log(paymentResponse);
+              const decodedObject = paymentResponse
+                .split("&")
+                .reduce((acc, curr) => {
+                  const [key, value] = curr.split("=");
+                  acc[key] = value || null;
+                  return acc;
+                }, {});
+
+              if (
+                decodedObject.response_code &&
+                decodedObject.response_code !== "100" &&
+                decodedObject.response &&
+                decodedObject.response !== "1"
+              ) {
+                return res.status(200).json({
+                  success: false,
+                  message: decodedObject.responsetext,
+                });
+              }
+
+              // check if refund success
+              if (
+                decodedObject.response_code &&
+                decodedObject.response_code === "100" &&
+                decodedObject.response &&
+                decodedObject.response === "1" &&
+                decodedObject.transactionid &&
+                decodedObject.transactionid !== null
+              ) {
+                // update the booking schema
+                booking.status = status;
+                payment.isRefunded = true;
+                // update the availability schema
+                const busAvailability = await BusAvailability.findOne({
+                  bus: booking.bus,
+                  date: booking.bookingDate,
+                });
+
+                let seatsDetails = booking.seatDetails;
+                let seatsToCancel = 0;
+                seatsDetails.map((seat) => {
+                  seatsToCancel += seat.seats;
+                });
+
+                if (
+                  busAvailability.availableSeats >= busAvailability.totalSeats
+                ) {
+                  busAvailability.availableSeats = busAvailability.totalSeats;
+                } else {
+                  busAvailability.availableSeats += seatsToCancel;
+                }
+
+                await booking.save();
+                await busAvailability.save();
+                await payment.save();
+
+                return res.status(200).json({
+                  success: true,
+                  message: `Your Booking has been ${status} successfully! Refund if applicable is being processed.`,
+                });
+              }
+            } else {
+              return res.status(200).json({
+                success: false,
+                message: "Payment Refund Failed. Please try again later.",
+              });
+            }
+          }
+        }
+      } else if (
+        booking.status === "cancelled" ||
+        booking.status === "refunded"
+      ) {
+        // if current status is cancelled or refunded then just update the status
+        booking.status = status;
+        await booking.save();
+      }
+      return res.status(200).json({
+        success: true,
+        message: `Booking status updated to ${status}.`,
+      });
+    }
   } catch (error) {
     console.log(error);
     return res.status(500).json({

@@ -110,7 +110,7 @@ export const login = async (req, res, next) => {
     });
   } catch (err) {
     // next(err);
-    console.log(error);
+    console.log(err);
     res.status(500);
     return res.json({
       success: false,

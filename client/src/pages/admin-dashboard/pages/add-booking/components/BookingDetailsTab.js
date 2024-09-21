@@ -476,9 +476,6 @@ const BookingDetailsTab = ({
               SetBookingStatus(e.target.value);
             }}
           >
-            <option value="" key="">
-              Choose
-            </option>
             <option value="cancelled" key="cancelled">
               Cancelled
             </option>

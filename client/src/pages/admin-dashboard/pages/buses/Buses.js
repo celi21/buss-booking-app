@@ -15,6 +15,7 @@ import AddNewBus from "./components/add-new-bus/AddNewBus";
 import { fetchBuses, removeBus } from "../../../../store/slices/BusSlice";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { fetchRoutes } from "../../../../store/slices/RoutesSlice";
 
 const Buses = () => {
   const [show, setShow] = useState(false);
@@ -24,12 +25,15 @@ const Buses = () => {
   const handleShow = () => setShow(true);
   const handleEditClose = () => setShowEdit(false);
   const [search, setSearch] = useState("");
+  const [filterRoute, setFilterRoute] = useState("");
   const { isBusesLoading, buses } = useSelector((state) => state.bus);
+  const { routes } = useSelector((state) => state.routes);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(fetchBuses());
+    dispatch(fetchRoutes());
   }, []);
 
   const editBus = (bus) => {
@@ -44,6 +48,17 @@ const Buses = () => {
       duration: 4000,
     });
   };
+
+  const filteredBuses = buses?.filter((bus) => {
+    const matchesSearch =
+      search.trim() === "" ||
+      bus.route.name?.toLowerCase().includes(search.toLowerCase()) ||
+      bus.busType.name?.toLowerCase().includes(search.toLowerCase());
+
+    const matchesRoute = filterRoute === "" || bus.route._id === filterRoute;
+
+    return matchesSearch && matchesRoute;
+  });
 
   return (
     <Container fluid>
@@ -75,12 +90,26 @@ const Buses = () => {
           </InputGroup>
         </Col>
         <Col className="d-flex justify-content-end align-items-center gap-3">
-          <div>Filter by:</div>
+          <div>Filter by Route:</div>
           <Row className="d-flex flex-row">
             <div className="w-100">
-              <select className="form-select w-100">
-                <option value="all">All</option>
-                <option value="all">All All</option>
+              <select
+                className="form-select w-100"
+                defaultValue={null}
+                onChange={(e) => {
+                  setFilterRoute(e.target.value);
+                }}
+              >
+                <option value={""} key={""}>
+                  Choose
+                </option>
+                {routes?.map((r) => {
+                  return (
+                    <option value={r._id} key={r._id}>
+                      {r.name}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </Row>
@@ -101,7 +130,7 @@ const Buses = () => {
             </tr>
           </thead>
           <tbody>
-            {buses.map((bus, index) => (
+            {filteredBuses.map((bus, index) => (
               <tr key={bus._id}>
                 <td className="text-nowrap">{index + 1}</td>
                 <td className="text-nowrap">{bus.route.name}</td>

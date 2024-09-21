@@ -10,17 +10,7 @@ import {
   Row,
   Table,
 } from "react-bootstrap";
-import {
-  ArrowClockwise,
-  Check,
-  ChevronDown,
-  Clock,
-  PencilSquare,
-  Plus,
-  Search,
-  Trash3,
-  X,
-} from "react-bootstrap-icons";
+import { ChevronDown, Plus, Search } from "react-bootstrap-icons";
 import "./bookings.css";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -28,6 +18,7 @@ import { fetchAdminBookings } from "../../../../store/slices/bookingSlice";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import { fetchRoutes } from "../../../../store/slices/RoutesSlice";
 import { fetchBuses } from "../../../../store/slices/BusSlice";
+import BookingRow from "./booking-row/BookingRow";
 
 const Bookings = () => {
   const [showMoreOptions, setShowMoreOptions] = useState(false);
@@ -43,21 +34,6 @@ const Bookings = () => {
   const [filterBus, setFilterBus] = useState("");
   const [filterFromDate, setFilterFromDate] = useState("");
   const [filterToDate, setFilterToDate] = useState("");
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "confirmed":
-        return "bg-success";
-      case "pending":
-        return "bg-warning";
-      case "refunded":
-        return "bg-secondary";
-      case "cancelled":
-        return "bg-danger";
-      default:
-        return "bg-primary";
-    }
-  };
 
   useEffect(() => {
     dispatch(fetchBuses());
@@ -101,6 +77,8 @@ const Bookings = () => {
       isDateInRange
     );
   });
+
+  console.log(filteredBookings);
 
   return (
     <Container fluid>
@@ -280,99 +258,7 @@ const Bookings = () => {
             }}
           >
             {filteredBookings.map((booking, index) => {
-              let statusColor = getStatusColor(booking.status);
-              return (
-                <tr
-                  key={booking._id}
-                  style={{
-                    fontSize: 14,
-                  }}
-                >
-                  <td>{index + 1}</td>
-                  <td className="text-nowrap">
-                    {booking.personalDetails?.firstName +
-                      (" " + booking.personalDetails?.lastName == null
-                        ? ""
-                        : booking.personalDetails?.lastName)}
-                    <br />
-                    {booking.personalDetails?.email}
-                  </td>
-                  <td className="text-nowrap">
-                    {booking.bookingDate} <br />
-                    {booking.bus.locations[0].departureTime} -{" "}
-                    {
-                      booking.bus.locations[booking.bus.locations.length - 1]
-                        .arrivalTime
-                    }
-                  </td>
-                  <td>
-                    {booking.route.name},{" "}
-                    {booking.bus.locations[0].departureTime} -{" "}
-                    {
-                      booking.bus.locations[booking.bus.locations.length - 1]
-                        .arrivalTime
-                    }
-                    <br />
-                    <b>from</b> {booking.from.name} <b>to</b> {booking.to.name}
-                  </td>
-                  <td className="text-nowrap">
-                    <div className="d-flex flex-row justify-content-start align-items-center gap-2">
-                      <select
-                        className="form-select form-select-sm w-auto"
-                        defaultValue={booking.status}
-                        // onChange={(e) => {
-                        //   updateStatus(city._id, e.target.value);
-                        // }}
-                      >
-                        <option value="confirmed">Confirmed</option>
-                        <option value="pending">Pending</option>
-                        <option value="refunded">Refunded</option>
-                        <option value="cancelled">Cancelled</option>
-                      </select>
-                      <div
-                        className={`${statusColor} rounded-circle d-flex justify-content-center align-items-center`}
-                        style={{ width: "20px", height: "20px" }}
-                      >
-                        {booking.status === "confirmed" && (
-                          <Check className="text-white" size={17} />
-                        )}
-                        {booking.status === "pending" && (
-                          <Clock className="text-white" size={17} />
-                        )}
-                        {booking.status === "refunded" && (
-                          <ArrowClockwise className="text-white" size={17} />
-                        )}
-                        {booking.status === "cancelled" && (
-                          <X className="text-white" size={17} />
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="d-flex flex-column justify-content-start align-items-start gap-1">
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        className="me-2"
-                        // onClick={() => {
-                        //   editCity(city);
-                        // }}
-                      >
-                        <PencilSquare />
-                      </Button>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        // onClick={() => {
-                        //   removeCity(city._id);
-                        // }}
-                      >
-                        <Trash3 />
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              );
+              return <BookingRow booking={booking} key={index} index={index} />;
             })}
           </tbody>
         )}

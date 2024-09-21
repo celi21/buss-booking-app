@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Alert, Button, Container, Tab, Tabs } from "react-bootstrap";
 import BookingDetailsTab from "./components/BookingDetailsTab";
 import ClientDetails from "./components/ClientDetails";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { resetBusAvailabilityData } from "../../../../store/slices/bookingSlice";
 import toast from "react-hot-toast";
@@ -18,7 +18,7 @@ const AddBooking = () => {
   const [ticketsPrice, setTicketsPrice] = useState(0);
   const [departureTime, setDepartureTime] = useState(null);
   const [arrivalTime, setArrivalTime] = useState(null);
-  const [bookingStatus, SetBookingStatus] = useState(null);
+  const [bookingStatus, SetBookingStatus] = useState("confirmed");
   const [firstName, setFirstName] = useState(null);
   const [lastName, setLastName] = useState(null);
   const [phone, setPhone] = useState(null);
@@ -120,6 +120,7 @@ const AddBooking = () => {
     }
   };
 
+  const navigate = useNavigate();
   const submitForm = async () => {
     if (!selectedDate) {
       toast.error(
@@ -259,16 +260,18 @@ const AddBooking = () => {
           },
           selectedSeats: selectedSeats,
           requestedSeats: requestedSeats,
+          status: bookingStatus,
         };
 
         const confirm = await confirmBooking(bookingData);
         if (confirm === true) {
           resetState();
-          setShowConfirmationModal(true);
+          // setShowConfirmationModal(true);
           toast.success("Booking has been added Successfully.", {
             duration: 4000,
             position: "top-right",
           });
+          navigate("/admin/bookings");
         }
       }
     } catch (error) {
