@@ -4,6 +4,9 @@ import {
   ArrowClockwise,
   Check,
   Clock,
+  Eye,
+  EyeFill,
+  InfoCircleFill,
   PencilSquare,
   Trash3,
   X,
@@ -12,7 +15,7 @@ import toast from "react-hot-toast";
 import { fetchAdminBookings } from "../../../../../store/slices/bookingSlice";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const BookingRow = ({ booking, index }) => {
   const [currentBookingStatus, setCurrentBookingStatus] = useState(
@@ -226,12 +229,21 @@ const BookingRow = ({ booking, index }) => {
               className="me-2"
               onClick={() => {
                 if (booking._id) {
-                  navigate(`/admin/edit-booking/${booking._id}`);
+                  navigate(`/admin/edit-booking/${booking.bookingId}`);
                 }
               }}
+              title="Edit"
             >
               <PencilSquare />
             </Button>
+            <Link
+              to={`/booking/${booking.bookingId}`}
+              target="_blank"
+              className="btn btn-info btn-sm text-light"
+              title="View Details"
+            >
+              <EyeFill color="#fff" size={15} />
+            </Link>
           </div>
         </td>
       </tr>

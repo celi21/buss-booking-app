@@ -185,14 +185,6 @@ const AddBooking = () => {
       return;
     }
 
-    if (!lastName || lastName.trim() == "") {
-      toast.error("Please enter the last name in Client Details.", {
-        duration: 4000,
-      });
-      setError("Please enter the last name in Client Details.");
-      return;
-    }
-
     if (!phone || phone.trim() == "") {
       toast.error("Please enter a phone number in Client Details.", {
         duration: 4000,

@@ -891,6 +891,235 @@ export const addBooking = async (req, res, next) => {
   }
 };
 
+export const updateBooking = async (req, res, next) => {
+  const bookingData = req.body;
+  try {
+    if (
+      !bookingData.bus ||
+      !bookingData.bookingId ||
+      !bookingData.busType ||
+      !bookingData.route ||
+      !bookingData.from ||
+      !bookingData.to ||
+      !bookingData.selectedDate ||
+      !bookingData.personalDetails ||
+      !bookingData.selectedSeats ||
+      !bookingData.requestedSeats
+    ) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete booking data.",
+      });
+    }
+
+    // confirm if booking exist
+    const booking = await Booking.findOne({
+      bookingId: bookingData.bookingId,
+    });
+    if (!booking) {
+      return res.status(200).json({
+        success: false,
+        message: "This Booking is not available. Please try again later.",
+      });
+    }
+
+    // first confirm the ticket pricing
+    const busId = bookingData.bus;
+    const foundBus = await Bus.findById(busId).populate(
+      "route busType locations locations.city ticketTypes ticketPrices"
+    );
+
+    if (!foundBus) {
+      return res.status(200).json({
+        success: false,
+        message: "This Bus is not available. Please try again later.",
+      });
+    }
+
+    let ticketsPrice = 0;
+    let requestedSeats = 0;
+    let previousBookedSeats = 0;
+    const seatsDetails = [];
+
+    booking.seatDetails.forEach((seat) => {
+      previousBookedSeats += parseInt(seat.seats);
+    });
+
+    bookingData.selectedSeats.forEach((seat) => {
+      let ticketPrice = foundBus.ticketPrices.find(
+        (ticket) =>
+          new mongoose.Types.ObjectId(seat._id).toString() ===
+          ticket.ticketType.toString()
+      );
+
+      let fromLocationCity = foundBus.locations.find(
+        (loc) =>
+          loc.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.from).toString()
+      );
+      let toLocationCity = foundBus.locations.find(
+        (loc) =>
+          loc.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.to).toString()
+      );
+
+      let ticketPriceInfo = ticketPrice.prices.find(
+        (p) =>
+          fromLocationCity?.city._id.toString() ===
+            new mongoose.Types.ObjectId(bookingData.from).toString() &&
+          toLocationCity?.city._id.toString() ===
+            new mongoose.Types.ObjectId(bookingData.to).toString() &&
+          fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
+          toLocationCity?._id.toString() === p.toLocationId.toString()
+      );
+
+      if (seat.seats > 0) {
+        ticketsPrice += Number(ticketPriceInfo?.price) * seat.seats;
+      }
+      seatsDetails.push(seat);
+      requestedSeats += parseInt(seat.seats);
+    });
+
+    // if both new date and bus is changed then
+    // Step 1: Check if either bus or date has changed
+    if (
+      booking.bus.toString() !== bookingData.bus.toString() || // Bus change
+      new Date(booking.bookingDate).getTime() !==
+        new Date(bookingData.selectedDate).getTime() // Date change
+    ) {
+      // Step 2: Handle Previous Bus Availability
+      let previousAvailability = await BusAvailability.findOne({
+        bus: booking.bus,
+        date: booking.bookingDate,
+      });
+
+      if (previousAvailability) {
+        previousAvailability.availableSeats += previousBookedSeats; // Revert seats from old booking
+        await previousAvailability.save();
+      }
+
+      // Step 3: Check the new availability for the new bus and date
+      let newBusAvailability = await BusAvailability.findOne({
+        bus: bookingData.bus,
+        date: bookingData.selectedDate,
+      });
+
+      // Step 4: Handle if new availability does not exist
+      if (!newBusAvailability) {
+        const totalSeats = foundBus.busType.seats;
+
+        // Ensure the requested seats are not more than the bus capacity
+        if (requestedSeats > totalSeats) {
+          return res.status(400).json({
+            success: false,
+            message: "Requested seats exceed the bus capacity.",
+          });
+        }
+
+        // Create new availability record if none exists
+        newBusAvailability = new BusAvailability({
+          bus: bookingData.bus,
+          date: bookingData.selectedDate,
+          totalSeats: totalSeats,
+          availableSeats: totalSeats - requestedSeats,
+        });
+        await newBusAvailability.save();
+      } else {
+        // Step 5: Check if the new bus has enough seats available
+        if (newBusAvailability.availableSeats < requestedSeats) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Not enough available seats on the new bus for the selected date.",
+          });
+        }
+        // Deduct requested seats from new availability
+        newBusAvailability.availableSeats -= requestedSeats;
+        await newBusAvailability.save();
+      }
+    } else {
+      // Step 1: Handle case when bus and date are the same, but requested seats have changed
+      const seatDifference = requestedSeats - previousBookedSeats; // Calculate the difference in seats
+
+      // Step 2: Fetch the availability for the current bus and date
+      let currentAvailability = await BusAvailability.findOne({
+        bus: booking.bus,
+        date: booking.bookingDate,
+      });
+
+      if (!currentAvailability) {
+        return res.status(400).json({
+          success: false,
+          message: "Bus availability not found for the selected date.",
+        });
+      }
+
+      // Step 3: Handle case when the requested seats have increased
+      if (seatDifference > 0) {
+        // Ensure the bus has enough available seats to accommodate the increase
+        if (currentAvailability.availableSeats < seatDifference) {
+          return res.status(400).json({
+            success: false,
+            message:
+              "Not enough available seats to accommodate the increased booking.",
+          });
+        }
+
+        // Decrease the available seats by the seat difference
+        currentAvailability.availableSeats -= seatDifference;
+      }
+
+      // Step 4: Handle case when the requested seats have decreased
+      else if (seatDifference < 0) {
+        // Increase the available seats by the seat difference (it's negative, so it adds back seats)
+        currentAvailability.availableSeats += Math.abs(seatDifference);
+      }
+
+      // Step 5: Save the updated availability
+      await currentAvailability.save();
+    }
+
+    // update payment details
+    await Payment.findByIdAndUpdate(booking.payment, {
+      amount: ticketsPrice,
+    });
+
+    // update personal details
+    await PersonalDetails.findByIdAndUpdate(booking.personalDetails, {
+      firstName: bookingData.personalDetails.firstName,
+      lastName: bookingData.personalDetails.lastName,
+      phone: bookingData.personalDetails.phone,
+      email: bookingData.personalDetails.email,
+      pickupAddress: bookingData.personalDetails.pickupAddress,
+      dropoffAddress: bookingData.personalDetails.dropoffAddress,
+      notes: bookingData.personalDetails.notes,
+      suitcases: bookingData.personalDetails.suitcases,
+    });
+
+    // finally save the booking data and send the booking id as well as confirm message
+    await Booking.findByIdAndUpdate(booking._id, {
+      bus: foundBus._id,
+      busType: foundBus.busType._id,
+      from: bookingData.from,
+      to: bookingData.to,
+      route: foundBus.route._id,
+      bookingDate: bookingData.selectedDate,
+      seatDetails: seatsDetails,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking Successfully added",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
 export const fetchAdminBookings = async (req, res, nex) => {
   try {
     const bookings = await Booking.find()
