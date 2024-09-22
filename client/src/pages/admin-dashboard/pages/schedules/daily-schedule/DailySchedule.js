@@ -141,7 +141,7 @@ const DailySchedule = () => {
                   <th>Arrival</th>
                   <th>FT Tickets</th>
                   <th>Total Tickets</th>
-                  <th>Actions</th>
+                  {/* <th>Actions</th> */}
                 </tr>
               </thead>
               <tbody>
@@ -156,7 +156,7 @@ const DailySchedule = () => {
                       </td>
                       <td>{index}</td>
                       <td>{index}</td>
-                      <td>
+                      {/* <td>
                         <div className="d-flex flex-row gap-2">
                           <Button
                             size="sm"
@@ -195,7 +195,7 @@ const DailySchedule = () => {
                             </Dropdown.Menu>
                           </Dropdown>
                         </div>
-                      </td>
+                      </td> */}
                     </tr>
                   );
                 })}
