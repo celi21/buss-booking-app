@@ -509,7 +509,6 @@ export const confirmBooking = async (req, res, next) => {
 
     let ticketsPrice = 0;
     let requestedSeats = 0;
-    console.log(bookingData.selectedSeats);
     const seatsDetails = [];
 
     bookingData.selectedSeats.forEach((seat) => {
@@ -547,8 +546,6 @@ export const confirmBooking = async (req, res, next) => {
       requestedSeats += parseInt(seat.seats);
     });
 
-    console.log(ticketsPrice, requestedSeats);
-
     // make the payment to merchant one
     let cardNumber = bookingData.paymentDetails.cardNumber;
     let expiryMonth = bookingData.paymentDetails.expiryMonth;
@@ -561,8 +558,11 @@ export const confirmBooking = async (req, res, next) => {
       fullName.split(" ").length > 1 ? fullName.split(" ")[1] : "";
     let transaction_session_id = uuidv4();
 
+    let totalTicketsPrice =
+      bookingData.flexOption == true ? ticketsPrice + 8 : ticketsPrice;
+
     let paymentResponse = await makePayment(
-      ticketsPrice,
+      totalTicketsPrice,
       cardNumber,
       expiryMonth,
       expiryYear,
@@ -646,6 +646,7 @@ export const confirmBooking = async (req, res, next) => {
           bookingId: bookingId,
           user: bookingData.user ? bookingData.user?.id : null,
           seatDetails: seatsDetails,
+          flexOption: bookingData.flexOption,
         });
 
         let busAvailability = await BusAvailability.findOne({

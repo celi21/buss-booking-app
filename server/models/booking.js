@@ -76,6 +76,10 @@ const bookingSchema = new Schema(
       type: String,
       default: "confirmed", //confirmed,pending,cancelled
     },
+    flexOption: {
+      type: Boolean,
+      default: false,
+    },
     isAddedByAdmin: {
       type: Boolean,
       default: false,
