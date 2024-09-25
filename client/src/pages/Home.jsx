@@ -7,6 +7,7 @@ import { Link, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/esm/Button";
 import GuestRegisterModal from "./components/GuestRegisterModal";
 import { useSelector } from "react-redux";
+import { translateText } from "../utils/translation";
 
 function Home() {
   const [showModal, setShowModal] = useState(false);
@@ -21,6 +22,9 @@ function Home() {
     }
     setShowModal(true);
   };
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
 
   return (
     <Container>
@@ -29,8 +33,15 @@ function Home() {
       )}
       <Row className="mt-4">
         <Col className="col-12 col-lg-6 d-flex flex-column justify-content-center">
-          <h1>Bueno Express Transportion Booking Portal</h1>
-          <h4>Be great</h4>
+          <h1>
+            Bueno Express Transportion{" "}
+            {selectedLanguage &&
+              translateText("Booking Portal", selectedLanguage.code)}
+          </h1>
+          <h4>
+            {selectedLanguage &&
+              translateText("Be great", selectedLanguage.code)}
+          </h4>
           <div className="mt-3">
             <Button
               variant="primary"
@@ -38,7 +49,8 @@ function Home() {
               className="p-2 px-4 w-auto"
               onClick={() => handleBookNow()}
             >
-              Book Now
+              {selectedLanguage &&
+                translateText("Book Now", selectedLanguage.code)}
             </Button>
           </div>
         </Col>

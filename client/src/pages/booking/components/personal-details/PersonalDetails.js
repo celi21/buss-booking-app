@@ -10,6 +10,7 @@ import Autocomplete from "react-google-autocomplete";
 import toast from "react-hot-toast";
 import BookingDetailsRow from "../booking-details-row/BookingDetailsRow";
 import BookingPayment from "../booking-payment/BookingPayment";
+import { translateText } from "../../../../utils/translation";
 
 const PersonalDetails = ({
   selectedFromCity,
@@ -127,95 +128,240 @@ const PersonalDetails = ({
 
   const handleProceedButton = () => {
     if (!firstName || firstName.trim() == "") {
-      toast.error("Please provide your First Name", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your First Name");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide your First Name",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText("Please provide your First Name", selectedLanguage.code)
+      );
       return;
     }
     if (!phone || phone.trim() == "") {
-      toast.error("Please provide your Phone", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your Phone");
+      toast.error(
+        selectedLanguage &&
+          translateText("Please provide your Phone", selectedLanguage.code),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText("Please provide your Phone", selectedLanguage.code)
+      );
       return;
     }
     if (!email || email.trim() == "") {
-      toast.error("Please provide your Email", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your Email");
+      toast.error(
+        selectedLanguage &&
+          translateText("Please provide your Email", selectedLanguage.code),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText("Please provide your Email", selectedLanguage.code)
+      );
       return;
     }
     if (!validateEmail(email)) {
-      toast.error("Please provide a valid Email address.", {
-        duration: 4000,
-      });
-      setLocalError("Please provide a valid Email address.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide a valid Email address.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide a valid Email address.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!pickupAddress || pickupAddress.trim() == "") {
-      toast.error("Please provide your Pickup Address", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your Pickup Address");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Pickup Address",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Pickup Address",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!dropoffAddress || dropoffAddress.trim() == "") {
-      toast.error("Please provide your Dropoff Address", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your Dropoff Address");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Dropoff Address",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Dropoff Address",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!fullName || fullName.trim() == "") {
-      toast.error("Please provide your Full Name on Card Details.", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your Full Name on Card Details.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Full Name on Card Details.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Full Name on Card Details.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!cardNumber || cardNumber.trim() == "") {
-      toast.error("Please provide your Card Number on Card Details.", {
-        duration: 4000,
-      });
-      setLocalError("Please provide your Card Number on Card Details.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Card Number on Card Details.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide your Card Number on Card Details.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!expiryMonth || expiryMonth.trim() == "") {
-      toast.error("Please provide card Expiry Month on Card Details.", {
-        duration: 4000,
-      });
-      setLocalError("Please provide card Expiry Month on Card Details.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide card Expiry Month on Card Details.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide card Expiry Month on Card Details.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!expiryYear || expiryYear.trim() == "") {
-      toast.error("Please provide card Expiry Year on Card Details.", {
-        duration: 4000,
-      });
-      setLocalError("Please provide card Expiry Year on Card Details.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide card Expiry Year on Card Details.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide card Expiry Year on Card Details.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!cvv || cvv.trim() == "") {
-      toast.error("Please provide card CVV/CVC number on Card Details.", {
-        duration: 4000,
-      });
-      setLocalError("Please provide card CVV/CVC number on Card Details.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please provide card CVV/CVC number on Card Details.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "Please provide card CVV/CVC number on Card Details.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
     if (!captcha || captcha.trim() == "") {
-      toast.error("Please enter the Captcha code.", {
-        duration: 4000,
-      });
-      setLocalError("Please enter the Captcha code.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please enter the Captcha code.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText("Please enter the Captcha code.", selectedLanguage.code)
+      );
       return;
     }
 
     if (captcha !== captchaCode) {
-      toast.error("Invalid Captcha code.", {
-        duration: 4000,
-      });
-      setLocalError("Invalid Captcha code.");
+      toast.error(
+        selectedLanguage &&
+          translateText("Invalid Captcha code.", selectedLanguage.code),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText("Invalid Captcha code.", selectedLanguage.code)
+      );
       return;
     }
 
@@ -251,18 +397,26 @@ const PersonalDetails = ({
     setLocalError(null);
   };
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <div className="bg-light border p-3 rounded w-100">
       {isTimerStarted && (
         <Alert variant="warning">
-          <div className="fw-bold">Booking Timeout Alert!</div>
-          Please Note: You have 4 minutes to complete your booking process. If
-          the time runs out, your current booking information will be reset. The
-          remaining time is displayed at the top right side of the screen. We
-          appreciate your prompt attention.
+          <div className="fw-bold">
+            {selectedLanguage &&
+              translateText("Booking Timeout Alert", selectedLanguage.code)}
+          </div>
+          {selectedLanguage &&
+            translateText("alert-description", selectedLanguage.code)}
         </Alert>
       )}
-      <p className="fs-4 fw-bold">Booking Details</p>
+      <p className="fs-4 fw-bold">
+        {selectedLanguage &&
+          translateText("booking-details", selectedLanguage.code)}
+      </p>
 
       <BookingDetailsRow
         selectedDate={selectedDate}
@@ -277,13 +431,18 @@ const PersonalDetails = ({
       />
 
       <div className="my-4">
-        <p className="fs-4 fw-bold">Personal Details</p>
+        <p className="fs-4 fw-bold">
+          {selectedLanguage && translateText("Personal", selectedLanguage.code)}{" "}
+          {selectedLanguage && translateText("details", selectedLanguage.code)}
+        </p>
         <Form>
           <Row className="mb-3">
             <Col lg={6} xl={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="m-0 fw-semibold" htmlFor="firstName">
-                  First Name:<span className="text-danger ms-1">*</span>
+                  {selectedLanguage &&
+                    translateText("first-name", selectedLanguage.code)}
+                  :<span className="text-danger ms-1">*</span>
                 </Form.Label>
                 <Form.Control
                   type="text"
@@ -300,7 +459,9 @@ const PersonalDetails = ({
             <Col lg={6} xl={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="m-0 fw-semibold" htmlFor="lastName">
-                  Last Name:
+                  {selectedLanguage &&
+                    translateText("last-name", selectedLanguage.code)}
+                  :
                 </Form.Label>
                 <Form.Control
                   type="text"
@@ -320,7 +481,9 @@ const PersonalDetails = ({
             <Col lg={6} xl={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="m-0 fw-semibold" htmlFor="phone">
-                  Phone:<span className="text-danger ms-1">*</span>
+                  {selectedLanguage &&
+                    translateText("phone", selectedLanguage.code)}
+                  :<span className="text-danger ms-1">*</span>
                 </Form.Label>
                 <Form.Control
                   type="text"
@@ -337,7 +500,9 @@ const PersonalDetails = ({
             <Col lg={6} xl={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="m-0 fw-semibold" htmlFor="email">
-                  Email:<span className="text-danger ms-1">*</span>
+                  {selectedLanguage &&
+                    translateText("email", selectedLanguage.code)}
+                  :<span className="text-danger ms-1">*</span>
                 </Form.Label>
                 <Form.Control
                   type="email"
@@ -360,7 +525,9 @@ const PersonalDetails = ({
                   className="m-0 fw-semibold"
                   htmlFor="pickup-address"
                 >
-                  Pickup Address:<span className="text-danger ms-1">*</span>
+                  {selectedLanguage &&
+                    translateText("Pickup Address", selectedLanguage.code)}
+                  :<span className="text-danger ms-1">*</span>
                 </Form.Label>
                 <Autocomplete
                   apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
@@ -382,7 +549,9 @@ const PersonalDetails = ({
                   className="m-0 fw-semibold"
                   htmlFor="dropoff-address"
                 >
-                  Dropoff Address:<span className="text-danger ms-1">*</span>
+                  {selectedLanguage &&
+                    translateText("Dropoff Address", selectedLanguage.code)}
+                  :<span className="text-danger ms-1">*</span>
                 </Form.Label>
                 <Autocomplete
                   apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
@@ -404,7 +573,9 @@ const PersonalDetails = ({
             <Col lg={6} xl={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="m-0 fw-semibold" htmlFor="notes">
-                  Notes:
+                  {selectedLanguage &&
+                    translateText("Notes", selectedLanguage.code)}
+                  :
                 </Form.Label>
                 <textarea
                   cols="30"
@@ -420,7 +591,9 @@ const PersonalDetails = ({
             <Col lg={6} xl={6} md={12} sm={12} xs={12}>
               <Form.Group>
                 <Form.Label className="m-0 fw-semibold" htmlFor="suitcases">
-                  Suitcases:
+                  {selectedLanguage &&
+                    translateText("Suitcases", selectedLanguage.code)}
+                  :
                 </Form.Label>
                 <Form.Select
                   id="suitcases"
@@ -443,7 +616,10 @@ const PersonalDetails = ({
 
       <hr />
 
-      <p className="fs-4 fw-bold">Payment Details</p>
+      <p className="fs-4 fw-bold text-capitalize">
+        {selectedLanguage && translateText("payment", selectedLanguage.code)}{" "}
+        {selectedLanguage && translateText("details", selectedLanguage.code)}
+      </p>
       <BookingPayment
         selectedSeats={selectedSeats}
         ticketsPrice={ticketsPrice}
@@ -465,7 +641,9 @@ const PersonalDetails = ({
           <Form.Group>
             <div className="d-flex align-items-center gap-3 mb-1">
               <Form.Label className="m-0 fw-semibold" htmlFor="Captcha">
-                Captcha:<span className="text-danger ms-1">*</span>
+                {selectedLanguage &&
+                  translateText("Captcha", selectedLanguage.code)}
+                :<span className="text-danger ms-1">*</span>
               </Form.Label>
               <div
                 className="bg-secondary p-3 py-1 text-white"
@@ -577,7 +755,7 @@ const PersonalDetails = ({
             className="px-3 py-2 fw-semibold"
             onClick={handleBackButton}
           >
-            Back
+            {selectedLanguage && translateText("back", selectedLanguage.code)}
           </Button>
         </Col>
         <Col className="justify-content-end d-flex">
@@ -585,7 +763,8 @@ const PersonalDetails = ({
             className="px-3 py-2 fw-semibold"
             onClick={handleProceedButton}
           >
-            Proceed to Confirmation
+            {selectedLanguage &&
+              translateText("proceed-to-confirmation", selectedLanguage.code)}
           </Button>
         </Col>
       </Row>

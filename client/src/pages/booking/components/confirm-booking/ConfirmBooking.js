@@ -9,6 +9,7 @@ import {
 } from "../../../../store/slices/bookingSlice";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { translateText } from "../../../../utils/translation";
 
 const ConfirmBooking = ({
   selectedFromCity,
@@ -183,12 +184,20 @@ const ConfirmBooking = ({
     }
   };
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <div className="bg-light border p-3 rounded w-100">
       <p className="fs-4 fw-semibold text-center border-bottom pb-3">
-        Please Confirm your Details.
+        {selectedLanguage &&
+          translateText("confirm-details", selectedLanguage.code)}
       </p>
-      <p className="fs-4 fw-bold">Booking Details</p>
+      <p className="fs-4 fw-bold">
+        {selectedLanguage &&
+          translateText("booking-details", selectedLanguage.code)}
+      </p>
 
       <BookingDetailsRow
         selectedDate={selectedDate}
@@ -204,12 +213,19 @@ const ConfirmBooking = ({
 
       <div className="my-4">
         <div className="d-flex flex-row align-items-center gap-2 mb-4">
-          <p className="fs-4 fw-bold m-0 p-0">Personal Details</p>
+          <p className="fs-4 fw-bold m-0 p-0">
+            {selectedLanguage &&
+              translateText("Personal", selectedLanguage.code)}{" "}
+            {selectedLanguage &&
+              translateText("details", selectedLanguage.code)}
+          </p>
           <Button
             className="p-0 m-0 bg-transparent border-0 outline-none text-primary"
             onClick={() => handleBackButton()}
           >
-            Change details
+            {selectedLanguage && translateText("change", selectedLanguage.code)}{" "}
+            {selectedLanguage &&
+              translateText("details", selectedLanguage.code)}
           </Button>
         </div>
 
@@ -219,7 +235,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="firstName">
-                    First Name:
+                    {selectedLanguage &&
+                      translateText("first-name", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">{personalDetails.firstName}</div>
                 </div>
@@ -227,7 +245,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="lastName">
-                    Last Name:
+                    {selectedLanguage &&
+                      translateText("last-name", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">{personalDetails.lastName}</div>
                 </div>
@@ -238,7 +258,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="phone">
-                    Phone:
+                    {selectedLanguage &&
+                      translateText("phone", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">{personalDetails.phone}</div>
                 </div>
@@ -246,7 +268,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="email">
-                    Email:
+                    {selectedLanguage &&
+                      translateText("email", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">{personalDetails.email}</div>
                 </div>
@@ -257,7 +281,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="pickup-address">
-                    Pickup Address:
+                    {selectedLanguage &&
+                      translateText("Pickup Address", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">
                     {personalDetails.pickupAddress}
@@ -267,7 +293,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="dropoff-address">
-                    Dropoff Address:
+                    {selectedLanguage &&
+                      translateText("Dropoff Address", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">
                     {personalDetails.dropoffAddress}
@@ -280,7 +308,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="notes">
-                    Notes:
+                    {selectedLanguage &&
+                      translateText("Notes", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <p className="fw-semibold">{personalDetails.notes}</p>
                 </div>
@@ -288,7 +318,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="suitcases">
-                    Suitcases:
+                    {selectedLanguage &&
+                      translateText("Suitcases", selectedLanguage.code)}
+                    :
                   </Form.Label>
                   <div className="fw-semibold">{personalDetails.suitcases}</div>
                 </div>
@@ -300,12 +332,19 @@ const ConfirmBooking = ({
 
       <div className="my-4">
         <div className="d-flex flex-row align-items-center gap-2 mb-4">
-          <p className="fs-4 fw-bold m-0 p-0">Payment Details</p>
+          <p className="fs-4 fw-bold m-0 p-0">
+            {selectedLanguage &&
+              translateText("payment", selectedLanguage.code)}{" "}
+            {selectedLanguage &&
+              translateText("details", selectedLanguage.code)}
+          </p>
           <Button
             className="p-0 m-0 bg-transparent border-0 outline-none text-primary"
             onClick={() => handleBackButton()}
           >
-            Change details
+            {selectedLanguage && translateText("change", selectedLanguage.code)}{" "}
+            {selectedLanguage &&
+              translateText("details", selectedLanguage.code)}
           </Button>
         </div>
         {paymentDetails && (
@@ -314,7 +353,8 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="firstName">
-                    Full Name on Card:
+                    {selectedLanguage &&
+                      translateText("Cardholder Name", selectedLanguage.code)}
                   </Form.Label>
                   <div className="fw-semibold">{paymentDetails.fullName}</div>
                 </div>
@@ -322,7 +362,8 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="lastName">
-                    Card Number:
+                    {selectedLanguage &&
+                      translateText("Card Number", selectedLanguage.code)}
                   </Form.Label>
                   <div className="fw-semibold">{paymentDetails.cardNumber}</div>
                 </div>
@@ -333,7 +374,9 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="phone">
-                    Card Expiry (MM/YY):
+                    {selectedLanguage &&
+                      translateText("Expiry Date", selectedLanguage.code)}{" "}
+                    (MM/YY):
                   </Form.Label>
                   <div className="fw-semibold">
                     {paymentDetails.expiryMonth}/{paymentDetails.expiryYear}
@@ -343,7 +386,7 @@ const ConfirmBooking = ({
               <Col lg={6} xl={6} md={12} sm={12} xs={12}>
                 <div>
                   <Form.Label className="m-0" htmlFor="email">
-                    CVV/CVC Number:
+                    CVV/CVC:
                   </Form.Label>
                   <div className="fw-semibold">{paymentDetails.cvv}</div>
                 </div>
@@ -362,7 +405,7 @@ const ConfirmBooking = ({
             className="px-3 py-2 fw-semibold"
             onClick={handleBackButton}
           >
-            Back
+            {selectedLanguage && translateText("back", selectedLanguage.code)}
           </Button>
         </Col>
         <Col className="justify-content-end d-flex">
@@ -380,7 +423,8 @@ const ConfirmBooking = ({
                 <Spinner size="small" />
               </div>
             ) : (
-              "Confirm Booking"
+              selectedLanguage &&
+              translateText("confirm-booking", selectedLanguage.code)
             )}
           </Button>
         </Col>

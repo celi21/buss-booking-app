@@ -1,32 +1,49 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
+import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
+import { translateText } from "../../../../../utils/translation";
 
 const BookingConfirmationModal = ({ showModal, setShowModal, booking }) => {
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <Modal show={showModal} onHide={() => setShowModal(false)}>
       <Modal.Header closeButton>
-        <Modal.Title>Booking Confirmed!</Modal.Title>
+        <Modal.Title>
+          {selectedLanguage &&
+            translateText("Booking Confirmed", selectedLanguage.code)}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h3>Booking ID: {booking?.bookingId}</h3>
-        <p>Your booking has been successfully completed! 🎉</p>
+        <h3>
+          {selectedLanguage && translateText("booking", selectedLanguage.code)}{" "}
+          ID: {booking?.bookingId}
+        </h3>
         <p>
-          We’re excited to have you on board! Please keep your booking details
-          handy. You can always view and manage your booking at any time using
-          the link below.
+          {selectedLanguage &&
+            translateText("booking-modal-p1", selectedLanguage.code)}
         </p>
         <p>
-          If you need assistance or want to make changes to your booking, feel
-          free to contact our support team.
+          {selectedLanguage &&
+            translateText("booking-modal-p2", selectedLanguage.code)}
+        </p>
+        <p>
+          {selectedLanguage &&
+            translateText("booking-modal-p3", selectedLanguage.code)}
         </p>
       </Modal.Body>
       <Modal.Footer>
         <Button variant="secondary" onClick={() => setShowModal(false)}>
-          Close
+          {selectedLanguage && translateText("close", selectedLanguage.code)}
         </Button>
         <Link to={`/booking/${booking?.bookingId}`}>
-          <Button variant="primary">View Your Booking Details</Button>
+          <Button variant="primary">
+            {selectedLanguage &&
+              translateText("view-booking-details", selectedLanguage.code)}
+          </Button>
         </Link>
       </Modal.Footer>
     </Modal>

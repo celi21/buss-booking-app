@@ -9,6 +9,7 @@ import {
   setCurrentBookingStep,
   updateBookingStepStatus,
 } from "../../../../store/slices/bookingSlice";
+import { translateText } from "../../../../utils/translation";
 
 const DatesAndLocations = ({
   selectedDate,
@@ -21,6 +22,9 @@ const DatesAndLocations = ({
   personalDetails,
   setPersonalDetails,
 }) => {
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
   const getCurrentDate = () => {
     var now = new Date();
     var day = ("0" + now.getDate()).slice(-2);
@@ -79,21 +83,39 @@ const DatesAndLocations = ({
 
   const checkAvailability = async () => {
     if (!selectedDate) {
-      toast.error("Please choose a departing date", {
-        duration: 4000,
-      });
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please choose a departing date",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
       return;
     }
     if (!selectedFromCity) {
-      toast.error("Please choose From city/stop", {
-        duration: 4000,
-      });
+      toast.error(
+        selectedLanguage &&
+          translateText("Please choose From city/stop", selectedLanguage.code),
+        {
+          duration: 4000,
+        }
+      );
       return;
     }
     if (!selectedToCity) {
-      toast.error("Please choose destination city/stop", {
-        duration: 4000,
-      });
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "Please choose destination city/stop",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
       return;
     }
 
@@ -128,9 +150,14 @@ const DatesAndLocations = ({
       updatedPersonalDetails["pickupAddress"] = null;
       setPersonalDetails(updatedPersonalDetails);
       // Handle error, if bus is not available or an error occurred
-      toast.error(resultAction.payload || "No bus available.", {
-        duration: 4000,
-      });
+      toast.error(
+        resultAction.payload ||
+          (selectedLanguage &&
+            translateText("No bus available.", selectedLanguage.code)),
+        {
+          duration: 4000,
+        }
+      );
     }
   };
 
@@ -144,7 +171,11 @@ const DatesAndLocations = ({
         <Col xl={6} lg={6}>
           <Form.Group className="mb-3 w-100">
             <Form.Label>
-              <span>Departing:</span>
+              <span>
+                {selectedLanguage &&
+                  translateText("departing", selectedLanguage.code)}
+                :
+              </span>
               <InfoCircleFill
                 title="Please Select a Booking Date"
                 color="#aaa"
@@ -173,7 +204,11 @@ const DatesAndLocations = ({
                 <Col xl={6} lg={6}>
                   <Form.Group className="mb-3 w-100">
                     <Form.Label>
-                      <span>From:</span>
+                      <span>
+                        {selectedLanguage &&
+                          translateText("from", selectedLanguage.code)}
+                        :
+                      </span>
                       <InfoCircleFill
                         title="Please Choose your Starting City/Stop"
                         color="#aaa"
@@ -188,7 +223,8 @@ const DatesAndLocations = ({
                       }}
                     >
                       <option value="" key="">
-                        Choose
+                        {selectedLanguage &&
+                          translateText("choose", selectedLanguage.code)}
                       </option>
                       {cities.map((city, index) => {
                         return (
@@ -213,7 +249,11 @@ const DatesAndLocations = ({
                 <Col xl={6} lg={6}>
                   <Form.Group className="mb-3 w-100">
                     <Form.Label>
-                      <span>To:</span>
+                      <span>
+                        {selectedLanguage &&
+                          translateText("to", selectedLanguage.code)}
+                        :
+                      </span>
                       <InfoCircleFill
                         title="Please Choose your Destination."
                         color="#aaa"
@@ -229,7 +269,8 @@ const DatesAndLocations = ({
                       disabled={selectedFromCity == null}
                     >
                       <option value="" key="">
-                        Choose
+                        {selectedLanguage &&
+                          translateText("choose", selectedLanguage.code)}
                       </option>
                       {filteredToCities.map((city, index) => {
                         return (
@@ -276,7 +317,13 @@ const DatesAndLocations = ({
                 {isBusAvailableLoading == true ? (
                   <Spinner size="sm" />
                 ) : (
-                  <span>Check Availability</span>
+                  <span>
+                    {selectedLanguage &&
+                      translateText(
+                        "check-availability",
+                        selectedLanguage.code
+                      )}
+                  </span>
                 )}
               </Button>
             </Col>

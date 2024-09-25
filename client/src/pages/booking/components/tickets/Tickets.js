@@ -30,6 +30,7 @@ import {
 } from "../../../../store/slices/bookingSlice";
 import ShowRouteDetailsModal from "./components/ShowRouteDetailsModal";
 import toast from "react-hot-toast";
+import { translateText } from "../../../../utils/translation";
 
 const Tickets = ({
   selectedFromCity,
@@ -127,7 +128,6 @@ const Tickets = ({
 
     if (availableBus) {
       if (selectedSeats.length <= 0) {
-        console.log("Seting selecetdseats");
         let ticketTypes = availableBus.ticketTypes.map((t) => {
           return { name: t.name, _id: t._id, seats: 0, price: 0 };
         });
@@ -166,10 +166,23 @@ const Tickets = ({
   const handleProceedButton = () => {
     // console.log(selectedSeats);
     if (selectedSeats.length <= 0) {
-      toast.error("You need to select at least one ticket.", {
-        duration: 4000,
-      });
-      setLocalError("You need to select at least one ticket.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "You need to select at least one ticket.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "You need to select at least one ticket.",
+            selectedLanguage.code
+          )
+      );
       return;
     }
 
@@ -182,10 +195,23 @@ const Tickets = ({
     }
 
     if (hasAnySeatSelected == false) {
-      toast.error("You need to select at least one ticket.", {
-        duration: 4000,
-      });
-      setLocalError("You need to select at least one ticket.");
+      toast.error(
+        selectedLanguage &&
+          translateText(
+            "You need to select at least one ticket.",
+            selectedLanguage.code
+          ),
+        {
+          duration: 4000,
+        }
+      );
+      setLocalError(
+        selectedLanguage &&
+          translateText(
+            "You need to select at least one ticket.",
+            selectedLanguage.code
+          )
+      );
       setTicketsPrice(0);
       const stepsToUpdate = ["details", "confirm", "payment"]; // Example steps
       stepsToUpdate.forEach((step) => {
@@ -314,6 +340,10 @@ const Tickets = ({
     }
   };
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   // Calculate remaining available seats
   const totalAvailableSeats = busAvailabilityData?.availableSeats || 0;
   const seatsTaken = selectedSeats?.reduce(
@@ -335,7 +365,10 @@ const Tickets = ({
           <Badge bg="danger" className="ms-2">
             {(cheapestLocations.includes(selectedFromCity) ||
               cheapestLocations.includes(selectedToCity)) && (
-              <span>Cheapest</span>
+              <span>
+                {selectedLanguage &&
+                  translateText("cheapest", selectedLanguage.code)}
+              </span>
             )}
           </Badge>
         </Card.Header>
@@ -346,7 +379,9 @@ const Tickets = ({
                 {availableBus?.locations.length > 0 && (
                   <span className="h6">
                     <SignTurnRightFill className="me-2" />
-                    Route:&nbsp;
+                    {selectedLanguage &&
+                      translateText("route", selectedLanguage.code)}
+                    :&nbsp;
                   </span>
                 )}
                 {availableBus?.locations.map((loc, index) => (
@@ -365,7 +400,9 @@ const Tickets = ({
             <Col className="col-12 col-md-6">
               <span className="h6">
                 <TicketPerforatedFill className="me-2" />
-                Seats left:{" "}
+                {selectedLanguage &&
+                  translateText("seats-left", selectedLanguage.code)}
+                :{" "}
               </span>
               <span>
                 {busAvailabilityData?.availableSeats} /{" "}
@@ -378,7 +415,9 @@ const Tickets = ({
                 <>
                   <span className="h6">
                     <GeoAltFill className="me-2" />
-                    Boarding at:{" "}
+                    {selectedLanguage &&
+                      translateText("boarding-at", selectedLanguage.code)}
+                    :{" "}
                   </span>
                   <span>
                     {
@@ -451,7 +490,6 @@ const Tickets = ({
                   let seats = selectedSeats?.find(
                     (seat) => seat.name === ticketInfo.name
                   )?.seats;
-                  console.log(seats);
 
                   return (
                     <Col>
@@ -517,7 +555,8 @@ const Tickets = ({
                   handleBackButton();
                 }}
               >
-                Back
+                {selectedLanguage &&
+                  translateText("back", selectedLanguage.code)}
               </Button>
             </Col>
             <Col className="justify-content-end d-flex">
@@ -534,7 +573,8 @@ const Tickets = ({
                 }}
                 disabled={!busAvailabilityData || totalAvailableSeats <= 0}
               >
-                Proceed to Details
+                {selectedLanguage &&
+                  translateText("proceed-to-details", selectedLanguage.code)}
               </Button>
             </Col>
           </Row>

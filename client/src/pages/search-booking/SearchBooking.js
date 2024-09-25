@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
 import { Alert, Card, Col, Container, ListGroup, Row } from "react-bootstrap";
 import axios from "axios";
+import { useSelector } from "react-redux";
+import { translateText } from "../../utils/translation";
 
 const SearchBooking = () => {
   const { bookingId } = useParams();
@@ -11,6 +13,9 @@ const SearchBooking = () => {
   const [error, setError] = useState(null);
   const [bookingStatus, setBookingStatus] = useState(null);
   const [statusColor, setStatusColor] = useState(null);
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -114,20 +119,29 @@ const SearchBooking = () => {
       {bookingData && (
         <>
           <Row className="mb-4 mx-auto border-bottom">
-            <h4 className="fw-bold text-center">Booking Details</h4>
+            <h4 className="fw-bold text-center">
+              {selectedLanguage &&
+                translateText("booking-details", selectedLanguage.code)}
+            </h4>
             <div className="mx-auto text-center">
               <div className="fw-bold mb-0 d-flex flex-row justify-content-center align-items-center gap-2">
                 <div className="bg-primary text-white p-2 px-3 rounded">
                   ID: {bookingId}
                 </div>
                 <div className={`text-white p-2 px-3 rounded ${statusColor}`}>
-                  Status:{" "}
-                  <span className="text-uppercase">{bookingData.status}</span>
+                  {selectedLanguage &&
+                    translateText("status", selectedLanguage.code)}
+                  :{" "}
+                  <span className="text-uppercase">
+                    {selectedLanguage &&
+                      translateText(bookingData.status, selectedLanguage.code)}
+                  </span>
                 </div>
               </div>
 
               <p>
-                This booking was done on{" "}
+                {selectedLanguage &&
+                  translateText("search-page-desc", selectedLanguage.code)}{" "}
                 <span className="fw-semibold">
                   {formatDate(bookingData.createdAt)}
                 </span>
@@ -139,17 +153,26 @@ const SearchBooking = () => {
               <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
                 <Card className="shadow-sm h-100">
                   <Card.Body>
-                    <Card.Title>User Details</Card.Title>
+                    <Card.Title>
+                      {selectedLanguage &&
+                        translateText("User Details", selectedLanguage.code)}
+                    </Card.Title>
                     <ListGroup className="list-group-flush">
                       <ListGroup.Item className="px-0 mx-0">
                         <div>
-                          <div className="fw-semibold">Name</div>
+                          <div className="fw-semibold">
+                            {selectedLanguage &&
+                              translateText("name", selectedLanguage.code)}
+                          </div>
                           <div>{bookingData.user.name}</div>
                         </div>
                       </ListGroup.Item>
                       <ListGroup.Item className="px-0 mx-0">
                         <div>
-                          <div className="fw-semibold">Email</div>
+                          <div className="fw-semibold">
+                            {selectedLanguage &&
+                              translateText("email", selectedLanguage.code)}
+                          </div>
                           <div>{bookingData.user.email}</div>
                         </div>
                       </ListGroup.Item>
@@ -162,11 +185,23 @@ const SearchBooking = () => {
             <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
-                  <Card.Title>Date and Locations</Card.Title>
+                  <Card.Title>
+                    {selectedLanguage &&
+                      translateText(
+                        "dates-and-locations",
+                        selectedLanguage.code
+                      )}
+                  </Card.Title>
                   <ListGroup className="list-group-flush">
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Departure Time</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText(
+                              "departure-from",
+                              selectedLanguage.code
+                            )}
+                        </div>
                         <div>
                           {bookingData.bookingDate}{" "}
                           {
@@ -179,7 +214,10 @@ const SearchBooking = () => {
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Arrival Time</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("arrive-to", selectedLanguage.code)}
+                        </div>
                         <div>
                           {bookingData.bookingDate}{" "}
                           {
@@ -192,13 +230,19 @@ const SearchBooking = () => {
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">From</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("from", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.from.name}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">To</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("to", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.to.name}</div>
                       </div>
                     </ListGroup.Item>
@@ -210,17 +254,28 @@ const SearchBooking = () => {
             <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
-                  <Card.Title>Bus Details</Card.Title>
+                  <Card.Title>
+                    {selectedLanguage &&
+                      translateText("bus", selectedLanguage.code)}{" "}
+                    {selectedLanguage &&
+                      translateText("details", selectedLanguage.code)}
+                  </Card.Title>
                   <ListGroup className="list-group-flush">
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Name</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("name", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.route.name}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Total Seats</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("Total Seats", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.busType.seats}</div>
                       </div>
                     </ListGroup.Item>
@@ -232,15 +287,31 @@ const SearchBooking = () => {
             <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
-                  <Card.Title>Tickets</Card.Title>
+                  <Card.Title>
+                    {selectedLanguage &&
+                      translateText("tickets", selectedLanguage.code)}
+                  </Card.Title>
                   <ListGroup className="list-group-flush">
                     {bookingData.seatDetails.map((seat) => {
                       return (
                         <ListGroup.Item className="px-0 mx-0">
                           <div>
                             <div className="fw-semibold">{seat.name}</div>
-                            <div>Total: {seat.seats}</div>
-                            <div>Price: ${seat.price} per seat</div>
+                            <div>
+                              {selectedLanguage &&
+                                translateText("Total", selectedLanguage.code)}
+                              : {seat.seats}
+                            </div>
+                            <div>
+                              {selectedLanguage &&
+                                translateText("Seats", selectedLanguage.code)}
+                              : ${seat.price}{" "}
+                              {selectedLanguage &&
+                                translateText(
+                                  "per seat",
+                                  selectedLanguage.code
+                                )}
+                            </div>
                           </div>
                         </ListGroup.Item>
                       );
@@ -253,35 +324,62 @@ const SearchBooking = () => {
             <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
-                  <Card.Title>Payment Details</Card.Title>
+                  <Card.Title>
+                    {selectedLanguage &&
+                      translateText("payment", selectedLanguage.code)}{" "}
+                    {selectedLanguage &&
+                      translateText("details", selectedLanguage.code)}
+                  </Card.Title>
                   <ListGroup className="list-group-flush">
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Transaction ID</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText(
+                              "Transaction",
+                              selectedLanguage.code
+                            )}{" "}
+                          ID
+                        </div>
                         <div>{bookingData.payment.transactionId}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Total Tickets</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText(
+                              "Tickets total",
+                              selectedLanguage.code
+                            )}
+                        </div>
                         <div>${bookingData.payment.amount}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Tax</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("Tax", selectedLanguage.code)}
+                        </div>
                         <div>${bookingData.payment.tax}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Total</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("Total", selectedLanguage.code)}
+                        </div>
                         <div>${bookingData.payment.amount}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Deposit</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("Deposit", selectedLanguage.code)}
+                        </div>
                         <div>${bookingData.payment.amount}</div>
                       </div>
                     </ListGroup.Item>
@@ -293,53 +391,88 @@ const SearchBooking = () => {
             <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
-                  <Card.Title>Personal Details</Card.Title>
+                  <Card.Title>
+                    {selectedLanguage &&
+                      translateText("Personal", selectedLanguage.code)}{" "}
+                    {selectedLanguage &&
+                      translateText("details", selectedLanguage.code)}
+                  </Card.Title>
                   <ListGroup className="list-group-flush">
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">First Name</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("first-name", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.personalDetails.firstName}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Last Name</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("last-name", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.personalDetails.lastName}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Phone</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("phone", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.personalDetails.phone}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Email</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("email", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.personalDetails.email}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Pickup Address</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText(
+                              "Pickup Address",
+                              selectedLanguage.code
+                            )}
+                        </div>
                         <div>{bookingData.personalDetails.pickupAddress}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Dropoff Address</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText(
+                              "Dropoff Address",
+                              selectedLanguage.code
+                            )}
+                        </div>
                         <div>{bookingData.personalDetails.dropoffAddress}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Notes</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("Notes", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.personalDetails.notes}</div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
                       <div>
-                        <div className="fw-semibold">Suitcases</div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
+                            translateText("Suitcases", selectedLanguage.code)}
+                        </div>
                         <div>{bookingData.personalDetails.suitcases}</div>
                       </div>
                     </ListGroup.Item>

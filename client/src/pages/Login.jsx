@@ -10,6 +10,7 @@ import Spinner from "react-bootstrap/Spinner";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/slices/AuthSlice";
+import { translateText } from "../utils/translation";
 
 function Login() {
   const navigate = useNavigate();
@@ -30,17 +31,26 @@ function Login() {
     dispatch(loginUser({ email, password }));
   };
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <Container className="mt-3">
       <Row>
-        <h2>Login</h2>
+        <h2>
+          {selectedLanguage && translateText("Login", selectedLanguage.code)}
+        </h2>
         {error && <Alert variant="danger">{error}</Alert>}
       </Row>
       <Row>
         <Col>
           <Form>
             <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
+              <Form.Label>
+                {selectedLanguage &&
+                  translateText("email", selectedLanguage.code)}
+              </Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Enter email"
@@ -49,7 +59,10 @@ function Login() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Label>Password</Form.Label>
+              <Form.Label>
+                {selectedLanguage &&
+                  translateText("password", selectedLanguage.code)}
+              </Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Password"

@@ -3,6 +3,8 @@ import { Button, Dropdown } from "react-bootstrap";
 import { InfoCircleFill, XCircleFill } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 import CancelBookingModal from "./CancelBookingModal";
+import { useSelector } from "react-redux";
+import { translateText } from "../../../../../utils/translation";
 
 const UserBookingRow = ({ booking }) => {
   const getStatusColor = (status) => {
@@ -21,6 +23,9 @@ const UserBookingRow = ({ booking }) => {
   };
 
   const [showCancelModal, setShowCancelModal] = useState(false);
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
 
   return (
     <>
@@ -77,7 +82,8 @@ const UserBookingRow = ({ booking }) => {
               booking.status
             )} text-white p-1 rounded`}
           >
-            {booking.status}
+            {selectedLanguage &&
+              translateText(booking.status, selectedLanguage.code)}
           </div>
         </td>
         <td className="text-center">
@@ -104,7 +110,10 @@ const UserBookingRow = ({ booking }) => {
                   }}
                 >
                   <InfoCircleFill color="blue" />
-                  <span>View Details</span>
+                  <span>
+                    {selectedLanguage &&
+                      translateText("View Details", selectedLanguage.code)}
+                  </span>
                 </Link>
               </Dropdown.Item>
               <Dropdown.Item as={"div"}>
@@ -116,7 +125,10 @@ const UserBookingRow = ({ booking }) => {
                   }}
                 >
                   <XCircleFill color="red" />
-                  <span>Cancel Booking</span>
+                  <span>
+                    {selectedLanguage &&
+                      translateText("Cancel Booking", selectedLanguage.code)}
+                  </span>
                 </Button>
               </Dropdown.Item>
             </Dropdown.Menu>

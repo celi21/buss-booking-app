@@ -14,6 +14,7 @@ import {
   setCurrentBookingStep,
 } from "../../store/slices/bookingSlice";
 import BookingConfirmationModal from "./components/booking-payment/booking-confirmation-modal/BookingConfirmationModal";
+import { translateText } from "../../utils/translation";
 
 const Booking = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -21,7 +22,7 @@ const Booking = () => {
   const [selectedToCity, setSelectedToCity] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [ticketsPrice, setTicketsPrice] = useState(0);
-  const [bookingTimeout, setBookingTimeout] = useState("3:00");
+  const [bookingTimeout, setBookingTimeout] = useState("7:00");
   const dispatch = useDispatch();
   const { currentBookingStep, bookingStepsStatus } = useSelector(
     (state) => state.booking
@@ -64,7 +65,7 @@ const Booking = () => {
 
   const timerRef = useRef(null);
   const startTimer = () => {
-    let timeLeft = 240; // 3 minutes in seconds
+    let timeLeft = 420; // 7 minutes in seconds
 
     timerRef.current = setInterval(() => {
       const minutes = Math.floor(timeLeft / 60);
@@ -151,6 +152,10 @@ const Booking = () => {
     </svg>
   );
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <Container className="my-4" fluid>
       <Toaster />
@@ -190,7 +195,8 @@ const Booking = () => {
               onClick={() => handleTabClick("dates-and-locations")}
               className="position-relative"
             >
-              Dates and Locations
+              {selectedLanguage &&
+                translateText("dates-and-locations", selectedLanguage.code)}
               {currentBookingStep == "dates-and-locations" && currentStepSVG}
             </Button>
             <ArrowRight className="mx-3" size={22} color="#aaa" />
@@ -222,7 +228,8 @@ const Booking = () => {
             onClick={() => handleTabClick("tickets")}
             className="position-relative"
           >
-            Tickets
+            {selectedLanguage &&
+              translateText("tickets", selectedLanguage.code)}
             {currentBookingStep == "tickets" && currentStepSVG}
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
@@ -253,7 +260,8 @@ const Booking = () => {
             onClick={() => handleTabClick("details")}
             className="position-relative"
           >
-            Details
+            {selectedLanguage &&
+              translateText("details", selectedLanguage.code)}
             {currentBookingStep == "details" && currentStepSVG}
           </Button>
           <ArrowRight className="mx-3" size={22} color="#aaa" />
@@ -284,7 +292,8 @@ const Booking = () => {
             onClick={() => handleTabClick("confirm")}
             className="position-relative"
           >
-            Confirm
+            {selectedLanguage &&
+              translateText("confirm", selectedLanguage.code)}
             {currentBookingStep == "confirm" && currentStepSVG}
           </Button>
         </Col>
@@ -332,7 +341,9 @@ const Booking = () => {
             zIndex: 100,
           }}
         >
-          <span className="fw-bold text-primary">Time</span>
+          <span className="fw-bold text-primary">
+            {selectedLanguage && translateText("Time", selectedLanguage.code)}
+          </span>
           <span className="fw-bold text-primary">{bookingTimeout}</span>
         </div>
       )}

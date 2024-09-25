@@ -4,6 +4,7 @@ import busTypeReducer from "./slices/BusTypeSlice";
 import routesReducer from "./slices/RoutesSlice";
 import busReducer from "./slices/BusSlice";
 import bookingReducer from "./slices/bookingSlice";
+import settingsReducer from "./slices/SettingsSlice";
 
 export const MainStore = configureStore({
   reducer: {
@@ -12,5 +13,6 @@ export const MainStore = configureStore({
     routes: routesReducer,
     bus: busReducer,
     booking: bookingReducer,
+    settings: settingsReducer,
   },
 });

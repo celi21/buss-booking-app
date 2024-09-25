@@ -6,3 +6,7 @@ a {
 a:hover {
   color: inherit;
 }
+
+#dropdown-language::after {
+  display: none;
+}

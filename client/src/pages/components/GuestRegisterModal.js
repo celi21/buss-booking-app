@@ -1,31 +1,50 @@
 import React from "react";
 import { Button, Modal } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import { translateText } from "../../utils/translation";
+import { useSelector } from "react-redux";
 
 const GuestRegisterModal = ({ showModal, handleClose }) => {
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <Modal show={showModal} onHide={handleClose}>
       <Modal.Header closeButton>
-        <Modal.Title>Continue as Guest or Register</Modal.Title>
+        <Modal.Title>
+          {selectedLanguage &&
+            translateText("GuestModalTitle", selectedLanguage.code)}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         <p>
-          You can proceed with booking without creating an account, but you
-          won't be able to view your booking history, cancel/refund bookings or
-          manage your bookings later.
+          {selectedLanguage &&
+            translateText("GuestModalTitleP1", selectedLanguage.code)}
         </p>
         <p>
-          If you register, you can track your bookings and have a more
-          personalized experience.
+          {selectedLanguage &&
+            translateText("GuestModalTitleP2", selectedLanguage.code)}
         </p>
-        <p>Choose the option that works best for you!</p>
+        <p>
+          {selectedLanguage &&
+            translateText("GuestModalTitleP3", selectedLanguage.code)}
+        </p>
       </Modal.Body>
       <Modal.Footer>
         <Link to="/booking">
-          <Button variant="secondary">Continue as Guest</Button>
+          <Button variant="secondary">
+            {selectedLanguage &&
+              translateText("GuestCloseBtn", selectedLanguage.code)}
+          </Button>
         </Link>
         <Link to="/signup">
-          <Button variant="primary">Register / Login</Button>
+          <Button variant="primary">
+            {selectedLanguage &&
+              translateText("Register", selectedLanguage.code)}{" "}
+            /{" "}
+            {selectedLanguage && translateText("Login", selectedLanguage.code)}
+          </Button>
         </Link>
       </Modal.Footer>
     </Modal>

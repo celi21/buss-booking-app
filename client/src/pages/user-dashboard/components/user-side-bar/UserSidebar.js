@@ -16,7 +16,7 @@ import {
 } from "react-bootstrap-icons";
 import "./user-sidebar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../../store/slices/AuthSlice";
 
 const UserSidebar = () => {
@@ -26,6 +26,9 @@ const UserSidebar = () => {
     dispatch(logoutUser());
     navigate("/");
   };
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
 
   return (
     <Nav
@@ -47,7 +50,8 @@ const UserSidebar = () => {
           }
         >
           <PlusCircle className="me-2" />
-          New Booking
+          {selectedLanguage &&
+            translateText("New Booking", selectedLanguage.code)}
         </NavLink>
         <NavLink
           to="/user/dashboard"
@@ -60,7 +64,8 @@ const UserSidebar = () => {
           }
         >
           <House className="me-2" />
-          Dashboard
+          {selectedLanguage &&
+            translateText("Dashboard", selectedLanguage.code)}
         </NavLink>
         <NavLink
           to="/user/bookings"
@@ -73,7 +78,7 @@ const UserSidebar = () => {
           }
         >
           <Clipboard className="me-2" />
-          Bookings
+          {selectedLanguage && translateText("Bookings", selectedLanguage.code)}
         </NavLink>
         <NavLink
           onClick={handleLogout}
@@ -87,7 +92,7 @@ const UserSidebar = () => {
           }
         >
           <BoxArrowRight className="me-2" />
-          Logout
+          {selectedLanguage && translateText("logout", selectedLanguage.code)}
         </NavLink>
       </div>
     </Nav>

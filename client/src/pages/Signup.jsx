@@ -10,6 +10,7 @@ import Spinner from "react-bootstrap/Spinner";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { registerUser } from "../store/slices/AuthSlice";
+import { translateText } from "../utils/translation";
 
 function Signup() {
   const navigate = useNavigate();
@@ -47,11 +48,17 @@ function Signup() {
     dispatch(registerUser({ name, email, password }));
   };
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
+
   return (
     <Container>
       <Row>
         <Col className="text-center mb-3 mt-3">
-          <h2>Signup</h2>
+          <h2>
+            {selectedLanguage && translateText("SignUp", selectedLanguage.code)}
+          </h2>
         </Col>
       </Row>
       <Row>
@@ -62,7 +69,10 @@ function Signup() {
           )}
           <Form>
             <Form.Group className="mb-3" controlId="formBasicName">
-              <Form.Label>Name</Form.Label>
+              <Form.Label>
+                {selectedLanguage &&
+                  translateText("name", selectedLanguage.code)}
+              </Form.Label>
               <Form.Control
                 type="text"
                 placeholder="Enter name"
@@ -71,7 +81,10 @@ function Signup() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
+              <Form.Label>
+                {selectedLanguage &&
+                  translateText("email", selectedLanguage.code)}
+              </Form.Label>
               <Form.Control
                 type="email"
                 placeholder="Enter email"
@@ -80,7 +93,10 @@ function Signup() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Label>Password</Form.Label>
+              <Form.Label>
+                {selectedLanguage &&
+                  translateText("password", selectedLanguage.code)}
+              </Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Password"
@@ -90,7 +106,10 @@ function Signup() {
             </Form.Group>
 
             <Form.Group className="mb-3" controlId="formBasicConfirmPassword">
-              <Form.Label>Confirm Password</Form.Label>
+              <Form.Label>
+                {selectedLanguage &&
+                  translateText("Confirm Password", selectedLanguage.code)}
+              </Form.Label>
               <Form.Control
                 type="password"
                 placeholder="Confirm password"
@@ -106,7 +125,12 @@ function Signup() {
               onClick={handleSignup}
               disabled={loading}
             >
-              {loading ? <Spinner animation="border" /> : "Sign Up"}
+              {loading ? (
+                <Spinner animation="border" />
+              ) : (
+                selectedLanguage &&
+                translateText("SignUp", selectedLanguage.code)
+              )}
             </Button>
           </Form>
         </Col>

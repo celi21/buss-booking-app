@@ -19,6 +19,7 @@ import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { setCurrentBookingStep } from "../../../../store/slices/bookingSlice";
 import BookingConfirmationModal from "./booking-confirmation-modal/BookingConfirmationModal";
+import { translateText } from "../../../../utils/translation";
 
 const BookingPayment = ({
   selectedSeats,
@@ -155,6 +156,9 @@ const BookingPayment = ({
     }
   }; */
 
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
   return (
     <Row className="align-items-stretch d-flex">
       <Col xl="6" lg="6" className="mx-auto h-100">
@@ -174,7 +178,12 @@ const BookingPayment = ({
                   color: "#1a1a1ab3",
                 }}
               >
-                <span>Payment Summary</span>
+                <span>
+                  {selectedLanguage &&
+                    translateText("payment", selectedLanguage.code)}{" "}
+                  {selectedLanguage &&
+                    translateText("summary", selectedLanguage.code)}
+                </span>
               </div>
             </h2>
           </div>
@@ -196,7 +205,8 @@ const BookingPayment = ({
                         fontSize: 14,
                       }}
                     >
-                      Tickets
+                      {selectedLanguage &&
+                        translateText("tickets", selectedLanguage.code)}
                     </div>
                   </Col>
                   <Col
@@ -234,7 +244,8 @@ const BookingPayment = ({
                       fontSize: 14,
                     }}
                   >
-                    Tax
+                    {selectedLanguage &&
+                      translateText("Tax", selectedLanguage.code)}
                   </Col>
                   <Col xl="6" lg="6" md="6" sm="6" xs="6">
                     <span
@@ -267,7 +278,8 @@ const BookingPayment = ({
                       fontSize: 14,
                     }}
                   >
-                    Total
+                    {selectedLanguage &&
+                      translateText("Total", selectedLanguage.code)}
                   </Col>
                   <Col xl="6" lg="6" md="6" sm="6" xs="6">
                     <span
@@ -301,7 +313,10 @@ const BookingPayment = ({
                   color: "#1a1a1ab3",
                 }}
               >
-                <div className="text-start">Pay Via Credit/Debit Card</div>
+                <div className="text-start">
+                  {selectedLanguage &&
+                    translateText("credit-debit", selectedLanguage.code)}
+                </div>
                 <div class="icons">
                   <img
                     src="https://i.imgur.com/2ISgYja.png"
@@ -350,7 +365,8 @@ const BookingPayment = ({
                   }}
                   className="fw-semibold"
                 >
-                  Cardholder Name
+                  {selectedLanguage &&
+                    translateText("Cardholder Name", selectedLanguage.code)}
                 </Form.Label>
                 <InputGroup className="mb-3">
                   <InputGroup.Text
@@ -386,7 +402,8 @@ const BookingPayment = ({
                   }}
                   className="fw-semibold"
                 >
-                  Card Number
+                  {selectedLanguage &&
+                    translateText("Card Number", selectedLanguage.code)}
                 </Form.Label>
                 <InputGroup className="mb-3">
                   <InputGroup.Text
@@ -424,7 +441,8 @@ const BookingPayment = ({
                       }}
                       className="fw-semibold"
                     >
-                      Expiry Date
+                      {selectedLanguage &&
+                        translateText("Expiry Date", selectedLanguage.code)}
                     </Form.Label>
                     <div
                       className="mb-3 d-flex flex-row align-items-center rounded"
@@ -535,7 +553,8 @@ const BookingPayment = ({
                     fontSize: 14,
                   }}
                 >
-                  Your transaction is secured with ssl certificate
+                  {selectedLanguage &&
+                    translateText("secure", selectedLanguage.code)}
                 </div>
               </div>
             </div>

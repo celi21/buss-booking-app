@@ -4,6 +4,7 @@ import { Alert, Button, Modal, Spinner } from "react-bootstrap";
 import toast from "react-hot-toast";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserBookings } from "../../../../../store/slices/bookingSlice";
+import { translateText } from "../../../../../utils/translation";
 
 const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
   const [cancelMessage, setCancelMessage] = useState(null);
@@ -11,11 +12,18 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { user, token } = useSelector((state) => state.auth);
   const [error, setError] = useState(null);
+  const selectedLanguage = useSelector(
+    (state) => state.settings.selectedLanguage
+  );
 
   const checkIfCancelPossible = (booking) => {
     if (booking.status === "refunded" || booking.status === "cancelled") {
       setCancelMessage(
-        "Your booking has already been canceled. No further action is required, and the refund (if applicable) is being processed."
+        selectedLanguage &&
+          translateText(
+            "Your booking has already been canceled. No further action is required, and the refund (if applicable) is being processed.",
+            selectedLanguage.code
+          )
       );
       setIsCancelPossible(false);
       return;
@@ -27,7 +35,11 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
 
     if (!fromLocation || !fromLocation.departureTime) {
       setCancelMessage(
-        "There was an error while cancelling your booking. Please try again later."
+        selectedLanguage &&
+          translateText(
+            "There was an error while cancelling your booking. Please try again later.",
+            selectedLanguage.code
+          )
       );
       setIsCancelPossible(false);
       return;
@@ -44,19 +56,31 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
     if (hoursDifference < 0) {
       setIsCancelPossible(false);
       setCancelMessage(
-        "Your booking cannot be canceled because the departure date and time have already passed. Unfortunately, no refunds are available for bookings after the bus has departed."
+        selectedLanguage &&
+          translateText(
+            "Your booking cannot be canceled because the departure date and time have already passed. Unfortunately, no refunds are available for bookings after the bus has departed.",
+            selectedLanguage.code
+          )
       );
       return;
     } else if (hoursDifference <= 24) {
       setIsCancelPossible(false);
       setCancelMessage(
-        "Your booking cannot be canceled because it is within 24 hours of the departure time. Bookings must be canceled at least 24 hours before departure to be eligible for a refund. Please contact customer support for further assistance."
+        selectedLanguage &&
+          translateText(
+            "Your booking cannot be canceled because it is within 24 hours of the departure time. Bookings must be canceled at least 24 hours before departure to be eligible for a refund. Please contact customer support for further assistance.",
+            selectedLanguage.code
+          )
       );
       return;
     } else {
       setIsCancelPossible(true);
       setCancelMessage(
-        "Your booking is eligible for cancellation. Upon cancellation, you will receive a refund according to our refund policy. Please proceed if you'd like to cancel your booking."
+        selectedLanguage &&
+          translateText(
+            "Your booking is eligible for cancellation. Upon cancellation, you will receive a refund according to our refund policy. Please proceed if you'd like to cancel your booking.",
+            selectedLanguage.code
+          )
       );
     }
   };
@@ -97,7 +121,11 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
         setCancelMessage(null);
         setIsCancelPossible(false);
         toast.success(
-          "Your booking has been successfully canceled. The refund will be processed according to our refund policy.",
+          selectedLanguage &&
+            translateText(
+              "Your booking has been successfully canceled. The refund will be processed according to our refund policy.",
+              selectedLanguage.code
+            ),
           {
             duration: 10000,
           }
@@ -137,7 +165,10 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
       }}
     >
       <Modal.Header closeButton>
-        <Modal.Title>Booking Cancellation</Modal.Title>
+        <Modal.Title>
+          {selectedLanguage &&
+            translateText("Booking Cancellation", selectedLanguage.code)}
+        </Modal.Title>
       </Modal.Header>
       <Modal.Body>
         {cancelMessage}
@@ -157,7 +188,7 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
             setShowModal(false);
           }}
         >
-          Close
+          {selectedLanguage && translateText("close", selectedLanguage.code)}
         </Button>
         <Button
           variant="primary"
@@ -169,7 +200,12 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
             }
           }}
         >
-          {isLoading ? <Spinner size="sm" /> : "Cancel Booking"}
+          {isLoading ? (
+            <Spinner size="sm" />
+          ) : (
+            selectedLanguage &&
+            translateText("Cancel Booking", selectedLanguage.code)
+          )}
         </Button>
       </Modal.Footer>
     </Modal>
