@@ -18,6 +18,7 @@ import "./user-sidebar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutUser } from "../../../../store/slices/AuthSlice";
+import { translateText } from "../../../../utils/translation";
 
 const UserSidebar = () => {
   const navigate = useNavigate();
