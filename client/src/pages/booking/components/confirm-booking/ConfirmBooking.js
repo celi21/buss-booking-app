@@ -33,6 +33,9 @@ const ConfirmBooking = ({
   showConfirmationModal,
   setShowConfirmationModal,
   resetForm,
+  flexOption,
+  setFlexOption,
+  flexCharge,
 }) => {
   const [localError, setLocalError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -164,6 +167,7 @@ const ConfirmBooking = ({
           selectedSeats: selectedSeats,
           requestedSeats: requestedSeats,
           user: user,
+          flexOption: flexOption,
         };
 
         const confirm = await confirmBooking(bookingData);
@@ -209,6 +213,9 @@ const ConfirmBooking = ({
         selectedToCity={selectedToCity}
         handleSeatsButton={handleSeatsButton}
         handleDateButton={handleDateButton}
+        flexOption={flexOption}
+        setFlexOption={setFlexOption}
+        flexCharge={flexCharge}
       />
 
       <div className="my-4">

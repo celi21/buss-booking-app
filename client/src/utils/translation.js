@@ -144,8 +144,42 @@ const translation = {
     "New Booking": "New Booking",
     Dashboard: "Dashboard",
     Bookings: "Bookings",
+    "Expiry Date": "Expiry Date",
+    "Baggage Policy": "Baggage Policy",
+    "Baggage Message":
+      "Please review the image for details on our baggage policy.",
+    "Flex Charges": "Flex Charges",
+    flexOptionLabel:
+      "Add Flex Option (+$8) - Cancel or reschedule at no extra charge.",
+    whyChooseFlex: "Why choose the Flex Option?",
+    flexDescription:
+      "For just an additional $8, you can enjoy extra flexibility with your booking, giving you the ability to cancel or reschedule without worrying about fees:",
+    freeCancellations:
+      "Free Cancellations: Cancel your booking up to 24 hours before departure without any additional fees.",
+    dateChange:
+      "Date Change: Reschedule your booking free of charge by contacting our dispatchers.",
+    prioritySupport:
+      "Priority Support: Enjoy priority access to our dispatch team for quick modifications to your booking.",
+    "Flex Option": "Flex Option",
   },
   ES: {
+    "Flex Option": "Opción Flex",
+    "Flex Charges": "Frais Flex",
+    flexOptionLabel:
+      "Ajouter l'Option Flex (+8$) - Annulez ou reprogrammez sans frais supplémentaires.",
+    whyChooseFlex: "Pourquoi choisir l'Option Flex ?",
+    flexDescription:
+      "Pour seulement 8$ supplémentaires, vous bénéficiez de plus de flexibilité avec votre réservation, vous permettant d'annuler ou de reprogrammer sans frais supplémentaires:",
+    freeCancellations:
+      "Annulations gratuites : Annulez votre réservation jusqu'à 24 heures avant le départ sans frais supplémentaires.",
+    dateChange:
+      "Changement de date : Reprogrammez votre réservation gratuitement en contactant nos dispatcheurs.",
+    prioritySupport:
+      "Support prioritaire : Profitez d'un accès prioritaire à notre équipe de dispatch pour des modifications rapides de votre réservation.",
+    "Baggage Policy": "Política de Equipaje",
+    "Baggage Message":
+      "Por favor, revise la imagen para obtener detalles sobre nuestra política de equipaje.",
+    "Expiry Date": "Fecha de Expiración",
     Dashboard: "Tablero",
     Bookings: "Reservas",
     "New Booking": "Nueva Reserva",

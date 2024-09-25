@@ -369,6 +369,18 @@ const SearchBooking = () => {
                       <div>
                         <div className="fw-semibold">
                           {selectedLanguage &&
+                            translateText(
+                              "Flex Charges",
+                              selectedLanguage.code
+                            )}
+                        </div>
+                        <div>${bookingData.flexOption == true ? 8 : 0}</div>
+                      </div>
+                    </ListGroup.Item>
+                    <ListGroup.Item className="px-0 mx-0">
+                      <div>
+                        <div className="fw-semibold">
+                          {selectedLanguage &&
                             translateText("Total", selectedLanguage.code)}
                         </div>
                         <div>${bookingData.payment.amount}</div>

@@ -14,6 +14,9 @@ const BookingDetailsRow = ({
   selectedToCity,
   handleDateButton,
   handleSeatsButton,
+  flexOption,
+  setFlexOption,
+  flexCharge,
 }) => {
   const { availableBus } = useSelector((state) => state.booking);
   const selectedLanguage = useSelector(
@@ -174,6 +177,18 @@ const BookingDetailsRow = ({
             </Col>
             <Col xl="6" lg="6" md="6" sm="6" xs="6">
               <span className="fw-semibold">${ticketsPrice}</span>
+            </Col>
+          </Row>
+
+          <Row className="mb-2">
+            <Col xl="6" lg="6" md="6" sm="6" xs="6">
+              {selectedLanguage &&
+                translateText("Flex Charges", selectedLanguage.code)}
+            </Col>
+            <Col xl="6" lg="6" md="6" sm="6" xs="6">
+              <span className="fw-semibold">
+                ${flexOption == true ? flexCharge : 0}
+              </span>
             </Col>
           </Row>
 

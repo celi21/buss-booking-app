@@ -48,12 +48,22 @@ const Tickets = ({
   setArrivalTime,
   setSelectedDate,
   cheapestLocations,
+  flexOption,
+  setFlexOption,
+  flexCharge,
 }) => {
   const { availableBus, isBusAvailableLoading, busAvailabilityData } =
     useSelector((state) => state.booking);
   const dispatch = useDispatch();
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [localError, setLocalError] = useState(null);
+
+  const handleFlexChange = (e) => {
+    setFlexOption(e.target.checked);
+    setTicketsPrice(
+      e.target.checked ? ticketsPrice + flexCharge : ticketsPrice - flexCharge
+    );
+  };
 
   function calculateTimeDifference(departureTime, arrivalTime) {
     // Helper function to convert time to Date object
@@ -255,6 +265,8 @@ const Tickets = ({
         total + parseFloat(ticketType.price) * parseInt(ticketType.seats),
       0
     );
+
+    priceSum = flexOption == true ? (priceSum += 8) : priceSum;
 
     setTicketsPrice(priceSum);
   };
@@ -544,9 +556,72 @@ const Tickets = ({
             </Col>
           </Row>
 
-          {localError && <Alert variant="danger">{localError}</Alert>}
+          <Row>
+            <Col xs={12} sm={12} md={12} lg={6}>
+              <h6 className="text-uppercase mb-0">
+                {selectedLanguage &&
+                  translateText("Flex Option", selectedLanguage.code)}
+              </h6>
+              <div className="mt-3">
+                <Form.Check
+                  type={"checkbox"}
+                  id={`flex-checkbox`}
+                  label={
+                    selectedLanguage &&
+                    translateText("flexOptionLabel", selectedLanguage.code)
+                  }
+                  checked={flexOption}
+                  onChange={handleFlexChange}
+                />
+              </div>
+              <div>
+                <p className="m-0 mt-2">
+                  {selectedLanguage &&
+                    translateText("whyChooseFlex", selectedLanguage.code)}
+                </p>
+                <ul>
+                  <li>
+                    {selectedLanguage &&
+                      translateText("flexDescription", selectedLanguage.code)}
+                  </li>
+                  <li>
+                    {selectedLanguage &&
+                      translateText("freeCancellations", selectedLanguage.code)}
+                  </li>
+                  <li>
+                    {selectedLanguage &&
+                      translateText("dateChange", selectedLanguage.code)}
+                  </li>
+                </ul>
+              </div>
+            </Col>
 
-          <Row className="mt-3">
+            <Col xs={12} sm={12} md={12} lg={6}>
+              <h6 className="text-uppercase mb-0">
+                {selectedLanguage &&
+                  translateText("Baggage Policy", selectedLanguage.code)}
+              </h6>
+              <p className="mt-0">
+                {selectedLanguage &&
+                  translateText("Baggage Message", selectedLanguage.code)}
+              </p>
+              <div>
+                <img
+                  src={require("../../../../assets/bags.png")}
+                  alt=""
+                  className="border border-primary object-contain"
+                />
+              </div>
+            </Col>
+          </Row>
+
+          {localError && (
+            <Alert variant="danger" className="mt-3">
+              {localError}
+            </Alert>
+          )}
+
+          <Row className="mt-3 border-top pt-3">
             <Col>
               <Button
                 variant="dark"

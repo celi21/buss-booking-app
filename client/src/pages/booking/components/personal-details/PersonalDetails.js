@@ -37,6 +37,9 @@ const PersonalDetails = ({
   SetBooking,
   setIsTimerStarted,
   isTimerStarted,
+  flexOption,
+  setFlexOption,
+  flexCharge,
 }) => {
   const dispatch = useDispatch();
   const handleBackButton = () => {
@@ -428,6 +431,9 @@ const PersonalDetails = ({
         selectedToCity={selectedToCity}
         handleSeatsButton={handleSeatsButton}
         handleDateButton={handleDateButton}
+        flexOption={flexOption}
+        setFlexOption={setFlexOption}
+        flexCharge={flexCharge}
       />
 
       <div className="my-4">

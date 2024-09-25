@@ -56,6 +56,8 @@ const Booking = () => {
     "66da9249114dd9be8eaf8a4a",
     "66da9269114dd9be8eaf8a50",
   ];
+  const [flexOption, setFlexOption] = useState(false);
+  const flexCharge = 8;
 
   useEffect(() => {
     dispatch(fetchCities());
@@ -126,6 +128,7 @@ const Booking = () => {
     timerRef.current = null; // Reset the timer reference
     setIsTimerStarted(false);
     setBookingTimeout("");
+    setFlexOption(false);
   };
 
   const handleTabClick = (tabName) => {
@@ -382,6 +385,9 @@ const Booking = () => {
             setArrivalTime={setArrivalTime}
             setSelectedDate={setSelectedDate}
             cheapestLocations={cheapestLocations}
+            flexOption={flexOption}
+            setFlexOption={setFlexOption}
+            flexCharge={flexCharge}
           />
         )}
 
@@ -412,6 +418,9 @@ const Booking = () => {
             SetBooking={SetBooking}
             isTimerStarted={isTimerStarted}
             setIsTimerStarted={setIsTimerStarted}
+            flexOption={flexOption}
+            setFlexOption={setFlexOption}
+            flexCharge={flexCharge}
           />
         )}
 
@@ -464,6 +473,9 @@ const Booking = () => {
             booking={booking}
             SetBooking={SetBooking}
             resetForm={resetForm}
+            flexOption={flexOption}
+            setFlexOption={setFlexOption}
+            flexCharge={flexCharge}
           />
         )}
       </div>
