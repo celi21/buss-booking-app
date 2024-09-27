@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Row, Table } from "react-bootstrap";
+import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
 import { CurrencyDollar } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "../../../../../../../components/loading-spinner/LoadingSpinner";
@@ -205,6 +205,9 @@ const EditBusTicketPrices = ({ handleCancel }) => {
         </div>
       ) : (
         <Row className="my-5">
+          <p>
+            <b>Note: </b>The tax feature is currently under development.
+          </p>
           <Table responsive hover bordered>
             <thead>
               <tr>
@@ -234,7 +237,7 @@ const EditBusTicketPrices = ({ handleCancel }) => {
                         <td
                           key={`${busLocations[i]._id}-${selectedTicketType}`}
                         >
-                          <div class="input-group input-group-md">
+                          <div class="input-group input-group-md mb-2">
                             <span class="input-group-text p-1">
                               <CurrencyDollar size={16} />
                             </span>
@@ -244,6 +247,12 @@ const EditBusTicketPrices = ({ handleCancel }) => {
                               toLocation={busLocations[i + 1]}
                               inputValue={inputValue}
                             />
+                          </div>
+                          <div class="input-group input-group-md">
+                            <span class="input-group-text p-1">
+                              <CurrencyDollar size={16} />
+                            </span>
+                            <Form.Control type="text" placeholder="Tax" />
                           </div>
                         </td>
                       );

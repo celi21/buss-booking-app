@@ -153,7 +153,7 @@ const translation = {
       "Add Flex Option (+$8) - Cancel or reschedule at no extra charge.",
     whyChooseFlex: "Why choose the Flex Option?",
     flexDescription:
-      "For just an additional $8, you can enjoy extra flexibility with your booking, giving you the ability to cancel or reschedule without worrying about fees:",
+      "For just an additional $8, you can enjoy extra flexibility with your booking, giving you the ability to cancel or reschedule without worrying about fees.",
     freeCancellations:
       "Free Cancellations: Cancel your booking up to 24 hours before departure without any additional fees.",
     dateChange:
@@ -161,17 +161,23 @@ const translation = {
     prioritySupport:
       "Priority Support: Enjoy priority access to our dispatch team for quick modifications to your booking.",
     "Flex Option": "Flex Option",
+    "View your Booking Details": "View your Booking Details",
+    "You did not provided any Booking ID":
+      "You did not provided any Booking ID",
   },
   ES: {
+    "You did not provided any Booking ID":
+      "No proporcionaste ningún ID de reserva",
+    "View your Booking Details": "Ver los detalles de su reserva",
     "Flex Option": "Opción Flex",
     "Flex Charges": "Frais Flex",
     flexOptionLabel:
-      "Ajouter l'Option Flex (+8$) - Annulez ou reprogrammez sans frais supplémentaires.",
-    whyChooseFlex: "Pourquoi choisir l'Option Flex ?",
+      "Agregar Opción Flex ($8) - Cancelar o reprogramar sin cargo adicional.",
+    whyChooseFlex: "¿Por qué elegir la opción Flex?",
     flexDescription:
-      "Pour seulement 8$ supplémentaires, vous bénéficiez de plus de flexibilité avec votre réservation, vous permettant d'annuler ou de reprogrammer sans frais supplémentaires:",
+      "Por solo $8 adicionales, puede disfrutar de mayor flexibilidad con su reserva, lo que le brinda la posibilidad de cancelar o reprogramar sin preocuparse por los cargos.",
     freeCancellations:
-      "Annulations gratuites : Annulez votre réservation jusqu'à 24 heures avant le départ sans frais supplémentaires.",
+      "Cancelaciones Gratuitas: Cancele su reserva hasta 24 horas antes de la salida sin ningún cargo adicional.Cambio de Fecha: Reprograme su reserva sin cargo alguno poniéndose en contacto con nuestros despachadores.",
     dateChange:
       "Changement de date : Reprogrammez votre réservation gratuitement en contactant nos dispatcheurs.",
     prioritySupport:
