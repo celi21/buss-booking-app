@@ -10,6 +10,7 @@ import BusAvailability from "../../models/busAvailability.js";
 import PersonalDetails from "../../models/personalDetails.js";
 import Payment from "../../models/payment.js";
 import { v4 as uuidv4 } from "uuid";
+import transporter from "../../utils/emailConfig.js";
 
 export const getUserBookings = async (req, res, next) => {
   try {
@@ -473,6 +474,217 @@ const makePayment = async (
   return response.data;
 };
 
+const sendConfirmationEmail = async (booking, to) => {
+  console.log(booking.bus.locations);
+  let departureCity = booking.bus.locations.find(
+    (loc) =>
+      loc.city.toString() ===
+      new mongoose.Types.ObjectId(booking.from).toString()
+  );
+  let arrivalCity = booking.bus.locations.find(
+    (loc) =>
+      loc.city.toString() === new mongoose.Types.ObjectId(booking.to).toString()
+  );
+  const routeName = booking.route.name;
+  let departureTime = departureCity.departureTime;
+  let arrivalTime = arrivalCity.arrivalTime;
+
+  let fullRouteAndTime = routeName + ", " + departureTime + " - " + arrivalTime;
+
+  const html = `
+  <div style="background-color:#d2c7ba">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tbody>
+        <tr>
+          <td align="center" bgcolor="#1e90ff">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
+              <tbody>
+                <tr>
+                  <td align="center" valign="top" style="padding:36px 24px">
+                    <a href="https://buenoexpresstransport.com" style="display:inline-block" target="_blank">
+                      <img src="https://buenoexpresstransport.com/logo.png" alt="Logo" border="0" style="display:block;width:100px;max-width:100px;min-width:100px">
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" bgcolor="#1e90ff">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
+              <tbody>
+              <tr>
+                <td align="left" bgcolor="#ffffff" style="padding:36px 24px 0;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;border-top:3px solid #d4dadf">
+                  <h1 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-1px;line-height:48px">Thank you for your booking!</h1>
+                </td>
+            </tr>
+          </tbody></table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" bgcolor="#1e90ff">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
+  
+            <tbody><tr>
+              <td align="left" bgcolor="#ffffff" style="padding:24px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
+                <p style="margin:0">Here is a summary of your recent booking. If you have any questions or concerns about your booking, please <a href="https://www.buenoexpresstransport.com" target="_blank">Contact Us</a>.</p>
+              </td>
+            </tr>
+            <tr>
+              <td align="left" bgcolor="#ffffff" style="padding:24px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
+                <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                  <tbody><tr>
+                    <td colspan="2" bgcolor="#1e90ff" width="75%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#fff;text-align:center"><strong>Booking Details</strong></td>
+                  </tr>
+
+                  <tr>
+                    <td align="left" width="45%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking ID</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.bookingId
+                    }</td>
+                  </tr>
+                  
+                  <tr>
+                    <td align="left" width="45%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">First name</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.personalDetails.firstName
+                    }</td>
+                  </tr>
+
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Last name</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.personalDetails.lastName
+                        ? booking.personalDetails.lastName
+                        : ""
+                    }</td>
+                  </tr>
+
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Phone</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.personalDetails.phone
+                    }</td>
+                  </tr>
+                  
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Email</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px"><a href="mailto:${
+                      booking.personalDetails.email
+                    }" target="_blank">${booking.personalDetails.email}</a></td>
+                  </tr>
+                    <tr>
+                    </tr><tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking Route</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${fullRouteAndTime}</td>
+                  </tr>
+                  
+                  
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking Date</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.bookingDate
+                    }</td>
+                  </tr>
+                  
+                  
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Pickup address</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.personalDetails.pickupAddress
+                    }</td>
+                  </tr>
+  
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Dropoff address</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.personalDetails.dropoffAddress
+                    }</td>
+                  </tr>
+
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Suitcases</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
+                      booking.personalDetails.suitcases
+                    }</td>
+                  </tr>
+                  
+                  <tr>
+                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Seats</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
+                    ${booking.seatDetails
+                      .map(
+                        (seat) =>
+                          seat.seats > 0 && `${seat.name} x ${seat.seats}`
+                      )
+                      .filter(Boolean)
+                      .join("<br />")}
+                    </td>
+                  </tr>
+                  
+                  <tr>
+                    <td align="left" width="75%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>Total Amount</strong></td>
+                    <td align="left" width="25%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>$${
+                      booking.payment.amount
+                    }</strong></td>
+                  </tr>
+                </tbody></table>
+              </td>
+            </tr>
+          </tbody></table>
+        </td>
+      </tr>
+      <tr>
+        <td align="center" bgcolor="#1e90ff" style="padding:24px">
+          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
+            <tbody>
+            <tr>
+              <td align="center" bgcolor="#1e90ff" style="padding:12px 24px;">
+                <a href="${process.env.FRONTEND_URL}/booking/${
+    booking.bookingId
+  }" target="_blank" style="
+                    display: block;
+                    background: white;
+                    color: #1e90ff;
+                    text-align: center;
+                    padding: 10px 30px;
+                    border-radius: 5px;
+                    text-decoration: none;
+                    font-weight: 600;
+                    width: fit-content;
+                    margin: auto;
+                    margin-top: 0px;
+                    font-size: 16px;
+                ">View Complete Details on Website</a>
+              </td>
+            </tr>
+
+            <tr>
+              <td align="center" bgcolor="#1e90ff" style="padding:12px 24px;">
+                <p style="margin:0"><a href="http://buenoexpresstransport.com" target="_blank" style="font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:#fff">buenoexpresstransport.com</a></p>
+              </td>
+            </tr>
+          </tbody></table>
+        </td>
+      </tr>
+    </tbody></table><div class="yj6qo"></div><div class="adL">
+  </div>
+  </div>
+  `;
+
+  const mailOptions = {
+    from: "joharkhan2001@gmail.com",
+    to: to,
+    subject: "Bueno Express Bus Booking Details",
+    html: html,
+  };
+
+  transporter.sendMail(mailOptions, (error, info) => {
+    console.log(info);
+  });
+};
+
 export const confirmBooking = async (req, res, next) => {
   const bookingData = req.body;
   try {
@@ -660,6 +872,16 @@ export const confirmBooking = async (req, res, next) => {
         await busAvailability.save();
 
         if (newBooking) {
+          const populatedBooking = await Booking.findById(newBooking._id)
+            .populate("payment")
+            .populate("personalDetails")
+            .populate("bus")
+            .populate("route");
+          await sendConfirmationEmail(
+            populatedBooking,
+            populatedBooking.personalDetails.email
+          );
+
           return res.status(200).json({
             success: true,
             message: "Booking Successfully added",
