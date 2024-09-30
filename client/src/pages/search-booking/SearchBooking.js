@@ -383,7 +383,15 @@ const SearchBooking = () => {
                           {selectedLanguage &&
                             translateText("Total", selectedLanguage.code)}
                         </div>
-                        <div>${bookingData.payment.amount}</div>
+                        <div>
+                          $
+                          {bookingData.flexOption == true
+                            ? bookingData.payment.amount +
+                              8 +
+                              bookingData.payment.tax
+                            : bookingData.payment.amount +
+                              bookingData.payment.tax}
+                        </div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">
@@ -392,7 +400,15 @@ const SearchBooking = () => {
                           {selectedLanguage &&
                             translateText("Deposit", selectedLanguage.code)}
                         </div>
-                        <div>${bookingData.payment.amount}</div>
+                        <div>
+                          $
+                          {bookingData.flexOption == true
+                            ? bookingData.payment.amount +
+                              8 +
+                              bookingData.payment.tax
+                            : bookingData.payment.amount +
+                              bookingData.payment.tax}
+                        </div>
                       </div>
                     </ListGroup.Item>
                   </ListGroup>

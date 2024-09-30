@@ -5,11 +5,13 @@ import bookingRouter from "./booking.js";
 import couponRouter from "./coupon.js";
 import paymentRouter from "./payment.js";
 import routesRouter from "./routes.js";
+import settingsRouter from "./settings.js";
 
 const router = express.Router();
 
 router.use("/auth", authRouter);
 router.use("/bus", busRouter);
+router.use("/settings", settingsRouter);
 router.use("/routes", routesRouter);
 router.use("/booking", bookingRouter);
 router.use("/coupon", couponRouter);

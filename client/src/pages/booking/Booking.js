@@ -15,6 +15,7 @@ import {
 } from "../../store/slices/bookingSlice";
 import BookingConfirmationModal from "./components/booking-payment/booking-confirmation-modal/BookingConfirmationModal";
 import { translateText } from "../../utils/translation";
+import { fetchTaxAmount } from "../../store/slices/SettingsSlice";
 
 const Booking = () => {
   const [selectedDate, setSelectedDate] = useState(null);
@@ -61,6 +62,7 @@ const Booking = () => {
 
   useEffect(() => {
     dispatch(fetchCities());
+    dispatch(fetchTaxAmount());
   }, []);
 
   // toast.custom("Pl")

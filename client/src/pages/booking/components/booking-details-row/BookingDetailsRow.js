@@ -22,6 +22,7 @@ const BookingDetailsRow = ({
   const selectedLanguage = useSelector(
     (state) => state.settings.selectedLanguage
   );
+  const { tax } = useSelector((state) => state.settings);
 
   return (
     <Row className="d-flex align-items-stretch">
@@ -176,7 +177,9 @@ const BookingDetailsRow = ({
                 translateText("Tickets total", selectedLanguage.code)}
             </Col>
             <Col xl="6" lg="6" md="6" sm="6" xs="6">
-              <span className="fw-semibold">${ticketsPrice}</span>
+              <span className="fw-semibold">
+                ${flexOption == true ? ticketsPrice - flexCharge : ticketsPrice}
+              </span>
             </Col>
           </Row>
 
@@ -197,7 +200,12 @@ const BookingDetailsRow = ({
               {selectedLanguage && translateText("Tax", selectedLanguage.code)}
             </Col>
             <Col xl="6" lg="6" md="6" sm="6" xs="6">
-              <span className="fw-semibold">$0.00</span>
+              <span className="fw-semibold">
+                $
+                {tax === null || tax <= 0
+                  ? 0
+                  : ((Number(tax) / 100) * ticketsPrice).toFixed(3)}
+              </span>
             </Col>
           </Row>
 
@@ -207,7 +215,9 @@ const BookingDetailsRow = ({
                 translateText("Total", selectedLanguage.code)}
             </Col>
             <Col xl="6" lg="6" md="6" sm="6" xs="6">
-              <span className="fw-semibold">${ticketsPrice}</span>
+              <span className="fw-semibold">
+                ${ticketsPrice + (Number(tax) / 100) * ticketsPrice}
+              </span>
             </Col>
           </Row>
 
@@ -217,7 +227,9 @@ const BookingDetailsRow = ({
                 translateText("Deposit", selectedLanguage.code)}
             </Col>
             <Col xl="6" lg="6" md="6" sm="6" xs="6">
-              <span className="fw-semibold">${ticketsPrice}</span>
+              <span className="fw-semibold">
+                ${ticketsPrice + (Number(tax) / 100) * ticketsPrice}
+              </span>
             </Col>
           </Row>
         </div>

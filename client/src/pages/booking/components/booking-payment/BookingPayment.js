@@ -159,6 +159,8 @@ const BookingPayment = ({
   const selectedLanguage = useSelector(
     (state) => state.settings.selectedLanguage
   );
+  const { tax } = useSelector((state) => state.settings);
+
   return (
     <Row className="align-items-stretch d-flex">
       <Col xl="6" lg="6" className="mx-auto h-100">
@@ -254,7 +256,7 @@ const BookingPayment = ({
                         fontSize: 14,
                       }}
                     >
-                      $0.00
+                      ${((Number(tax) / 100) * ticketsPrice).toFixed(3)}
                     </span>
                   </Col>
                 </Row>
@@ -288,7 +290,7 @@ const BookingPayment = ({
                         fontSize: 14,
                       }}
                     >
-                      ${ticketsPrice}
+                      ${ticketsPrice + (Number(tax) / 100) * ticketsPrice}
                     </span>
                   </Col>
                 </Row>

@@ -11,6 +11,7 @@ import PersonalDetails from "../../models/personalDetails.js";
 import Payment from "../../models/payment.js";
 import { v4 as uuidv4 } from "uuid";
 import transporter from "../../utils/emailConfig.js";
+import Settings from "../../models/settings.js";
 
 export const getUserBookings = async (req, res, next) => {
   try {
@@ -626,7 +627,9 @@ const sendConfirmationEmail = async (booking, to) => {
                   <tr>
                     <td align="left" width="75%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>Total Amount</strong></td>
                     <td align="left" width="25%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>$${
-                      booking.payment.amount
+                      booking.flexOption == true
+                        ? booking.payment.amount + 8 + booking.payment.tax
+                        : booking.payment.amount + booking.payment.tax
                     }</strong></td>
                   </tr>
                 </tbody></table>
@@ -773,6 +776,12 @@ export const confirmBooking = async (req, res, next) => {
     let totalTicketsPrice =
       bookingData.flexOption == true ? ticketsPrice + 8 : ticketsPrice;
 
+    const settings = await Settings.find({});
+    if (settings[0]?.tax && settings[0]?.tax >= 0) {
+      let taxAmount = (Number(settings[0].tax) / 100) * ticketsPrice;
+      totalTicketsPrice = totalTicketsPrice + taxAmount;
+    }
+
     let paymentResponse = await makePayment(
       totalTicketsPrice,
       cardNumber,
@@ -825,6 +834,7 @@ export const confirmBooking = async (req, res, next) => {
           transactionId: decodedObject.transactionid,
           amount: ticketsPrice,
           user: bookingData.user ? bookingData.user?.id : null,
+          tax: (Number(settings[0].tax) / 100) * ticketsPrice,
         });
 
         // if pay success then save the personal details
