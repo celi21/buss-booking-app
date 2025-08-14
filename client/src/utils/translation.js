@@ -38,7 +38,7 @@ const translation = {
     "proceed-to-details": "Proceed to Details",
     "Booking Timeout Alert": "Booking Timeout Alert!",
     "alert-description":
-      "Please Note: You have 4 minutes to complete your booking process. If the time runs out, your current booking information will be reset. The remaining time is displayed at the top right side of the screen. We appreciate your prompt attention.",
+      "Please Note: You have 7 minutes to complete your booking process. If the time runs out, your current booking information will be reset. The remaining time is displayed at the top right side of the screen. We appreciate your prompt attention.",
     "booking-details": "Booking Details",
     journey: "JOURNEY",
     date: "Date",
@@ -253,7 +253,7 @@ const translation = {
     "proceed-to-details": "Proceder a Detalles",
     "Booking Timeout Alert": "¡Alerta de Tiempo de Reserva!",
     "alert-description":
-      "Tenga en cuenta: tiene 4 minutos para completar su proceso de reserva. Si se agota el tiempo, la información actual de su reserva se restablecerá. El tiempo restante se muestra en la esquina superior derecha de la pantalla. Apreciamos su pronta atención.",
+      "Tenga en cuenta: tiene 7 minutos para completar su proceso de reserva. Si se agota el tiempo, la información actual de su reserva se restablecerá. El tiempo restante se muestra en la esquina superior derecha de la pantalla. Apreciamos su pronta atención.",
     "booking-details": "Detalles de la Reserva",
     journey: "VIAJE",
     date: "Fecha",
