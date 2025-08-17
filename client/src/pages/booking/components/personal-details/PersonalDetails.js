@@ -235,106 +235,106 @@ const PersonalDetails = ({
       );
       return;
     }
-    if (!fullName || fullName.trim() == "") {
-      toast.error(
-        selectedLanguage &&
-          translateText(
-            "Please provide your Full Name on Card Details.",
-            selectedLanguage.code
-          ),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText(
-            "Please provide your Full Name on Card Details.",
-            selectedLanguage.code
-          )
-      );
-      return;
-    }
-    if (!cardNumber || cardNumber.trim() == "") {
-      toast.error(
-        selectedLanguage &&
-          translateText(
-            "Please provide your Card Number on Card Details.",
-            selectedLanguage.code
-          ),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText(
-            "Please provide your Card Number on Card Details.",
-            selectedLanguage.code
-          )
-      );
-      return;
-    }
-    if (!expiryMonth || expiryMonth.trim() == "") {
-      toast.error(
-        selectedLanguage &&
-          translateText(
-            "Please provide card Expiry Month on Card Details.",
-            selectedLanguage.code
-          ),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText(
-            "Please provide card Expiry Month on Card Details.",
-            selectedLanguage.code
-          )
-      );
-      return;
-    }
-    if (!expiryYear || expiryYear.trim() == "") {
-      toast.error(
-        selectedLanguage &&
-          translateText(
-            "Please provide card Expiry Year on Card Details.",
-            selectedLanguage.code
-          ),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText(
-            "Please provide card Expiry Year on Card Details.",
-            selectedLanguage.code
-          )
-      );
-      return;
-    }
-    if (!cvv || cvv.trim() == "") {
-      toast.error(
-        selectedLanguage &&
-          translateText(
-            "Please provide card CVV/CVC number on Card Details.",
-            selectedLanguage.code
-          ),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText(
-            "Please provide card CVV/CVC number on Card Details.",
-            selectedLanguage.code
-          )
-      );
-      return;
-    }
+    // if (!fullName || fullName.trim() == "") {
+    //   toast.error(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide your Full Name on Card Details.",
+    //         selectedLanguage.code
+    //       ),
+    //     {
+    //       duration: 4000,
+    //     }
+    //   );
+    //   setLocalError(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide your Full Name on Card Details.",
+    //         selectedLanguage.code
+    //       )
+    //   );
+    //   return;
+    // }
+    // if (!cardNumber || cardNumber.trim() == "") {
+    //   toast.error(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide your Card Number on Card Details.",
+    //         selectedLanguage.code
+    //       ),
+    //     {
+    //       duration: 4000,
+    //     }
+    //   );
+    //   setLocalError(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide your Card Number on Card Details.",
+    //         selectedLanguage.code
+    //       )
+    //   );
+    //   return;
+    // }
+    // if (!expiryMonth || expiryMonth.trim() == "") {
+    //   toast.error(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide card Expiry Month on Card Details.",
+    //         selectedLanguage.code
+    //       ),
+    //     {
+    //       duration: 4000,
+    //     }
+    //   );
+    //   setLocalError(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide card Expiry Month on Card Details.",
+    //         selectedLanguage.code
+    //       )
+    //   );
+    //   return;
+    // }
+    // if (!expiryYear || expiryYear.trim() == "") {
+    //   toast.error(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide card Expiry Year on Card Details.",
+    //         selectedLanguage.code
+    //       ),
+    //     {
+    //       duration: 4000,
+    //     }
+    //   );
+    //   setLocalError(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide card Expiry Year on Card Details.",
+    //         selectedLanguage.code
+    //       )
+    //   );
+    //   return;
+    // }
+    // if (!cvv || cvv.trim() == "") {
+    //   toast.error(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide card CVV/CVC number on Card Details.",
+    //         selectedLanguage.code
+    //       ),
+    //     {
+    //       duration: 4000,
+    //     }
+    //   );
+    //   setLocalError(
+    //     selectedLanguage &&
+    //       translateText(
+    //         "Please provide card CVV/CVC number on Card Details.",
+    //         selectedLanguage.code
+    //       )
+    //   );
+    //   return;
+    // }
     if (!captcha || captcha.trim() == "") {
       toast.error(
         selectedLanguage &&
@@ -642,7 +642,7 @@ const PersonalDetails = ({
         setLocalError={setLocalError}
       />
 
-      <Row className="mb-3">
+      <Row className="mb-3 mt-5">
         <Col lg={6} xl={6} md={12} sm={12} xs={12}>
           <Form.Group>
             <div className="d-flex align-items-center gap-3 mb-1">

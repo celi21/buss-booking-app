@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import toast from "react-hot-toast";
 import { translateText } from "../../../../utils/translation";
+import StripeContainer from "../booking-payment/stripe/StripeContainer";
 
 const ConfirmBooking = ({
   selectedFromCity,
@@ -42,16 +43,6 @@ const ConfirmBooking = ({
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
 
-  const handleBackButton = () => {
-    dispatch(setCurrentBookingStep("details"));
-    dispatch(
-      updateBookingStepStatus({
-        step: "confirm",
-        isCompleted: false,
-      })
-    );
-  };
-
   const handleDateButton = () => {
     const stepsToUpdate = ["details", "confirm", "tickets"];
     dispatch(setCurrentBookingStep("dates-and-locations"));
@@ -78,119 +69,19 @@ const ConfirmBooking = ({
     });
   };
 
-  const { availableBus, busAvailabilityData } = useSelector(
-    (state) => state.booking
-  );
-
-  const confirmBusAvailable = async (queryObject) => {
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-bus-seats-availability`,
-        queryObject,
-        config
-      );
-      if (
-        response.data &&
-        response.data.success &&
-        response.data.success == true
-      ) {
-        return true;
-      } else {
-        setLocalError(response.data.message);
-        return false;
-      }
-    } catch (error) {
-      setLocalError(error.message);
-      return false;
-    }
-  };
-
-  const confirmBooking = async (bookingData) => {
-    try {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-      const response = await axios.post(
-        `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-booking`,
-        bookingData,
-        config
-      );
-      if (
-        response.data &&
-        response.data.success &&
-        response.data.success == true
-      ) {
-        SetBooking(response.data.booking);
-        return true;
-      } else {
-        setLocalError(response.data.message);
-        return false;
-      }
-    } catch (error) {
-      setLocalError(error.message);
-      return false;
-    }
-  };
-
-  const handleConfirmButton = async () => {
-    setLoading(true);
-    try {
-      const requestedSeats = selectedSeats.reduce(
-        (total, seat) => total + seat.seats
-      );
-
-      const queryObject = {
-        selectedDate,
-        busId: availableBus?._id,
-        requestedSeats: requestedSeats,
-      };
-      // confirm if bus/seats is still available
-      const doesBusSeatsExists = await confirmBusAvailable(queryObject);
-
-      if (doesBusSeatsExists === true) {
-        let bookingData = {
-          bus: availableBus._id,
-          busType: availableBus.busType._id,
-          route: availableBus.route._id,
-          from: selectedFromCity,
-          to: selectedToCity,
-          selectedDate: selectedDate,
-          paymentDetails: paymentDetails,
-          personalDetails: personalDetails,
-          selectedSeats: selectedSeats,
-          requestedSeats: requestedSeats,
-          user: user,
-          flexOption: flexOption,
-        };
-
-        const confirm = await confirmBooking(bookingData);
-        if (confirm === true) {
-          resetForm();
-          setShowConfirmationModal(true);
-          toast.success("Your booking has been completed Successfully.", {
-            duration: 4000,
-            position: "top-right",
-          });
-        }
-      }
-    } catch (error) {
-      setLocalError(error.message);
-      setLoading(false);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const selectedLanguage = useSelector(
     (state) => state.settings.selectedLanguage
   );
+
+  const handleBackButton = () => {
+    dispatch(setCurrentBookingStep("details"));
+    dispatch(
+      updateBookingStepStatus({
+        step: "confirm",
+        isCompleted: false,
+      })
+    );
+  };
 
   return (
     <div className="bg-light border p-3 rounded w-100">
@@ -354,88 +245,27 @@ const ConfirmBooking = ({
               translateText("details", selectedLanguage.code)}
           </Button>
         </div>
-        {paymentDetails && (
-          <div>
-            <Row className="mb-3">
-              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-                <div>
-                  <Form.Label className="m-0" htmlFor="firstName">
-                    {selectedLanguage &&
-                      translateText("Cardholder Name", selectedLanguage.code)}
-                  </Form.Label>
-                  <div className="fw-semibold">{paymentDetails.fullName}</div>
-                </div>
-              </Col>
-              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-                <div>
-                  <Form.Label className="m-0" htmlFor="lastName">
-                    {selectedLanguage &&
-                      translateText("Card Number", selectedLanguage.code)}
-                  </Form.Label>
-                  <div className="fw-semibold">{paymentDetails.cardNumber}</div>
-                </div>
-              </Col>
-            </Row>
-
-            <Row className="mb-3">
-              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-                <div>
-                  <Form.Label className="m-0" htmlFor="phone">
-                    {selectedLanguage &&
-                      translateText("Expiry Date", selectedLanguage.code)}{" "}
-                    (MM/YY):
-                  </Form.Label>
-                  <div className="fw-semibold">
-                    {paymentDetails.expiryMonth}/{paymentDetails.expiryYear}
-                  </div>
-                </div>
-              </Col>
-              <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-                <div>
-                  <Form.Label className="m-0" htmlFor="email">
-                    CVV/CVC:
-                  </Form.Label>
-                  <div className="fw-semibold">{paymentDetails.cvv}</div>
-                </div>
-              </Col>
-            </Row>
-          </div>
-        )}
+        <div>
+          <StripeContainer
+            ticketsPrice={ticketsPrice}
+            setLocalError={setLocalError}
+            SetBooking={SetBooking}
+            selectedSeats={selectedSeats}
+            selectedDate={selectedDate}
+            selectedFromCity={selectedFromCity}
+            selectedToCity={selectedToCity}
+            personalDetails={personalDetails}
+            flexOption={flexOption}
+            resetForm={resetForm}
+            setShowConfirmationModal={setShowConfirmationModal}
+            setLoading={setLoading}
+            loading={loading}
+            handleBackButton={handleBackButton}
+          />
+        </div>
       </div>
 
       {localError && <Alert variant="danger">{localError}</Alert>}
-
-      <Row className="mt-5">
-        <Col>
-          <Button
-            variant="dark"
-            className="px-3 py-2 fw-semibold"
-            onClick={handleBackButton}
-          >
-            {selectedLanguage && translateText("back", selectedLanguage.code)}
-          </Button>
-        </Col>
-        <Col className="justify-content-end d-flex">
-          <Button
-            variant="primary"
-            className="fw-bold py-2"
-            style={{
-              fontSize: "18px",
-            }}
-            onClick={handleConfirmButton}
-            disabled={loading}
-          >
-            {loading ? (
-              <div className="d-flex align-items-center justify-content-center">
-                <Spinner size="small" />
-              </div>
-            ) : (
-              selectedLanguage &&
-              translateText("confirm-booking", selectedLanguage.code)
-            )}
-          </Button>
-        </Col>
-      </Row>
     </div>
   );
 };
