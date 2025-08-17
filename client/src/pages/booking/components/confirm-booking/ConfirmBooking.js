@@ -236,14 +236,14 @@ const ConfirmBooking = ({
             {selectedLanguage &&
               translateText("details", selectedLanguage.code)}
           </p>
-          <Button
+          {/* <Button
             className="p-0 m-0 bg-transparent border-0 outline-none text-primary"
             onClick={() => handleBackButton()}
           >
             {selectedLanguage && translateText("change", selectedLanguage.code)}{" "}
             {selectedLanguage &&
               translateText("details", selectedLanguage.code)}
-          </Button>
+          </Button> */}
         </div>
         <div>
           <StripeContainer
