@@ -12,6 +12,11 @@ import Payment from "../../models/payment.js";
 import { v4 as uuidv4 } from "uuid";
 import transporter from "../../utils/emailConfig.js";
 import Settings from "../../models/settings.js";
+import Stripe from "stripe";
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  maxNetworkRetries: 2,
+});
 
 export const getUserBookings = async (req, res, next) => {
   try {
@@ -438,41 +443,16 @@ const merchantOneResultCodeTable = {
   461: "Unsupported card type. This type of card is not supported by the merchant.",
 };
 
-const makePayment = async (
-  amount,
-  ccnumber,
-  expiryMonth,
-  expiryYear,
-  cvv,
-  first_name,
-  last_name,
-  transaction_session_id,
-  currency = "USD"
-) => {
-  var data = querystring.stringify({
-    type: "sale",
-    amount: amount,
-    ccnumber: ccnumber,
-    security_key: process.env.MERCHANT_ONE_SECRET_KEY,
-    ccexp: `${expiryMonth}/${expiryYear}`,
-    cvv: cvv,
-    first_name: first_name,
-    last_name: last_name,
-    currency: currency,
-    transaction_session_id: transaction_session_id,
-  });
-
-  const response = await axios.post(
-    "https://secure.merchantonegateway.com/api/transact.php",
-    data,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-
-  return response.data;
+const retrievePayment = async (paymentIntentId) => {
+  const payment = await stripe.paymentIntents.retrieve(paymentIntentId);
+  if (!payment) {
+    return null;
+  }
+  return {
+    id: payment.id,
+    amount: payment.amount,
+    method: payment.payment_method,
+  };
 };
 
 const sendConfirmationEmail = async (booking, to) => {
@@ -688,10 +668,54 @@ const sendConfirmationEmail = async (booking, to) => {
   });
 };
 
+export const createPaymentIntent = async (req, res, next) => {
+  try {
+    if (!req.body.ticketsPrice) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete booking price data.",
+      });
+    }
+
+    let totalTicketsPrice = Number(req.body.ticketsPrice);
+
+    const settings = await Settings.find({});
+    if (settings[0]?.tax && settings[0]?.tax >= 0) {
+      let taxAmount = (Number(settings[0].tax) / 100) * req.body.ticketsPrice;
+      totalTicketsPrice = totalTicketsPrice + taxAmount;
+    }
+
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(totalTicketsPrice * 100),
+      currency: "usd",
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        title: "Bueno Express Transport bus booking payment.",
+      },
+      description: "Payment for Bus reservation/booking wih Bueno Express.",
+    });
+    if (paymentIntent) {
+      return res.send({ client_secret: paymentIntent.client_secret });
+    }
+
+    return res.status(500).send({ error: "Failed to create payment intent" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
 export const confirmBooking = async (req, res, next) => {
-  const bookingData = req.body;
+  const bookingData = req.body?.bookingData;
+  const stripeData = req.body?.stripeData;
+
   try {
     if (
+      !bookingData ||
       !bookingData.bus ||
       !bookingData.busType ||
       !bookingData.route ||
@@ -699,13 +723,19 @@ export const confirmBooking = async (req, res, next) => {
       !bookingData.to ||
       !bookingData.selectedDate ||
       !bookingData.personalDetails ||
-      !bookingData.paymentDetails ||
       !bookingData.selectedSeats ||
       !bookingData.requestedSeats
     ) {
       return res.status(200).json({
         success: false,
         message: "Please provide complete booking data.",
+      });
+    }
+
+    if (!stripeData || !stripeData.paymentId) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete Payment details.",
       });
     }
 
@@ -761,18 +791,6 @@ export const confirmBooking = async (req, res, next) => {
       requestedSeats += parseInt(seat.seats);
     });
 
-    // make the payment to merchant one
-    let cardNumber = bookingData.paymentDetails.cardNumber;
-    let expiryMonth = bookingData.paymentDetails.expiryMonth;
-    let expiryYear = bookingData.paymentDetails.expiryYear;
-    let cvv = bookingData.paymentDetails.cvv;
-    let fullName = bookingData.paymentDetails.fullName;
-
-    let first_name = fullName.split(" ")[0];
-    let last_name =
-      fullName.split(" ").length > 1 ? fullName.split(" ")[1] : "";
-    let transaction_session_id = uuidv4();
-
     let totalTicketsPrice =
       bookingData.flexOption == true ? ticketsPrice + 8 : ticketsPrice;
 
@@ -782,56 +800,15 @@ export const confirmBooking = async (req, res, next) => {
       totalTicketsPrice = totalTicketsPrice + taxAmount;
     }
 
-    let paymentResponse = await makePayment(
-      totalTicketsPrice,
-      cardNumber,
-      expiryMonth,
-      expiryYear,
-      cvv,
-      first_name,
-      last_name,
-      transaction_session_id
-    );
+    let paymentResponse = await retrievePayment(stripeData.paymentId);
     // console.log(paymentResponse);
     if (paymentResponse) {
       console.log(paymentResponse);
-      const decodedObject = paymentResponse.split("&").reduce((acc, curr) => {
-        const [key, value] = curr.split("=");
-        acc[key] = value || null;
-        return acc;
-      }, {});
-
-      console.log(decodedObject);
-
-      if (
-        decodedObject.response_code &&
-        decodedObject.response_code !== "100" &&
-        decodedObject.response &&
-        decodedObject.response !== "1"
-      ) {
-        return res.status(200).json({
-          success: false,
-          message:
-            decodedObject.responsetext +
-            ". " +
-            merchantOneResultCodeTable[decodedObject.response_code],
-        });
-      }
-
       // check if pay success
-      if (
-        decodedObject.response_code &&
-        decodedObject.response_code === "100" &&
-        decodedObject.response &&
-        decodedObject.response === "1" &&
-        decodedObject.transactionid &&
-        decodedObject.transactionid !== null
-      ) {
+      if (paymentResponse && paymentResponse.id) {
         // create/save payment schema
         const paymentDetails = new Payment({
-          firstName: first_name,
-          lastName: last_name,
-          transactionId: decodedObject.transactionid,
+          transactionId: stripeData.paymentId,
           amount: ticketsPrice,
           user: bookingData.user ? bookingData.user?.id : null,
           tax: (Number(settings[0].tax) / 100) * ticketsPrice,
@@ -864,7 +841,7 @@ export const confirmBooking = async (req, res, next) => {
           personalDetails: personalDetails._id,
           route: foundBus.route._id,
           bookingDate: bookingData.selectedDate,
-          transaction_session_id: transaction_session_id,
+          transaction_session_id: stripeData.paymentId,
           bookingId: bookingId,
           user: bookingData.user ? bookingData.user?.id : null,
           seatDetails: seatsDetails,
@@ -898,6 +875,11 @@ export const confirmBooking = async (req, res, next) => {
             booking: newBooking,
           });
         }
+      } else {
+        return res.status(200).json({
+          success: false,
+          message: "Payment Failed. Please try again later.",
+        });
       }
     } else {
       return res.status(200).json({
