@@ -18,7 +18,8 @@ import { translateText } from "../../utils/translation";
 import { fetchTaxAmount } from "../../store/slices/SettingsSlice";
 
 const Booking = () => {
-  console.log("currentBookingStep:", currentBookingStep);
+  console.log("Booking component rendered.");
+  console.log("currentBookingStep inside Booking:", currentBookingStep);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedFromCity, setSelectedFromCity] = useState(null);
   const [selectedToCity, setSelectedToCity] = useState(null);
