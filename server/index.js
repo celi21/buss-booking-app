@@ -7,8 +7,24 @@ import router from "./routes/index.js";
 
 const app = express();
 
-// CORS
-app.use(cors());
+// CORS with allowlist from environment
+const allowedOriginsEnv = process.env.CORS_ORIGINS || process.env.FRONTEND_URL || "";
+const allowedOrigins = allowedOriginsEnv
+  .split(",")
+  .map((o) => o.trim())
+  .filter((o) => o.length > 0);
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.length === 0) return callback(null, true);
+      if (allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(new Error("Not allowed by CORS"));
+    },
+    credentials: true,
+  })
+);
 
 // Cookie parser
 app.use(cookieParser());

@@ -1,0 +1,23 @@
+name: Deploy Production (Render)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Production Deploy (API)
+        run: |
+          curl -fsSL "$RENDER_PROD_API_DEPLOY_HOOK"
+        env:
+          RENDER_PROD_API_DEPLOY_HOOK: ${{ secrets.RENDER_PROD_API_DEPLOY_HOOK }}
+
+      - name: Trigger Render Production Deploy (Web)
+        run: |
+          curl -fsSL "$RENDER_PROD_WEB_DEPLOY_HOOK"
+        env:
+          RENDER_PROD_WEB_DEPLOY_HOOK: ${{ secrets.RENDER_PROD_WEB_DEPLOY_HOOK }}
+

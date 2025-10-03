@@ -1,6 +1,58 @@
 # Bus Booking Application
 The bus booking app project is a web-based platform built using NodeJS, Express, MongoDB, React, and Stripe payment gateway. It offers functionalities such as user authentication via login and signup, an admin portal for journey creation, and a user portal for booking, viewing bookings, generating invoices, processing payments, redeeming coupon codes, and managing cancellations. The app streamlines the bus booking process, making it easier and more convenient for both users and administrators.
 
+## Environments & Deployment
+
+This repo is configured for isolated Staging and Production deployments on Render (free plan). Production remains untouched by default; all changes flow to Staging first.
+
+### Branching
+- `staging`: auto-deploys Staging services
+- `main`: auto-deploys Production services
+
+### Render Blueprint
+We include `render.yaml` to provision four services:
+- `buss-booking-api` (prod, Node web service, branch: `main`)
+- `buss-booking-web` (prod, static site, branch: `main`)
+- `buss-booking-api-staging` (staging, Node web service, branch: `staging`)
+- `buss-booking-web-staging` (staging, static site, branch: `staging`)
+
+Deploy the blueprint from Render Dashboard → New + → Blueprint → Connect repository.
+
+### Environment Variables
+Set the following environment variables in Render or locally via `.env` files:
+
+Server (`server/.env`):
+```sh
+PORT=8000
+NODE_ENV=production
+MONGO_URL=
+JWT_SECRET=
+SALT_ROUNDS=10
+STRIPE_SECRET_KEY=
+MERCHANT_ONE_SECRET_KEY=
+EMAIL_USER=
+EMAIL_PASS=
+FRONTEND_URL=
+CORS_ORIGINS=
+```
+
+Client (`client/.env`):
+```sh
+REACT_APP_API_BASE_URL=
+REACT_APP_STRIPE_PUBLISHABLE_KEY=
+REACT_APP_GOOGLE_MAPS_API_KEY=
+```
+
+### CORS
+Server CORS is allowlist-based via `CORS_ORIGINS` (comma-separated) or fallback `FRONTEND_URL`. Credentials are enabled.
+
+### GitHub Actions
+Two workflows trigger Render deploys via deploy hooks:
+- `.github/workflows/deploy-staging.yml` (on `staging`) uses secrets: `RENDER_STAGING_API_DEPLOY_HOOK`, `RENDER_STAGING_WEB_DEPLOY_HOOK`.
+- `.github/workflows/deploy-production.yml` (on `main`) uses: `RENDER_PROD_API_DEPLOY_HOOK`, `RENDER_PROD_WEB_DEPLOY_HOOK`.
+
+Create deploy hooks from each Render service → Settings → Deploy Hook and add them as GitHub repo secrets.
+
 ## Functionalities
 + User authentication via login and signup
 + Admin portal for journey creation

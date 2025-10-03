@@ -1,0 +1,23 @@
+name: Deploy Staging (Render)
+
+on:
+  push:
+    branches:
+      - staging
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Render Staging Deploy (API)
+        run: |
+          curl -fsSL "$RENDER_STAGING_API_DEPLOY_HOOK"
+        env:
+          RENDER_STAGING_API_DEPLOY_HOOK: ${{ secrets.RENDER_STAGING_API_DEPLOY_HOOK }}
+
+      - name: Trigger Render Staging Deploy (Web)
+        run: |
+          curl -fsSL "$RENDER_STAGING_WEB_DEPLOY_HOOK"
+        env:
+          RENDER_STAGING_WEB_DEPLOY_HOOK: ${{ secrets.RENDER_STAGING_WEB_DEPLOY_HOOK }}
+

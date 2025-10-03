@@ -1,0 +1,123 @@
+services:
+  # Production API (Express)
+  - type: web
+    name: buss-booking-api
+    env: node
+    plan: free
+    region: oregon
+    rootDir: server
+    branch: main
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGO_URL
+        fromSecret: PROD_MONGO_URL
+      - key: JWT_SECRET
+        fromSecret: PROD_JWT_SECRET
+      - key: SALT_ROUNDS
+        value: "10"
+      - key: STRIPE_SECRET_KEY
+        fromSecret: PROD_STRIPE_SECRET_KEY
+      - key: MERCHANT_ONE_SECRET_KEY
+        fromSecret: PROD_MERCHANT_ONE_SECRET_KEY
+      - key: EMAIL_USER
+        fromSecret: PROD_EMAIL_USER
+      - key: EMAIL_PASS
+        fromSecret: PROD_EMAIL_PASS
+      - key: FRONTEND_URL
+        fromService:
+          type: static_site
+          name: buss-booking-web
+          property: url
+      - key: CORS_ORIGINS
+        fromService:
+          type: static_site
+          name: buss-booking-web
+          property: url
+
+  # Production Web (React static site)
+  - type: static_site
+    name: buss-booking-web
+    plan: free
+    region: oregon
+    rootDir: client
+    branch: main
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        fromService:
+          type: web
+          name: buss-booking-api
+          property: url
+      - key: REACT_APP_STRIPE_PUBLISHABLE_KEY
+        fromSecret: PROD_STRIPE_PUBLISHABLE_KEY
+      - key: REACT_APP_GOOGLE_MAPS_API_KEY
+        fromSecret: PROD_GOOGLE_MAPS_API_KEY
+
+  # Staging API (Express)
+  - type: web
+    name: buss-booking-api-staging
+    env: node
+    plan: free
+    region: oregon
+    rootDir: server
+    branch: staging
+    autoDeploy: true
+    buildCommand: npm install
+    startCommand: node index.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: staging
+      - key: MONGO_URL
+        fromSecret: STAGING_MONGO_URL
+      - key: JWT_SECRET
+        fromSecret: STAGING_JWT_SECRET
+      - key: SALT_ROUNDS
+        value: "10"
+      - key: STRIPE_SECRET_KEY
+        fromSecret: STAGING_STRIPE_SECRET_KEY
+      - key: MERCHANT_ONE_SECRET_KEY
+        fromSecret: STAGING_MERCHANT_ONE_SECRET_KEY
+      - key: EMAIL_USER
+        fromSecret: STAGING_EMAIL_USER
+      - key: EMAIL_PASS
+        fromSecret: STAGING_EMAIL_PASS
+      - key: FRONTEND_URL
+        fromService:
+          type: static_site
+          name: buss-booking-web-staging
+          property: url
+      - key: CORS_ORIGINS
+        fromService:
+          type: static_site
+          name: buss-booking-web-staging
+          property: url
+
+  # Staging Web (React static site)
+  - type: static_site
+    name: buss-booking-web-staging
+    plan: free
+    region: oregon
+    rootDir: client
+    branch: staging
+    autoDeploy: true
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: REACT_APP_API_BASE_URL
+        fromService:
+          type: web
+          name: buss-booking-api-staging
+          property: url
+      - key: REACT_APP_STRIPE_PUBLISHABLE_KEY
+        fromSecret: STAGING_STRIPE_PUBLISHABLE_KEY
+      - key: REACT_APP_GOOGLE_MAPS_API_KEY
+        fromSecret: STAGING_GOOGLE_MAPS_API_KEY
+
