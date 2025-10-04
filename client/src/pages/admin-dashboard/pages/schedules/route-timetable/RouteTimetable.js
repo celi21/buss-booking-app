@@ -68,11 +68,11 @@ const RouteTimetable = () => {
 
   useEffect(() => {
     if (selectedRoute) {
-      let findRoute = buses.find((b) => b.route._id === selectedRoute);
-      let bus = buses?.find((b) => b.route._id === selectedRoute);
+      let findRoute = buses.find((b) => b.route?._id === selectedRoute);
+      let bus = buses?.find((b) => b.route?._id === selectedRoute);
       if (bus) {
         console.log(bus);
-        setDepartureTime(bus?.locations[0]?.departureTime);
+        setDepartureTime(bus?.locations?.[0]?.departureTime);
       }
       if (findRoute) {
         setCurrentRouteData(findRoute);
@@ -185,7 +185,7 @@ const RouteTimetable = () => {
             </thead>
             <tbody>
               <tr key="">
-                <td>{currentRouteData && currentRouteData.route.name}</td>
+                <td>{currentRouteData?.route?.name || 'N/A'}</td>
                 {currentRouteData &&
                   week.map((w) => {
                     let checkDate = checkIfCurrentDateInBetween(
