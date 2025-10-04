@@ -328,21 +328,6 @@ const Booking = () => {
             flexCharge={flexCharge}
           />
         )}
-
-        {/* Fallback: If no step matches, show dates-and-locations by default */}
-        {!currentBookingStep && (
-          <DatesAndLocations
-            selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
-            selectedFromCity={selectedFromCity}
-            setSelectedFromCity={setSelectedFromCity}
-            selectedToCity={selectedToCity}
-            setSelectedToCity={setSelectedToCity}
-            cheapestLocations={cheapestLocations}
-            personalDetails={personalDetails}
-            setPersonalDetails={setPersonalDetails}
-          />
-        )}
       </div>
     </Container>
   );
