@@ -138,8 +138,8 @@ const Buses = () => {
                   {bus.busType.name} ({bus.busType.seats})
                 </td>
                 <td className="text-nowrap">
-                  {bus.locations[0].departureTime} -{" "}
-                  {bus.locations[bus.locations.length - 1].arrivalTime}
+                  {bus.locations?.[0]?.departureTime || 'N/A'} -{" "}
+                  {bus.locations?.[bus.locations?.length - 1]?.arrivalTime || 'N/A'}
                 </td>
                 <td className="text-nowrap">
                   {bus.periodStartDate} - {bus.periodEndDate}

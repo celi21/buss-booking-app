@@ -156,12 +156,12 @@ const BookingRow = ({ booking, index }) => {
         </td>
         <td className="text-nowrap">
           {booking.bookingDate} <br />
-          {booking.bus.locations[0].departureTime} -{" "}
-          {booking.bus.locations[booking.bus.locations.length - 1].arrivalTime}
+          {booking.bus?.locations?.[0]?.departureTime || 'N/A'} -{" "}
+          {booking.bus?.locations?.[booking.bus?.locations?.length - 1]?.arrivalTime || 'N/A'}
         </td>
         <td>
-          {booking.route.name}, {booking.bus.locations[0].departureTime} -{" "}
-          {booking.bus.locations[booking.bus.locations.length - 1].arrivalTime}
+          {booking.route.name}, {booking.bus?.locations?.[0]?.departureTime || 'N/A'} -{" "}
+          {booking.bus?.locations?.[booking.bus?.locations?.length - 1]?.arrivalTime || 'N/A'}
           <br />
           <b>from</b> {booking.from.name} <b>to</b> {booking.to.name}
         </td>
