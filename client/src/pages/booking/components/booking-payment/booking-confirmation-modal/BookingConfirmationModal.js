@@ -20,7 +20,7 @@ const BookingConfirmationModal = ({ showModal, setShowModal, booking }) => {
       <Modal.Body>
         <h3>
           {selectedLanguage && translateText("booking", selectedLanguage.code)}{" "}
-          ID: {booking?.bookingId}
+          ID: {booking?.bookingId || 'Processing...'}
         </h3>
         <p>
           {selectedLanguage &&
@@ -39,12 +39,19 @@ const BookingConfirmationModal = ({ showModal, setShowModal, booking }) => {
         <Button variant="secondary" onClick={() => setShowModal(false)}>
           {selectedLanguage && translateText("close", selectedLanguage.code)}
         </Button>
-        <Link to={`/booking/${booking?.bookingId}`}>
-          <Button variant="primary">
+        {booking?.bookingId ? (
+          <Link to={`/booking/${booking.bookingId}`}>
+            <Button variant="primary">
+              {selectedLanguage &&
+                translateText("view-booking-details", selectedLanguage.code)}
+            </Button>
+          </Link>
+        ) : (
+          <Button variant="primary" disabled>
             {selectedLanguage &&
               translateText("view-booking-details", selectedLanguage.code)}
           </Button>
-        </Link>
+        )}
       </Modal.Footer>
     </Modal>
   );
