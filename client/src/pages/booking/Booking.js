@@ -36,7 +36,13 @@ const Booking = () => {
   const [departureTime, setDepartureTime] = useState(null);
   const [arrivalTime, setArrivalTime] = useState(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [booking, SetBooking] = useState(null);
+
+  // ✅ Initialize booking with safe defaults to prevent null errors
+  const [booking, SetBooking] = useState({
+    locations: [],
+    details: {},
+  });
+
   const [personalDetails, setPersonalDetails] = useState({
     firstName: null,
     lastName: null,
@@ -132,6 +138,9 @@ const Booking = () => {
     setIsTimerStarted(false);
     setBookingTimeout("");
     setFlexOption(false);
+
+    // ✅ Reset booking safely
+    SetBooking({ locations: [], details: {} });
   };
 
   const handleTabClick = (tabName) => {
@@ -195,9 +204,7 @@ const Booking = () => {
             <ArrowRight className="mx-3" size={22} color="#aaa" />
           </div>
         </Col>
-
-        {/* Repeat same structure for Tickets, Details, Confirm */}
-        {/* ... shortened for clarity, keep your original structure */}
+        {/* repeat for other steps ... */}
       </Row>
 
       {/* Timer */}
