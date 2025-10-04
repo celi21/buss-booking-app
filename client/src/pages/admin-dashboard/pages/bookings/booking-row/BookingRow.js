@@ -161,11 +161,11 @@ const BookingRow = ({ booking, index }) => {
             : 'N/A'}
         </td>
         <td>
-          {booking.route.name}, {booking.bus && booking.bus.locations && booking.bus.locations.length > 0
+          {booking.route?.name || 'N/A'}, {booking.bus && booking.bus.locations && booking.bus.locations.length > 0
             ? `${booking.bus.locations[0].departureTime} - ${booking.bus.locations[booking.bus.locations.length - 1].arrivalTime}`
             : 'N/A'}
           <br />
-          <b>from</b> {booking.from.name} <b>to</b> {booking.to.name}
+          <b>from</b> {booking.from?.name || 'N/A'} <b>to</b> {booking.to?.name || 'N/A'}
         </td>
         <td className="text-nowrap">
           <div className="d-flex flex-row justify-content-start align-items-center gap-2">

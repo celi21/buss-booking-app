@@ -154,8 +154,8 @@ const AdminRoutesTab = () => {
               <tr key={route._id}>
                 <td>{index + 1}</td>
                 <td>{route.name}</td>
-                <td>{route.from.name}</td>
-                <td>{route.to.name}</td>
+                <td>{route.from?.name || 'N/A'}</td>
+                <td>{route.to?.name || 'N/A'}</td>
                 <td>
                   <div className="d-flex flex-row justify-content-start align-items-center gap-2">
                     <select

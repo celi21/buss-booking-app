@@ -149,7 +149,7 @@ const DailySchedule = () => {
                   return (
                     <tr key={bus._id}>
                       <td>{index + 1}</td>
-                      <td>{bus.route.name}</td>
+                      <td>{bus.route?.name || 'N/A'}</td>
                       <td>
                         {bus.locations && bus.locations.length > 0
                           ? bus.locations[0].departureTime

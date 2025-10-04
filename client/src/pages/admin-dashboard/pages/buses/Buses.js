@@ -52,10 +52,10 @@ const Buses = () => {
   const filteredBuses = buses?.filter((bus) => {
     const matchesSearch =
       search.trim() === "" ||
-      bus.route.name?.toLowerCase().includes(search.toLowerCase()) ||
-      bus.busType.name?.toLowerCase().includes(search.toLowerCase());
+      bus.route?.name?.toLowerCase().includes(search.toLowerCase()) ||
+      bus.busType?.name?.toLowerCase().includes(search.toLowerCase());
 
-    const matchesRoute = filterRoute === "" || bus.route._id === filterRoute;
+    const matchesRoute = filterRoute === "" || bus.route?._id === filterRoute;
 
     return matchesSearch && matchesRoute;
   });
@@ -133,9 +133,9 @@ const Buses = () => {
             {filteredBuses.map((bus, index) => (
               <tr key={bus._id}>
                 <td className="text-nowrap">{index + 1}</td>
-                <td className="text-nowrap">{bus.route.name}</td>
+                <td className="text-nowrap">{bus.route?.name || 'N/A'}</td>
                 <td className="text-nowrap">
-                  {bus.busType.name} ({bus.busType.seats})
+                  {bus.busType ? `${bus.busType.name} (${bus.busType.seats})` : 'N/A'}
                 </td>
                 <td className="text-nowrap">
                   {bus.locations && bus.locations.length > 0
