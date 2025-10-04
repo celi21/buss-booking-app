@@ -114,9 +114,15 @@ const EditBooking = () => {
         setSelectedFromCity(booking.from._id);
         setSelectedToCity(booking.to._id);
         setSelectedSeats(booking.seatDetails);
-        setDepartureTime(booking.bus.locations[0].departureTime);
+        setDepartureTime(
+          booking.bus && booking.bus.locations && booking.bus.locations.length > 0
+            ? booking.bus.locations[0].departureTime
+            : 'N/A'
+        );
         setArrivalTime(
-          booking.bus.locations[booking.bus.locations.length - 1].arrivalTime
+          booking.bus && booking.bus.locations && booking.bus.locations.length > 0
+            ? booking.bus.locations[booking.bus.locations.length - 1].arrivalTime
+            : 'N/A'
         );
         setTicketsPrice(booking.payment.amount);
         setFirstName(booking.personalDetails.firstName);

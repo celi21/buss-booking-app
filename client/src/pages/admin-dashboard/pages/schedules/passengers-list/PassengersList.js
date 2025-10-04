@@ -82,9 +82,9 @@ const PassengersList = () => {
                     selected={selectedBus == bus._id}
                   >
                     {bus.route.name},{" "}
-                    {bus.locations[0]?.departureTime +
-                      " - " +
-                      bus.locations[bus.locations.length - 1].arrivalTime}
+                    {bus.locations && bus.locations.length > 0
+                      ? `${bus.locations[0].departureTime} - ${bus.locations[bus.locations.length - 1].arrivalTime}`
+                      : 'N/A'}
                   </option>
                 ))}
               </select>

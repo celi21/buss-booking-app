@@ -212,8 +212,10 @@ const Bookings = () => {
                       </option>
                       {buses.map((bus, index) => (
                         <option value={bus._id} key={bus._id}>
-                          {bus.route.name} {bus.locations[0].departureTime} -{" "}
-                          {bus.locations[bus.locations.length - 1].arrivalTime}
+                          {bus.route.name}{" "}
+                          {bus.locations && bus.locations.length > 0
+                            ? `${bus.locations[0].departureTime} - ${bus.locations[bus.locations.length - 1].arrivalTime}`
+                            : 'N/A'}
                         </option>
                       ))}
                     </Form.Select>
