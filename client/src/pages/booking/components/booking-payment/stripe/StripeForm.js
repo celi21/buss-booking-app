@@ -93,6 +93,7 @@ const StripeForm = ({
           response.data.success &&
           response.data.success == true
         ) {
+          // Return the booking object directly
           return response.data.booking;
         } else {
           setLocalError(response.data.message);
@@ -140,17 +141,23 @@ const StripeForm = ({
         };
 
         const bookingResult = await confirmBooking(bookingData);
-        if (bookingResult) {
+        if (bookingResult && bookingResult.bookingId) {
+          // Set booking state with the returned booking object
           SetBooking(bookingResult);
-          setShowConfirmationModal(true);
-          toast.success("Your booking has been completed Successfully.", {
-            duration: 4000,
-            position: "top-right",
-          });
-          // Reset form after a short delay to allow modal to read booking data
+          
+          // Use setTimeout to ensure state updates before opening modal
+          setTimeout(() => {
+            setShowConfirmationModal(true);
+            toast.success("Your booking has been completed Successfully.", {
+              duration: 4000,
+              position: "top-right",
+            });
+          }, 100);
+          
+          // Reset form after modal has time to display
           setTimeout(() => {
             resetForm();
-          }, 500);
+          }, 1000);
         }
       }
     } catch (error) {
