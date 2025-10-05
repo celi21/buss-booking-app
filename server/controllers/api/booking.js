@@ -863,7 +863,9 @@ export const confirmBooking = async (req, res, next) => {
             .populate("payment")
             .populate("personalDetails")
             .populate("bus")
-            .populate("route");
+            .populate("route")
+            .populate("from")
+            .populate("to");
           await sendConfirmationEmail(
             populatedBooking,
             populatedBooking.personalDetails.email
@@ -872,7 +874,7 @@ export const confirmBooking = async (req, res, next) => {
           return res.status(200).json({
             success: true,
             message: "Booking Successfully added",
-            booking: newBooking,
+            booking: populatedBooking,
           });
         }
       } else {
