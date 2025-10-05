@@ -406,43 +406,6 @@ export const confirmBusSeatsAvailability = async (req, res, next) => {
   }
 };
 
-const merchantOneResultCodeTable = {
-  100: "Transaction was approved. Your payment was successful.",
-  200: "Transaction was declined by the processor. Please contact your card issuer.",
-  201: "Do not honor. The bank has refused the transaction. Try another payment method.",
-  202: "Insufficient funds. You don't have enough funds in your account.",
-  203: "Over limit. The transaction amount exceeds your credit limit.",
-  204: "Transaction not allowed. This type of transaction is not allowed for your account.",
-  220: "Incorrect payment information. Please check the card details and try again.",
-  221: "No such card issuer. The card issuer could not be identified.",
-  222: "No card number on file with issuer. The card number is not recognized by the bank.",
-  223: "Expired card. Your card has expired, please use a valid card.",
-  224: "Invalid expiration date. The expiration date entered is incorrect.",
-  225: "Invalid card security code. The security code (CVV) entered is incorrect.",
-  226: "Invalid PIN. The PIN entered is incorrect.",
-  240: "Call issuer for further information. Contact your card issuer for more details.",
-  250: "Pick up card. The card has been flagged by the issuer, typically for fraud prevention.",
-  251: "Lost card. The card has been reported as lost.",
-  252: "Stolen card. The card has been reported as stolen.",
-  253: "Fraudulent card. The card has been flagged for fraudulent use.",
-  260: "Declined with further instructions available. Please refer to the response text for more details.",
-  261: "Declined - Stop all recurring payments. The cardholder has requested to stop recurring payments.",
-  262: "Declined - Stop this recurring program. The recurring program has been stopped as per cardholder request.",
-  263: "Declined - Update cardholder data available. Updated card information is available, please update the card details.",
-  264: "Declined - Retry in a few days. The bank has requested to try again later.",
-  300: "Transaction was rejected by the gateway. The payment gateway rejected the transaction, try again.",
-  400: "Transaction error returned by processor. An error occurred during transaction processing, try again.",
-  410: "Invalid merchant configuration. The merchant's account is not properly set up.",
-  411: "Merchant account is inactive. The merchant account is currently inactive.",
-  420: "Communication error. There was an error in communication during the transaction, try again.",
-  421: "Communication error with issuer. There was an issue communicating with the card issuer.",
-  430: "Duplicate transaction at processor. This transaction has already been processed.",
-  440: "Processor format error. There was an error in the transaction format.",
-  441: "Invalid transaction information. Some details of the transaction are incorrect.",
-  460: "Processor feature not available. The feature you are trying to use is not supported.",
-  461: "Unsupported card type. This type of card is not supported by the merchant.",
-};
-
 const retrievePayment = async (paymentIntentId) => {
   const payment = await stripe.paymentIntents.retrieve(paymentIntentId);
   if (!payment) {
@@ -1479,7 +1442,7 @@ export const cancelBooking = async (req, res, nex) => {
       });
     }
 
-    // first make the refund from merchant api
+    // Process refund via Stripe API
     let paymentResponse = await makeRefund(
       payment.amount,
       payment.transactionId
@@ -1672,7 +1635,7 @@ export const changeBookingStatus = async (req, res, next) => {
           } else {
             // if not refunded then run the makeRefund function to refund to user
             // and update the status as well as seats
-            // first make the refund from merchant api
+            // Process refund via Stripe API
             let paymentResponse = await makeRefund(
               payment.amount,
               payment.transactionId
