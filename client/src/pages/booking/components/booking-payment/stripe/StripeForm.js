@@ -93,19 +93,18 @@ const StripeForm = ({
           response.data.success &&
           response.data.success == true
         ) {
-          SetBooking(response.data.booking);
-          return true;
+          return response.data.booking;
         } else {
           setLocalError(response.data.message);
-          return false;
+          return null;
         }
       } else {
         setLocalError(paymentResult.error.message);
-        return false;
+        return null;
       }
     } catch (error) {
       setLocalError(error.message);
-      return false;
+      return null;
     }
   };
 
@@ -140,8 +139,9 @@ const StripeForm = ({
           flexOption: flexOption,
         };
 
-        const confirm = await confirmBooking(bookingData);
-        if (confirm === true) {
+        const bookingResult = await confirmBooking(bookingData);
+        if (bookingResult) {
+          SetBooking(bookingResult);
           setShowConfirmationModal(true);
           toast.success("Your booking has been completed Successfully.", {
             duration: 4000,
