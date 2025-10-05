@@ -142,12 +142,15 @@ const StripeForm = ({
 
         const confirm = await confirmBooking(bookingData);
         if (confirm === true) {
-          resetForm();
           setShowConfirmationModal(true);
           toast.success("Your booking has been completed Successfully.", {
             duration: 4000,
             position: "top-right",
           });
+          // Reset form after a short delay to allow modal to read booking data
+          setTimeout(() => {
+            resetForm();
+          }, 500);
         }
       }
     } catch (error) {
