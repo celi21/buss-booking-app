@@ -1603,6 +1603,10 @@ export const changeBookingStatus = async (req, res, next) => {
           // if its not added by admin then check if it is refunded.
           // if its refunded then just update the status as well as the seats
           const payment = await Payment.findById(booking.payment);
+          
+          console.log('Payment object:', payment);
+          console.log('Transaction ID:', payment?.transactionId);
+          console.log('Transaction ID type:', typeof payment?.transactionId);
 
           if (!payment) {
             // If no payment record exists, just update status without refund
@@ -1647,8 +1651,9 @@ export const changeBookingStatus = async (req, res, next) => {
               success: true,
               message: `Booking status updated to ${status}. Payment has already been refunded.`,
             });
-          } else if (!payment.transactionId || typeof payment.transactionId !== 'string' || !payment.transactionId.startsWith('pi_')) {
+          } else if (!payment.transactionId || (typeof payment.transactionId === 'string' && !payment.transactionId.startsWith('pi_')) || typeof payment.transactionId === 'number') {
             // If there's no valid Stripe transaction ID, just update status without refund
+            console.log('Skipping refund - invalid transaction ID');
             booking.status = status;
             const busAvailability = await BusAvailability.findOne({
               bus: booking.bus,
