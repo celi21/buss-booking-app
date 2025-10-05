@@ -1400,7 +1400,8 @@ const makeRefund = async (amount, transactionId, currency = "USD") => {
     return `response_code=100&response=1&transactionid=${refund.id}&responsetext=SUCCESS`;
   } catch (error) {
     console.error("Stripe refund error:", error);
-    return `response_code=error&response=0&responsetext=${encodeURIComponent(error.message || "Transaction not found")}`;
+    const errorMessage = error.message || "Transaction not found";
+    return `response_code=300&response=0&responsetext=${errorMessage}`;
   }
 };
 
@@ -1452,30 +1453,15 @@ export const cancelBooking = async (req, res, nex) => {
       console.log(paymentResponse);
       const decodedObject = paymentResponse.split("&").reduce((acc, curr) => {
         const [key, value] = curr.split("=");
-        acc[key] = value || null;
+        acc[key] = decodeURIComponent(value || "");
         return acc;
       }, {});
 
-      if (
-        decodedObject.response_code &&
-        decodedObject.response_code !== "100" &&
-        decodedObject.response &&
-        decodedObject.response !== "1"
-      ) {
-        return res.status(200).json({
-          success: false,
-          message: decodedObject.responsetext,
-        });
-      }
-
       // check if refund success
       if (
-        decodedObject.response_code &&
         decodedObject.response_code === "100" &&
-        decodedObject.response &&
         decodedObject.response === "1" &&
-        decodedObject.transactionid &&
-        decodedObject.transactionid !== null
+        decodedObject.transactionid
       ) {
         // update the booking schema
         booking.status = "cancelled";
@@ -1505,6 +1491,12 @@ export const cancelBooking = async (req, res, nex) => {
         return res.status(200).json({
           success: true,
           message: "Your Booking has been cancelled successfully!",
+        });
+      } else {
+        // Refund failed
+        return res.status(200).json({
+          success: false,
+          message: decodedObject.responsetext || "Payment Refund Failed. Please try again later.",
         });
       }
     } else {
@@ -1647,30 +1639,15 @@ export const changeBookingStatus = async (req, res, next) => {
                 .split("&")
                 .reduce((acc, curr) => {
                   const [key, value] = curr.split("=");
-                  acc[key] = value || null;
+                  acc[key] = decodeURIComponent(value || "");
                   return acc;
                 }, {});
 
-              if (
-                decodedObject.response_code &&
-                decodedObject.response_code !== "100" &&
-                decodedObject.response &&
-                decodedObject.response !== "1"
-              ) {
-                return res.status(200).json({
-                  success: false,
-                  message: decodedObject.responsetext,
-                });
-              }
-
               // check if refund success
               if (
-                decodedObject.response_code &&
                 decodedObject.response_code === "100" &&
-                decodedObject.response &&
                 decodedObject.response === "1" &&
-                decodedObject.transactionid &&
-                decodedObject.transactionid !== null
+                decodedObject.transactionid
               ) {
                 // update the booking schema
                 booking.status = status;
@@ -1702,6 +1679,12 @@ export const changeBookingStatus = async (req, res, next) => {
                 return res.status(200).json({
                   success: true,
                   message: `Your Booking has been ${status} successfully! Refund if applicable is being processed.`,
+                });
+              } else {
+                // Refund failed
+                return res.status(200).json({
+                  success: false,
+                  message: decodedObject.responsetext || "Payment Refund Failed. Please try again later.",
                 });
               }
             } else {
