@@ -154,10 +154,8 @@ const StripeForm = ({
             });
           }, 100);
           
-          // Reset form after modal has time to display
-          setTimeout(() => {
-            resetForm();
-          }, 1000);
+          // Don't reset form automatically - let user close modal first
+          // The modal close button or navigation will handle cleanup
         }
       }
     } catch (error) {

@@ -175,6 +175,7 @@ const Booking = () => {
           booking={booking}
           showModal={showConfirmationModal}
           setShowModal={setShowConfirmationModal}
+          resetForm={resetForm}
         />
       )}
 

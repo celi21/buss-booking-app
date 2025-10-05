@@ -4,13 +4,23 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { translateText } from "../../../../../utils/translation";
 
-const BookingConfirmationModal = ({ showModal, setShowModal, booking }) => {
+const BookingConfirmationModal = ({ showModal, setShowModal, booking, resetForm }) => {
   const selectedLanguage = useSelector(
     (state) => state.settings.selectedLanguage
   );
 
+  const handleClose = () => {
+    setShowModal(false);
+    // Reset form when modal closes to prepare for next booking
+    if (resetForm) {
+      setTimeout(() => {
+        resetForm();
+      }, 300);
+    }
+  };
+
   return (
-    <Modal show={showModal} onHide={() => setShowModal(false)}>
+    <Modal show={showModal} onHide={handleClose}>
       <Modal.Header closeButton>
         <Modal.Title>
           {selectedLanguage &&
@@ -36,7 +46,7 @@ const BookingConfirmationModal = ({ showModal, setShowModal, booking }) => {
         </p>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={() => setShowModal(false)}>
+        <Button variant="secondary" onClick={handleClose}>
           {selectedLanguage && translateText("close", selectedLanguage.code)}
         </Button>
         {booking?.bookingId ? (
