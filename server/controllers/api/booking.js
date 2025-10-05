@@ -410,7 +410,7 @@ const merchantOneResultCodeTable = {
   100: "Transaction was approved. Your payment was successful.",
   200: "Transaction was declined by the processor. Please contact your card issuer.",
   201: "Do not honor. The bank has refused the transaction. Try another payment method.",
-  202: "Insufficient funds. You don’t have enough funds in your account.",
+  202: "Insufficient funds. You don't have enough funds in your account.",
   203: "Over limit. The transaction amount exceeds your credit limit.",
   204: "Transaction not allowed. This type of transaction is not allowed for your account.",
   220: "Incorrect payment information. Please check the card details and try again.",
@@ -1427,25 +1427,18 @@ const isBookingCancelPossible = (booking) => {
 };
 
 const makeRefund = async (amount, transactionId, currency = "USD") => {
-  var data = querystring.stringify({
-    type: "refund",
-    amount: amount,
-    security_key: process.env.MERCHANT_ONE_SECRET_KEY,
-    transaction_id: transactionId,
-    currency: currency,
-  });
-
-  const response = await axios.post(
-    "https://secure.merchantonegateway.com/api/transact.php",
-    data,
-    {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-    }
-  );
-
-  return response.data;
+  try {
+    // Use Stripe refund API
+    const refund = await stripe.refunds.create({
+      payment_intent: transactionId,
+    });
+    
+    // Return response in format expected by existing code
+    return `response_code=100&response=1&transactionid=${refund.id}&responsetext=SUCCESS`;
+  } catch (error) {
+    console.error("Stripe refund error:", error);
+    return `response_code=error&response=0&responsetext=${encodeURIComponent(error.message || "Transaction not found")}`;
+  }
 };
 
 export const cancelBooking = async (req, res, nex) => {
