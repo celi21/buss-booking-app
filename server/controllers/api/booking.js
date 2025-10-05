@@ -1624,6 +1624,27 @@ export const changeBookingStatus = async (req, res, next) => {
               success: true,
               message: `Booking status updated to ${status}. Payment has already been refunded.`,
             });
+          } else if (!payment.transactionId || !payment.transactionId.startsWith('pi_')) {
+            // If there's no valid Stripe transaction ID, just update status without refund
+            booking.status = status;
+            const busAvailability = await BusAvailability.findOne({
+              bus: booking.bus,
+              date: booking.bookingDate,
+            });
+
+            let seatsDetails = booking.seatDetails;
+            let seatsToCancel = 0;
+            seatsDetails.map((seat) => {
+              seatsToCancel += seat.seats;
+            });
+            busAvailability.availableSeats += seatsToCancel;
+            await booking.save();
+            await busAvailability.save();
+
+            return res.status(200).json({
+              success: true,
+              message: `Booking status updated to ${status}. No payment to refund.`,
+            });
           } else {
             // if not refunded then run the makeRefund function to refund to user
             // and update the status as well as seats
