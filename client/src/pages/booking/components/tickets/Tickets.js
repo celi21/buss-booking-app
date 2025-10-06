@@ -170,7 +170,7 @@ const Tickets = ({
         setArrivalTime(arrivalCity.arrivalTime);
       }
     }
-  }, [availableBus, busAvailabilityData]);
+  }, [availableBus, busAvailabilityData, selectedFromCity, selectedToCity]);
 
   const handleBackButton = () => {
     dispatch(setCurrentBookingStep("dates-and-locations"));
@@ -392,6 +392,11 @@ const Tickets = ({
               </span>
             )}
           </Badge>
+          {tripType === "round-trip" && (
+            <Badge bg="info" className="ms-2">
+              Round-Trip (2x Price)
+            </Badge>
+          )}
         </Card.Header>
         <Card.Body>
           <Row>

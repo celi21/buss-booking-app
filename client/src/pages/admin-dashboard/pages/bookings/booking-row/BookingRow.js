@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { Badge, Button } from "react-bootstrap";
 import {
   ArrowClockwise,
   Check,
@@ -159,6 +159,17 @@ const BookingRow = ({ booking, index }) => {
           {booking.bus && booking.bus.locations && booking.bus.locations.length > 0
             ? `${booking.bus.locations[0].departureTime} - ${booking.bus.locations[booking.bus.locations.length - 1].arrivalTime}`
             : 'N/A'}
+          <br />
+          {booking.tripType === 'round-trip' && (
+            <Badge bg={booking.isReturnTrip ? "warning" : "info"} className="mt-1">
+              {booking.isReturnTrip ? "🔄 Return Trip" : "🔄 Round-Trip"}
+            </Badge>
+          )}
+          {booking.linkedBookingId && (
+            <small className="d-block text-muted mt-1">
+              Linked: {booking.linkedBookingId}
+            </small>
+          )}
         </td>
         <td>
           {booking.route?.name || 'N/A'}, {booking.bus && booking.bus.locations && booking.bus.locations.length > 0
