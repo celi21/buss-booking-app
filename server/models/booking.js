@@ -84,6 +84,19 @@ const bookingSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    tripType: {
+      type: String,
+      enum: ['one-way', 'round-trip'],
+      default: 'one-way',
+    },
+    isReturnTrip: {
+      type: Boolean,
+      default: false,
+    },
+    linkedBookingId: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

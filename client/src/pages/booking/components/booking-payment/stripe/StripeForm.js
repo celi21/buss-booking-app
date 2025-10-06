@@ -28,9 +28,14 @@ const StripeForm = ({
   const stripe = useStripe();
   const elements = useElements();
   const [formLoading, setFormLoading] = useState(false);
-  const { availableBus, busAvailabilityData } = useSelector(
-    (state) => state.booking
-  );
+  const { 
+    availableBus, 
+    busAvailabilityData,
+    tripType,
+    returnDate,
+    availableReturnBus,
+    returnBusAvailabilityData,
+  } = useSelector((state) => state.booking);
   const { user } = useSelector((state) => state.auth);
   const selectedLanguage = useSelector(
     (state) => state.settings.selectedLanguage
@@ -65,7 +70,7 @@ const StripeForm = ({
     }
   };
 
-  const confirmBooking = async (bookingData) => {
+  const confirmBooking = async (bookingData, returnBookingData = null) => {
     try {
       const paymentResult = await stripe.confirmPayment({
         redirect: "if_required",
@@ -83,9 +88,15 @@ const StripeForm = ({
           paymentAmount: paymentResult.paymentIntent.amount,
           paymentCreated: paymentResult.paymentIntent.created,
         };
+        
+        const requestBody = { bookingData, stripeData };
+        if (returnBookingData) {
+          requestBody.returnBookingData = returnBookingData;
+        }
+        
         const response = await axios.post(
           `${process.env.REACT_APP_API_BASE_URL}/booking/confirm-booking`,
-          { bookingData, stripeData },
+          requestBody,
           config
         );
         if (
@@ -93,8 +104,11 @@ const StripeForm = ({
           response.data.success &&
           response.data.success == true
         ) {
-          // Return the booking object directly
-          return response.data.booking;
+          // Return both bookings for round-trip
+          return {
+            booking: response.data.booking,
+            returnBooking: response.data.returnBooking || null,
+          };
         } else {
           setLocalError(response.data.message);
           return null;
@@ -116,47 +130,87 @@ const StripeForm = ({
         (total, seat) => total + seat.seats
       );
 
+      // Check outbound bus availability
       const queryObject = {
         selectedDate,
         busId: availableBus?._id,
         requestedSeats: requestedSeats,
       };
-      // confirm if bus/seats is still available
       const doesBusSeatsExists = await confirmBusAvailable(queryObject);
 
-      if (doesBusSeatsExists === true) {
-        let bookingData = {
-          bus: availableBus._id,
-          busType: availableBus.busType._id,
-          route: availableBus.route._id,
-          from: selectedFromCity,
-          to: selectedToCity,
-          selectedDate: selectedDate,
-          // paymentDetails: paymentDetails,
-          personalDetails: personalDetails,
+      if (!doesBusSeatsExists) {
+        setLoading(false);
+        return;
+      }
+
+      // For round-trip, check return bus availability
+      if (tripType === "round-trip") {
+        if (!availableReturnBus) {
+          setLocalError("Return bus not available");
+          setLoading(false);
+          return;
+        }
+
+        const returnQueryObject = {
+          selectedDate: returnDate,
+          busId: availableReturnBus._id,
+          requestedSeats: requestedSeats,
+        };
+        const doesReturnBusSeatsExist = await confirmBusAvailable(returnQueryObject);
+
+        if (!doesReturnBusSeatsExist) {
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Prepare outbound booking data
+      let bookingData = {
+        bus: availableBus._id,
+        busType: availableBus.busType._id,
+        route: availableBus.route._id,
+        from: selectedFromCity,
+        to: selectedToCity,
+        selectedDate: selectedDate,
+        personalDetails: personalDetails,
+        selectedSeats: selectedSeats,
+        requestedSeats: requestedSeats,
+        user: user,
+        flexOption: flexOption,
+        tripType: tripType,
+        availableReturnBus: availableReturnBus,
+      };
+
+      // Prepare return booking data if round-trip
+      let returnBookingData = null;
+      if (tripType === "round-trip") {
+        returnBookingData = {
+          bus: availableReturnBus._id,
+          busType: availableReturnBus.busType._id,
+          route: availableReturnBus.route._id,
+          from: selectedToCity, // Swap cities for return
+          to: selectedFromCity,
+          selectedDate: returnDate,
           selectedSeats: selectedSeats,
           requestedSeats: requestedSeats,
-          user: user,
-          flexOption: flexOption,
         };
+      }
 
-        const bookingResult = await confirmBooking(bookingData);
-        if (bookingResult && bookingResult.bookingId) {
-          // Set booking state with the returned booking object
-          SetBooking(bookingResult);
-          
-          // Use setTimeout to ensure state updates before opening modal
-          setTimeout(() => {
-            setShowConfirmationModal(true);
-            toast.success("Your booking has been completed Successfully.", {
-              duration: 4000,
-              position: "top-right",
-            });
-          }, 100);
-          
-          // Don't reset form automatically - let user close modal first
-          // The modal close button or navigation will handle cleanup
-        }
+      const bookingResult = await confirmBooking(bookingData, returnBookingData);
+      if (bookingResult && bookingResult.booking) {
+        // Set booking state with both outbound and return bookings
+        SetBooking(bookingResult);
+        
+        setTimeout(() => {
+          setShowConfirmationModal(true);
+          const successMsg = tripType === "round-trip" 
+            ? "Your round-trip booking has been completed successfully!" 
+            : "Your booking has been completed successfully.";
+          toast.success(successMsg, {
+            duration: 4000,
+            position: "top-right",
+          });
+        }, 100);
       }
     } catch (error) {
       setLocalError(error.message);

@@ -631,6 +631,118 @@ const sendConfirmationEmail = async (booking, to) => {
   });
 };
 
+// Helper function to create a single booking
+const createSingleBooking = async (bookingData, settings, paymentId, taxAmount) => {
+  const busId = bookingData.bus;
+  const foundBus = await Bus.findById(busId).populate(
+    "route busType locations locations.city ticketTypes ticketPrices"
+  );
+
+  if (!foundBus) {
+    throw new Error("This Bus is not available. Please try again later.");
+  }
+
+  let ticketsPrice = 0;
+  let requestedSeats = 0;
+  const seatsDetails = [];
+
+  bookingData.selectedSeats.forEach((seat) => {
+    let ticketPrice = foundBus.ticketPrices.find(
+      (ticket) =>
+        new mongoose.Types.ObjectId(seat._id).toString() ===
+        ticket.ticketType.toString()
+    );
+
+    let fromLocationCity = foundBus.locations.find(
+      (loc) =>
+        loc.city._id.toString() ===
+        new mongoose.Types.ObjectId(bookingData.from).toString()
+    );
+    let toLocationCity = foundBus.locations.find(
+      (loc) =>
+        loc.city._id.toString() ===
+        new mongoose.Types.ObjectId(bookingData.to).toString()
+    );
+
+    let ticketPriceInfo = ticketPrice.prices.find(
+      (p) =>
+        fromLocationCity?.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.from).toString() &&
+        toLocationCity?.city._id.toString() ===
+          new mongoose.Types.ObjectId(bookingData.to).toString() &&
+        fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
+        toLocationCity?._id.toString() === p.toLocationId.toString()
+    );
+
+    if (seat.seats > 0) {
+      ticketsPrice += Number(ticketPriceInfo?.price) * seat.seats;
+    }
+    seatsDetails.push(seat);
+    requestedSeats += parseInt(seat.seats);
+  });
+
+  // create/save payment schema
+  const paymentDetails = new Payment({
+    transactionId: paymentId,
+    amount: ticketsPrice,
+    user: bookingData.user ? bookingData.user?.id : null,
+    tax: taxAmount,
+  });
+
+  // if pay success then save the personal details
+  const personalDetails = new PersonalDetails({
+    firstName: bookingData.personalDetails.firstName,
+    lastName: bookingData.personalDetails.lastName,
+    phone: bookingData.personalDetails.phone,
+    email: bookingData.personalDetails.email,
+    pickupAddress: bookingData.personalDetails.pickupAddress,
+    dropoffAddress: bookingData.personalDetails.dropoffAddress,
+    notes: bookingData.personalDetails.notes,
+    suitcases: bookingData.personalDetails.suitcases,
+    user: bookingData.user ? bookingData.user?.id : null,
+  });
+
+  await personalDetails.save();
+  await paymentDetails.save();
+
+  // finally save the booking data and send the booking id as well as confirm message
+  const bookingId = Date.now() + (bookingData.isReturnTrip ? 1 : 0); // Ensure unique IDs
+  const newBooking = new Booking({
+    bus: foundBus._id,
+    busType: foundBus.busType._id,
+    from: bookingData.from,
+    to: bookingData.to,
+    payment: paymentDetails._id,
+    personalDetails: personalDetails._id,
+    route: foundBus.route._id,
+    bookingDate: bookingData.selectedDate,
+    transaction_session_id: paymentId,
+    bookingId: bookingId,
+    user: bookingData.user ? bookingData.user?.id : null,
+    seatDetails: seatsDetails,
+    flexOption: bookingData.flexOption,
+    tripType: bookingData.tripType || 'one-way',
+    isReturnTrip: bookingData.isReturnTrip || false,
+    linkedBookingId: bookingData.linkedBookingId || null,
+  });
+
+  let busAvailability = await BusAvailability.findOne({
+    bus: foundBus._id,
+    date: bookingData.selectedDate,
+  });
+
+  if (!busAvailability) {
+    throw new Error("Bus availability not found.");
+  }
+
+  busAvailability.availableSeats -= requestedSeats;
+
+  await newBooking.save();
+  await busAvailability.save();
+
+  return newBooking;
+};
+
 export const createPaymentIntent = async (req, res, next) => {
   try {
     if (!req.body.ticketsPrice) {
@@ -675,6 +787,7 @@ export const createPaymentIntent = async (req, res, next) => {
 export const confirmBooking = async (req, res, next) => {
   const bookingData = req.body?.bookingData;
   const stripeData = req.body?.stripeData;
+  const returnBookingData = req.body?.returnBookingData; // For round-trip
 
   try {
     if (
@@ -699,6 +812,16 @@ export const confirmBooking = async (req, res, next) => {
       return res.status(200).json({
         success: false,
         message: "Please provide complete Payment details.",
+      });
+    }
+
+    // Check if this is a round-trip booking
+    const isRoundTrip = bookingData.tripType === 'round-trip' && returnBookingData;
+
+    if (isRoundTrip && (!returnBookingData.bus || !returnBookingData.selectedDate)) {
+      return res.status(200).json({
+        success: false,
+        message: "Please provide complete return trip data.",
       });
     }
 
@@ -754,98 +877,66 @@ export const confirmBooking = async (req, res, next) => {
       requestedSeats += parseInt(seat.seats);
     });
 
-    let totalTicketsPrice =
-      bookingData.flexOption == true ? ticketsPrice + 8 : ticketsPrice;
-
     const settings = await Settings.find({});
-    if (settings[0]?.tax && settings[0]?.tax >= 0) {
-      let taxAmount = (Number(settings[0].tax) / 100) * ticketsPrice;
-      totalTicketsPrice = totalTicketsPrice + taxAmount;
-    }
+    const taxRate = settings[0]?.tax || 0;
+    const taxAmount = (Number(taxRate) / 100) * ticketsPrice;
 
     let paymentResponse = await retrievePayment(stripeData.paymentId);
-    // console.log(paymentResponse);
-    if (paymentResponse) {
+    if (paymentResponse && paymentResponse.id) {
       console.log(paymentResponse);
-      // check if pay success
-      if (paymentResponse && paymentResponse.id) {
-        // create/save payment schema
-        const paymentDetails = new Payment({
-          transactionId: stripeData.paymentId,
-          amount: ticketsPrice,
-          user: bookingData.user ? bookingData.user?.id : null,
-          tax: (Number(settings[0].tax) / 100) * ticketsPrice,
-        });
-
-        // if pay success then save the personal details
-        const personalDetails = new PersonalDetails({
-          firstName: bookingData.personalDetails.firstName,
-          lastName: bookingData.personalDetails.lastName,
-          phone: bookingData.personalDetails.phone,
-          email: bookingData.personalDetails.email,
-          pickupAddress: bookingData.personalDetails.pickupAddress,
-          dropoffAddress: bookingData.personalDetails.dropoffAddress,
-          notes: bookingData.personalDetails.notes,
-          suitcases: bookingData.personalDetails.suitcases,
-          user: bookingData.user ? bookingData.user?.id : null,
-        });
-
-        await personalDetails.save();
-        await paymentDetails.save();
-
-        // finally save the booking data and send the booking id as well as confirm message
-        const bookingId = Date.now();
-        const newBooking = new Booking({
-          bus: foundBus._id,
-          busType: foundBus.busType._id,
-          from: bookingData.from,
-          to: bookingData.to,
-          payment: paymentDetails._id,
-          personalDetails: personalDetails._id,
-          route: foundBus.route._id,
-          bookingDate: bookingData.selectedDate,
-          transaction_session_id: stripeData.paymentId,
-          bookingId: bookingId,
-          user: bookingData.user ? bookingData.user?.id : null,
-          seatDetails: seatsDetails,
+      
+      // Create outbound booking
+      const outboundBooking = await createSingleBooking(bookingData, settings, stripeData.paymentId, taxAmount);
+      
+      let returnBooking = null;
+      if (isRoundTrip) {
+        // Prepare return booking data
+        const returnData = {
+          ...returnBookingData,
+          tripType: 'round-trip',
+          isReturnTrip: true,
+          linkedBookingId: outboundBooking.bookingId.toString(),
+          user: bookingData.user,
+          personalDetails: bookingData.personalDetails,
           flexOption: bookingData.flexOption,
-        });
-
-        let busAvailability = await BusAvailability.findOne({
-          bus: foundBus._id,
-          date: bookingData.selectedDate,
-        });
-
-        busAvailability.availableSeats -= requestedSeats;
-
-        await newBooking.save();
-        await busAvailability.save();
-
-        if (newBooking) {
-          const populatedBooking = await Booking.findById(newBooking._id)
-            .populate("payment")
-            .populate("personalDetails")
-            .populate("bus")
-            .populate("route")
-            .populate("from")
-            .populate("to");
-          await sendConfirmationEmail(
-            populatedBooking,
-            populatedBooking.personalDetails.email
-          );
-
-          return res.status(200).json({
-            success: true,
-            message: "Booking Successfully added",
-            booking: populatedBooking,
-          });
-        }
-      } else {
-        return res.status(200).json({
-          success: false,
-          message: "Payment Failed. Please try again later.",
-        });
+        };
+        
+        returnBooking = await createSingleBooking(returnData, settings, stripeData.paymentId, taxAmount);
+        
+        // Update outbound booking with linked return booking ID
+        outboundBooking.linkedBookingId = returnBooking.bookingId.toString();
+        await outboundBooking.save();
       }
+      
+      // Populate and send response
+      const populatedOutbound = await Booking.findById(outboundBooking._id)
+        .populate("payment")
+        .populate("personalDetails")
+        .populate("bus")
+        .populate("route")
+        .populate("from")
+        .populate("to");
+      
+      await sendConfirmationEmail(populatedOutbound, populatedOutbound.personalDetails.email);
+      
+      const response = {
+        success: true,
+        message: isRoundTrip ? "Round-trip booking successfully added" : "Booking Successfully added",
+        booking: populatedOutbound,
+      };
+      
+      if (returnBooking) {
+        const populatedReturn = await Booking.findById(returnBooking._id)
+          .populate("payment")
+          .populate("personalDetails")
+          .populate("bus")
+          .populate("route")
+          .populate("from")
+          .populate("to");
+        response.returnBooking = populatedReturn;
+      }
+      
+      return res.status(200).json(response);
     } else {
       return res.status(200).json({
         success: false,

@@ -6,8 +6,11 @@ import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinne
 import toast from "react-hot-toast";
 import {
   checkIfBusAvailable,
+  checkIfReturnBusAvailable,
   setCurrentBookingStep,
   updateBookingStepStatus,
+  setTripType,
+  setReturnDate,
 } from "../../../../store/slices/bookingSlice";
 import { translateText } from "../../../../utils/translation";
 
@@ -39,6 +42,11 @@ const DatesAndLocations = ({
     availableBusError,
     availableBus,
     isBusAvailableLoading,
+    tripType,
+    returnDate,
+    availableReturnBus,
+    isReturnBusAvailableLoading,
+    availableReturnBusError,
   } = useSelector((state) => state.booking);
   const dispatch = useDispatch();
 
@@ -119,28 +127,73 @@ const DatesAndLocations = ({
       return;
     }
 
+    // Check return date for round-trip
+    if (tripType === "round-trip" && !returnDate) {
+      toast.error("Please choose a return date", {
+        duration: 4000,
+      });
+      return;
+    }
+
     const queryObject = {
       selectedDate,
       selectedFromCity,
       selectedToCity,
     };
 
-    // dispatch(checkIfBusAvailable(queryObject));
+    // Check outbound bus availability
     const resultAction = await dispatch(checkIfBusAvailable(queryObject));
 
     // Check if the bus availability was successful
     if (checkIfBusAvailable.fulfilled.match(resultAction)) {
       const availableBus = resultAction.payload;
 
-      // If bus is available, update the state and proceed to the next step
+      // If bus is available, check return bus for round-trip
       if (availableBus) {
-        dispatch(setCurrentBookingStep("tickets"));
-        dispatch(
-          updateBookingStepStatus({
-            step: "dates-and-locations",
-            isCompleted: true,
-          })
-        );
+        if (tripType === "round-trip") {
+          // Check return bus availability
+          const returnQueryObject = {
+            selectedDate: returnDate,
+            selectedFromCity: selectedToCity, // Swap for return trip
+            selectedToCity: selectedFromCity,
+          };
+          
+          const returnResultAction = await dispatch(checkIfReturnBusAvailable(returnQueryObject));
+          
+          if (checkIfReturnBusAvailable.fulfilled.match(returnResultAction)) {
+            // Both buses available, proceed
+            dispatch(setCurrentBookingStep("tickets"));
+            dispatch(
+              updateBookingStepStatus({
+                step: "dates-and-locations",
+                isCompleted: true,
+              })
+            );
+          } else if (checkIfReturnBusAvailable.rejected.match(returnResultAction)) {
+            let updatedPersonalDetails = {
+              ...personalDetails,
+            };
+            updatedPersonalDetails["dropoffAddress"] = null;
+            updatedPersonalDetails["pickupAddress"] = null;
+            setPersonalDetails(updatedPersonalDetails);
+            toast.error(
+              `Return trip: ${returnResultAction.payload}` ||
+                "No return bus available.",
+              {
+                duration: 4000,
+              }
+            );
+          }
+        } else {
+          // One-way trip, proceed
+          dispatch(setCurrentBookingStep("tickets"));
+          dispatch(
+            updateBookingStepStatus({
+              step: "dates-and-locations",
+              isCompleted: true,
+            })
+          );
+        }
       }
     } else if (checkIfBusAvailable.rejected.match(resultAction)) {
       let updatedPersonalDetails = {
@@ -167,6 +220,39 @@ const DatesAndLocations = ({
 
   return (
     <div className="bg-light border p-3 rounded w-100">
+      {/* Trip Type Selector */}
+      <Row className="mb-3">
+        <Col>
+          <Form.Group>
+            <Form.Label className="fw-semibold">
+              {selectedLanguage &&
+                translateText("Trip Type", selectedLanguage.code)}
+              :
+            </Form.Label>
+            <div className="d-flex gap-4">
+              <Form.Check
+                inline
+                type="radio"
+                label={selectedLanguage && translateText("One-way", selectedLanguage.code) || "One-way"}
+                name="tripType"
+                id="one-way"
+                checked={tripType === "one-way"}
+                onChange={() => dispatch(setTripType("one-way"))}
+              />
+              <Form.Check
+                inline
+                type="radio"
+                label={selectedLanguage && translateText("Round-trip", selectedLanguage.code) || "Round-trip"}
+                name="tripType"
+                id="round-trip"
+                checked={tripType === "round-trip"}
+                onChange={() => dispatch(setTripType("round-trip"))}
+              />
+            </div>
+          </Form.Group>
+        </Col>
+      </Row>
+
       <Row>
         <Col xl={6} lg={6}>
           <Form.Group className="mb-3 w-100">
@@ -189,6 +275,33 @@ const DatesAndLocations = ({
               value={selectedDate}
               onChange={handleDateChange}
               defaultValue={selectedDate}
+            />
+          </Form.Group>
+        </Col>
+        
+        {/* Return Date Picker - Conditional */}
+        <Col xl={6} lg={6}>
+          <Form.Group className="mb-3 w-100">
+            <Form.Label>
+              <span>
+                {selectedLanguage &&
+                  translateText("returning", selectedLanguage.code) || "Returning"}
+                :
+              </span>
+              <InfoCircleFill
+                title="Please Select a Return Date"
+                color="#aaa"
+                size={13}
+                className="ms-2"
+              />
+            </Form.Label>
+            <Form.Control
+              type="date"
+              min={selectedDate}
+              value={returnDate || ""}
+              onChange={(e) => dispatch(setReturnDate(e.target.value))}
+              disabled={tripType === "one-way"}
+              style={tripType === "one-way" ? { backgroundColor: "#e9ecef", cursor: "not-allowed" } : {}}
             />
           </Form.Group>
         </Col>
@@ -299,7 +412,12 @@ const DatesAndLocations = ({
             <Col>
               {availableBusError && (
                 <Alert variant="danger" className="w-auto p-2">
-                  {availableBusError}
+                  <strong>Outbound:</strong> {availableBusError}
+                </Alert>
+              )}
+              {availableReturnBusError && tripType === "round-trip" && (
+                <Alert variant="danger" className="w-auto p-2">
+                  <strong>Return:</strong> {availableReturnBusError}
                 </Alert>
               )}
             </Col>

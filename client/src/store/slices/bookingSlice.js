@@ -18,6 +18,12 @@ const initialState = {
   busAvailabilityData: null,
   availableBus: null,
   availableBusError: null,
+  tripType: "one-way",
+  returnDate: null,
+  availableReturnBus: null,
+  returnBusAvailabilityData: null,
+  isReturnBusAvailableLoading: false,
+  availableReturnBusError: null,
   currentBookingStep: "dates-and-locations",
   bookingStepsStatus: {
     "dates-and-locations": {
@@ -61,6 +67,42 @@ export const fetchCities = createAsyncThunk(
 
 export const checkIfBusAvailable = createAsyncThunk(
   "booking/checkIfBusAvailable",
+  async (queryObject, { getState, rejectWithValue }) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/check-bus-availability`,
+        queryObject,
+        config
+      );
+      if (
+        response.data &&
+        response.data.success &&
+        response.data.success == true
+      ) {
+        return {
+          bus: response.data.bus,
+          busAvailabilityData: response.data.busAvailability,
+        };
+      } else {
+        return rejectWithValue(response.data.message);
+      }
+    } catch (error) {
+      if (error.response && error.response.data.message) {
+        return rejectWithValue(error.response.data.message);
+      } else {
+        return rejectWithValue(error.message);
+      }
+    }
+  }
+);
+
+export const checkIfReturnBusAvailable = createAsyncThunk(
+  "booking/checkIfReturnBusAvailable",
   async (queryObject, { getState, rejectWithValue }) => {
     try {
       const config = {
@@ -179,6 +221,17 @@ const bookingSlice = createSlice({
       state.busAvailabilityData = null;
       state.availableBus = null;
     },
+    setTripType: (state, action) => {
+      state.tripType = action.payload;
+      if (action.payload === "one-way") {
+        state.returnDate = null;
+        state.availableReturnBus = null;
+        state.returnBusAvailabilityData = null;
+      }
+    },
+    setReturnDate: (state, action) => {
+      state.returnDate = action.payload;
+    },
     setCurrentBookingStep: (state, action) => {
       state.currentBookingStep = action.payload;
     },
@@ -218,6 +271,21 @@ const bookingSlice = createSlice({
         state.isBusAvailableLoading = false;
         state.availableBusError = action.payload;
         state.availableBus = null;
+      })
+      .addCase(checkIfReturnBusAvailable.pending, (state) => {
+        state.isReturnBusAvailableLoading = true;
+        state.availableReturnBusError = null;
+      })
+      .addCase(checkIfReturnBusAvailable.fulfilled, (state, action) => {
+        state.isReturnBusAvailableLoading = false;
+        state.availableReturnBus = action.payload.bus;
+        state.returnBusAvailabilityData = action.payload.busAvailabilityData;
+        state.availableReturnBusError = null;
+      })
+      .addCase(checkIfReturnBusAvailable.rejected, (state, action) => {
+        state.isReturnBusAvailableLoading = false;
+        state.availableReturnBusError = action.payload;
+        state.availableReturnBus = null;
       })
       .addCase(fetchUserBookings.pending, (state) => {
         state.isUserBookingsLoading = true;
@@ -259,6 +327,8 @@ export const {
   updateBookingStepStatus,
   resetBookingForm,
   resetBusAvailabilityData,
+  setTripType,
+  setReturnDate,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

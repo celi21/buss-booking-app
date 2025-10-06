@@ -19,6 +19,10 @@ const BookingConfirmationModal = ({ showModal, setShowModal, booking, resetForm 
     }
   };
 
+  // Check if this is a round-trip booking
+  const isRoundTrip = booking?.returnBooking;
+  const outboundBooking = booking?.booking || booking;
+
   return (
     <Modal show={showModal} onHide={handleClose}>
       <Modal.Header closeButton>
@@ -28,10 +32,34 @@ const BookingConfirmationModal = ({ showModal, setShowModal, booking, resetForm 
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>
-        <h3>
-          {selectedLanguage && translateText("booking", selectedLanguage.code)}{" "}
-          ID: {booking?.bookingId || 'Processing...'}
-        </h3>
+        {isRoundTrip ? (
+          <>
+            <h4 className="mb-3">🎉 Round-Trip Booking Confirmed!</h4>
+            <div className="mb-3 p-3 bg-light rounded">
+              <h5>Outbound Trip</h5>
+              <p className="mb-1">
+                <strong>Booking ID:</strong> {outboundBooking?.bookingId || 'Processing...'}
+              </p>
+              <p className="mb-0">
+                <strong>Date:</strong> {outboundBooking?.bookingDate || 'N/A'}
+              </p>
+            </div>
+            <div className="mb-3 p-3 bg-light rounded">
+              <h5>Return Trip</h5>
+              <p className="mb-1">
+                <strong>Booking ID:</strong> {booking?.returnBooking?.bookingId || 'Processing...'}
+              </p>
+              <p className="mb-0">
+                <strong>Date:</strong> {booking?.returnBooking?.bookingDate || 'N/A'}
+              </p>
+            </div>
+          </>
+        ) : (
+          <h3>
+            {selectedLanguage && translateText("booking", selectedLanguage.code)}{" "}
+            ID: {outboundBooking?.bookingId || 'Processing...'}
+          </h3>
+        )}
         <p>
           {selectedLanguage &&
             translateText("booking-modal-p1", selectedLanguage.code)}
@@ -49,8 +77,8 @@ const BookingConfirmationModal = ({ showModal, setShowModal, booking, resetForm 
         <Button variant="secondary" onClick={handleClose}>
           {selectedLanguage && translateText("close", selectedLanguage.code)}
         </Button>
-        {booking?.bookingId ? (
-          <Link to={`/booking/${booking.bookingId}`}>
+        {outboundBooking?.bookingId ? (
+          <Link to={`/booking/${outboundBooking.bookingId}`}>
             <Button variant="primary">
               {selectedLanguage &&
                 translateText("view-booking-details", selectedLanguage.code)}

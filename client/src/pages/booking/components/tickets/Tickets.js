@@ -52,8 +52,12 @@ const Tickets = ({
   setFlexOption,
   flexCharge,
 }) => {
-  const { availableBus, isBusAvailableLoading, busAvailabilityData } =
-    useSelector((state) => state.booking);
+  const { 
+    availableBus, 
+    isBusAvailableLoading, 
+    busAvailabilityData,
+    tripType, 
+  } = useSelector((state) => state.booking);
   const dispatch = useDispatch();
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [localError, setLocalError] = useState(null);
@@ -265,6 +269,11 @@ const Tickets = ({
         total + parseFloat(ticketType.price) * parseInt(ticketType.seats),
       0
     );
+
+    // Double the price for round-trip bookings
+    if (tripType === "round-trip") {
+      priceSum = priceSum * 2;
+    }
 
     priceSum = flexOption == true ? (priceSum += 8) : priceSum;
 
