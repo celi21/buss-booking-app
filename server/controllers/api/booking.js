@@ -632,7 +632,7 @@ const sendConfirmationEmail = async (booking, to) => {
 };
 
 // Helper function to create a single booking
-const createSingleBooking = async (bookingData, settings, paymentId, taxAmount) => {
+const createSingleBooking = async (bookingData, paymentDetailsId, personalDetailsId) => {
   const busId = bookingData.bus;
   const foundBus = await Bus.findById(busId).populate(
     "route busType locations locations.city ticketTypes ticketPrices"
@@ -642,68 +642,13 @@ const createSingleBooking = async (bookingData, settings, paymentId, taxAmount) 
     throw new Error("This Bus is not available. Please try again later.");
   }
 
-  let ticketsPrice = 0;
   let requestedSeats = 0;
   const seatsDetails = [];
 
   bookingData.selectedSeats.forEach((seat) => {
-    let ticketPrice = foundBus.ticketPrices.find(
-      (ticket) =>
-        new mongoose.Types.ObjectId(seat._id).toString() ===
-        ticket.ticketType.toString()
-    );
-
-    let fromLocationCity = foundBus.locations.find(
-      (loc) =>
-        loc.city._id.toString() ===
-        new mongoose.Types.ObjectId(bookingData.from).toString()
-    );
-    let toLocationCity = foundBus.locations.find(
-      (loc) =>
-        loc.city._id.toString() ===
-        new mongoose.Types.ObjectId(bookingData.to).toString()
-    );
-
-    let ticketPriceInfo = ticketPrice.prices.find(
-      (p) =>
-        fromLocationCity?.city._id.toString() ===
-          new mongoose.Types.ObjectId(bookingData.from).toString() &&
-        toLocationCity?.city._id.toString() ===
-          new mongoose.Types.ObjectId(bookingData.to).toString() &&
-        fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
-        toLocationCity?._id.toString() === p.toLocationId.toString()
-    );
-
-    if (seat.seats > 0) {
-      ticketsPrice += Number(ticketPriceInfo?.price) * seat.seats;
-    }
     seatsDetails.push(seat);
     requestedSeats += parseInt(seat.seats);
   });
-
-  // create/save payment schema
-  const paymentDetails = new Payment({
-    transactionId: paymentId,
-    amount: ticketsPrice,
-    user: bookingData.user ? bookingData.user?.id : null,
-    tax: taxAmount,
-  });
-
-  // if pay success then save the personal details
-  const personalDetails = new PersonalDetails({
-    firstName: bookingData.personalDetails.firstName,
-    lastName: bookingData.personalDetails.lastName,
-    phone: bookingData.personalDetails.phone,
-    email: bookingData.personalDetails.email,
-    pickupAddress: bookingData.personalDetails.pickupAddress,
-    dropoffAddress: bookingData.personalDetails.dropoffAddress,
-    notes: bookingData.personalDetails.notes,
-    suitcases: bookingData.personalDetails.suitcases,
-    user: bookingData.user ? bookingData.user?.id : null,
-  });
-
-  await personalDetails.save();
-  await paymentDetails.save();
 
   // finally save the booking data and send the booking id as well as confirm message
   const bookingId = Date.now() + (bookingData.isReturnTrip ? 1 : 0); // Ensure unique IDs
@@ -712,15 +657,15 @@ const createSingleBooking = async (bookingData, settings, paymentId, taxAmount) 
     busType: foundBus.busType._id,
     from: bookingData.from,
     to: bookingData.to,
-    payment: paymentDetails._id,
-    personalDetails: personalDetails._id,
+    payment: paymentDetailsId,
+    personalDetails: personalDetailsId,
     route: foundBus.route._id,
     bookingDate: bookingData.selectedDate,
-    transaction_session_id: paymentId,
+    transaction_session_id: bookingData.transaction_session_id || null,
     bookingId: bookingId,
     user: bookingData.user ? bookingData.user?.id : null,
     seatDetails: seatsDetails,
-    flexOption: bookingData.flexOption,
+    flexOption: bookingData.flexOption || false,
     tripType: bookingData.tripType || 'one-way',
     isReturnTrip: bookingData.isReturnTrip || false,
     linkedBookingId: bookingData.linkedBookingId || null,
@@ -885,8 +830,37 @@ export const confirmBooking = async (req, res, next) => {
     if (paymentResponse && paymentResponse.id) {
       console.log(paymentResponse);
       
+      // Create shared payment and personal details records
+      const paymentDetails = new Payment({
+        transactionId: stripeData.paymentId,
+        amount: ticketsPrice,
+        user: bookingData.user ? bookingData.user?.id : null,
+        tax: taxAmount,
+      });
+
+      const personalDetails = new PersonalDetails({
+        firstName: bookingData.personalDetails.firstName,
+        lastName: bookingData.personalDetails.lastName,
+        phone: bookingData.personalDetails.phone,
+        email: bookingData.personalDetails.email,
+        pickupAddress: bookingData.personalDetails.pickupAddress,
+        dropoffAddress: bookingData.personalDetails.dropoffAddress,
+        notes: bookingData.personalDetails.notes,
+        suitcases: bookingData.personalDetails.suitcases,
+        user: bookingData.user ? bookingData.user?.id : null,
+      });
+
+      await personalDetails.save();
+      await paymentDetails.save();
+      
+      // Prepare outbound booking data
+      const outboundData = {
+        ...bookingData,
+        transaction_session_id: stripeData.paymentId,
+      };
+      
       // Create outbound booking
-      const outboundBooking = await createSingleBooking(bookingData, settings, stripeData.paymentId, taxAmount);
+      const outboundBooking = await createSingleBooking(outboundData, paymentDetails._id, personalDetails._id);
       
       let returnBooking = null;
       if (isRoundTrip) {
@@ -897,11 +871,11 @@ export const confirmBooking = async (req, res, next) => {
           isReturnTrip: true,
           linkedBookingId: outboundBooking.bookingId.toString(),
           user: bookingData.user,
-          personalDetails: bookingData.personalDetails,
           flexOption: bookingData.flexOption,
+          transaction_session_id: stripeData.paymentId,
         };
         
-        returnBooking = await createSingleBooking(returnData, settings, stripeData.paymentId, taxAmount);
+        returnBooking = await createSingleBooking(returnData, paymentDetails._id, personalDetails._id);
         
         // Update outbound booking with linked return booking ID
         outboundBooking.linkedBookingId = returnBooking.bookingId.toString();
@@ -934,6 +908,7 @@ export const confirmBooking = async (req, res, next) => {
           .populate("from")
           .populate("to");
         response.returnBooking = populatedReturn;
+        await sendConfirmationEmail(populatedReturn, populatedReturn.personalDetails.email);
       }
       
       return res.status(200).json(response);
