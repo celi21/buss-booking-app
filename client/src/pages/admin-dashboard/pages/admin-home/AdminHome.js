@@ -16,8 +16,8 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import {
-  TrendingUp,
-  TrendingDown,
+  ArrowUp,
+  ArrowDown,
   Calendar,
   Lock,
   Plus,
@@ -220,12 +220,12 @@ const AdminHome = () => {
               <div className="d-flex align-items-center">
                 {bookingChange >= 0 ? (
                   <>
-                    <TrendingUp className="text-success me-2" size={20} />
+                    <ArrowUp className="text-success me-2" size={20} />
                     <span className="text-success">+{percentChange}%</span>
                   </>
                 ) : (
                   <>
-                    <TrendingDown className="text-danger me-2" size={20} />
+                    <ArrowDown className="text-danger me-2" size={20} />
                     <span className="text-danger">{percentChange}%</span>
                   </>
                 )}
