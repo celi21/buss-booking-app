@@ -1833,9 +1833,8 @@ export const deleteBooking = async (req, res, next) => {
       });
     }
 
-    // Find the booking with all related data
-    const booking = await Booking.findOne({ bookingId })
-      .populate("bus route from to personalDetails payment busType");
+    // Find the booking first without population to get IDs
+    const booking = await Booking.findOne({ bookingId });
 
     if (!booking) {
       return res.status(404).json({
@@ -1846,7 +1845,7 @@ export const deleteBooking = async (req, res, next) => {
 
     // Restore seat availability
     const busAvailability = await BusAvailability.findOne({
-      bus: booking.bus._id,
+      bus: booking.bus,
       date: booking.bookingDate,
     });
 
@@ -1861,20 +1860,24 @@ export const deleteBooking = async (req, res, next) => {
       await busAvailability.save();
     }
 
+    // Populate the booking for deletion log details
+    const populatedBooking = await Booking.findOne({ bookingId })
+      .populate("bus route from to personalDetails payment busType");
+
     // Create deletion log
     const deletionLog = new DeletionLog({
       bookingId: booking.bookingId,
       bookingDetails: {
-        customerName: `${booking.personalDetails?.firstName || ''} ${booking.personalDetails?.lastName || ''}`,
-        email: booking.personalDetails?.email,
-        phone: booking.personalDetails?.phone,
-        route: booking.route?.name,
-        from: booking.from?.name,
-        to: booking.to?.name,
+        customerName: `${populatedBooking?.personalDetails?.firstName || ''} ${populatedBooking?.personalDetails?.lastName || ''}`,
+        email: populatedBooking?.personalDetails?.email || 'N/A',
+        phone: populatedBooking?.personalDetails?.phone || 'N/A',
+        route: populatedBooking?.route?.name || 'N/A',
+        from: populatedBooking?.from?.name || 'N/A',
+        to: populatedBooking?.to?.name || 'N/A',
         bookingDate: booking.bookingDate,
         seatDetails: booking.seatDetails,
         status: booking.status,
-        totalAmount: booking.payment?.amount,
+        totalAmount: populatedBooking?.payment?.amount || 0,
       },
       deletedBy: req.user.id,
       reason: "Deleted by admin",
