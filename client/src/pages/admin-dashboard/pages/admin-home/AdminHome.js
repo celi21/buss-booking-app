@@ -4,78 +4,582 @@ import {
   Card,
   Col,
   Container,
-  Form,
-  InputGroup,
   Row,
+  Badge,
+  Table,
+  Accordion,
+  Modal,
+  Form,
 } from "react-bootstrap";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  fetchTaxAmount,
-  updateTaxAmount,
-} from "../../../../store/slices/SettingsSlice";
+import { useSelector } from "react-redux";
+import axios from "axios";
+import toast from "react-hot-toast";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
-import toast, { Toaster } from "react-hot-toast";
+import {
+  TrendingUp,
+  TrendingDown,
+  Calendar,
+  Lock,
+  Plus,
+  CheckCircle,
+  PlayCircle,
+  XCircle,
+  Trash,
+  Eye,
+} from "react-bootstrap-icons";
+import { Link } from "react-router-dom";
 
 const AdminHome = () => {
-  const [taxValue, setTaxValue] = useState(null);
-  const dispatch = useDispatch();
-  const { tax, isTaxLoading } = useSelector((state) => state.settings);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [tasks, setTasks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [tasksLoading, setTasksLoading] = useState(true);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [newTask, setNewTask] = useState({
+    title: "",
+    description: "",
+    source: "Admin",
+    tag: "Normal",
+  });
+
+  const { token } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    dispatch(fetchTaxAmount());
+    fetchDashboardData();
+    fetchTasks();
   }, []);
 
-  useEffect(() => {
-    if (tax) setTaxValue(tax);
-  }, [tax]);
-
-  const updateTax = async () => {
-    if (!taxValue) return;
-
-    dispatch(updateTaxAmount(taxValue));
-    toast.success("Tax Updated");
+  const fetchDashboardData = async () => {
+    try {
+      setLoading(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/get-dashboard-stats`,
+        {},
+        config
+      );
+      if (response.data && response.data.success) {
+        setDashboardData(response.data.data);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to fetch dashboard data");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const fetchTasks = async () => {
+    try {
+      setTasksLoading(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/task/get-tasks`,
+        {},
+        config
+      );
+      if (response.data && response.data.success) {
+        setTasks(response.data.data.tasks);
+      }
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setTasksLoading(false);
+    }
+  };
+
+  const createTask = async () => {
+    if (!newTask.title.trim()) {
+      toast.error("Task title is required");
+      return;
+    }
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/task/create-task`,
+        newTask,
+        config
+      );
+      if (response.data && response.data.success) {
+        toast.success("Task created successfully");
+        setNewTask({ title: "", description: "", source: "Admin", tag: "Normal" });
+        setShowTaskModal(false);
+        fetchTasks();
+      }
+    } catch (error) {
+      toast.error("Failed to create task");
+    }
+  };
+
+  const updateTaskStatus = async (taskId, status) => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/task/update-task-status`,
+        { taskId, status },
+        config
+      );
+      if (response.data && response.data.success) {
+        toast.success("Task status updated");
+        fetchTasks();
+      }
+    } catch (error) {
+      toast.error("Failed to update task status");
+    }
+  };
+
+  const deleteTask = async (taskId) => {
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/task/delete-task`,
+        { taskId },
+        config
+      );
+      if (response.data && response.data.success) {
+        toast.success("Task deleted successfully");
+        fetchTasks();
+      }
+    } catch (error) {
+      toast.error("Failed to delete task");
+    }
+  };
+
+  const getStatusBadge = (status) => {
+    const variants = {
+      confirmed: "success",
+      pending: "warning",
+      cancelled: "danger",
+      refunded: "secondary",
+    };
+    return variants[status] || "primary";
+  };
+
+  const getTaskStatusBadge = (status) => {
+    const variants = {
+      Pending: "warning",
+      Started: "info",
+      Completed: "success",
+    };
+    return variants[status] || "secondary";
+  };
+
+  if (loading) {
+    return (
+      <Container fluid>
+        <LoadingSpinner />
+      </Container>
+    );
+  }
+
+  const bookingChange = dashboardData?.newBookingsToday - dashboardData?.newBookingsYesterday;
+  const percentChange = dashboardData?.newBookingsYesterday > 0
+    ? ((bookingChange / dashboardData?.newBookingsYesterday) * 100).toFixed(1)
+    : 0;
 
   return (
     <Container fluid>
-      <Toaster />
-      <h4>Welcome To Admin Dashboard</h4>
-      <hr />
-      <Row className="my-4">
-        <Col xs={12} sm={12} md={12} lg={6}>
-          <Card>
-            <Card.Header>Tax Settings</Card.Header>
-            {isTaxLoading ? (
-              <LoadingSpinner />
-            ) : (
-              <Card.Body>
-                <Card.Title className="m-0">
-                  Update your Tax percentage here.
-                </Card.Title>
-                <small>This tax will be applied to all bookings.</small>
+      <h4 className="mb-4">Admin Dashboard</h4>
 
-                <InputGroup className="mb-3 mt-3">
-                  <InputGroup.Text>%</InputGroup.Text>
-                  <Form.Control
-                    placeholder="Please enter tax percent eg: 8.75"
-                    type="number"
-                    min={0}
-                    max={100}
-                    value={taxValue}
-                    onChange={(e) => {
-                      setTaxValue(e.target.value);
-                    }}
-                  />
-                </InputGroup>
-
-                <Button variant="primary" onClick={updateTax}>
-                  Update Tax
-                </Button>
-              </Card.Body>
-            )}
+      {/* 1. New Bookings Today */}
+      <Row className="mb-4">
+        <Col xs={12} md={6} lg={4}>
+          <Card className="shadow-sm">
+            <Card.Body>
+              <Card.Title className="text-muted mb-3">New Bookings Today</Card.Title>
+              <h2 className="mb-2">{dashboardData?.newBookingsToday || 0}</h2>
+              <div className="d-flex align-items-center">
+                {bookingChange >= 0 ? (
+                  <>
+                    <TrendingUp className="text-success me-2" size={20} />
+                    <span className="text-success">+{percentChange}%</span>
+                  </>
+                ) : (
+                  <>
+                    <TrendingDown className="text-danger me-2" size={20} />
+                    <span className="text-danger">{percentChange}%</span>
+                  </>
+                )}
+                <span className="text-muted ms-2">vs yesterday</span>
+              </div>
+            </Card.Body>
           </Card>
         </Col>
       </Row>
+
+      {/* 2. Latest Bookings Preview */}
+      <Row className="mb-4">
+        <Col xs={12}>
+          <Accordion defaultActiveKey="0">
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Latest Bookings (Preview)</Accordion.Header>
+              <Accordion.Body>
+                <div className="table-responsive">
+                  <Table striped hover size="sm">
+                    <thead>
+                      <tr>
+                        <th>Booking ID</th>
+                        <th>Passenger</th>
+                        <th>Route</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dashboardData?.latestBookings?.slice(0, 10).map((booking) => (
+                        <tr key={booking.bookingId}>
+                          <td>
+                            <strong>{booking.bookingId}</strong>
+                          </td>
+                          <td>{booking.passengerName || "N/A"}</td>
+                          <td>
+                            <small>
+                              {booking.from} → {booking.to}
+                            </small>
+                          </td>
+                          <td>{booking.bookingDate}</td>
+                          <td>
+                            <Badge bg={getStatusBadge(booking.status)}>
+                              {booking.status}
+                            </Badge>
+                          </td>
+                          <td>
+                            <Link
+                              to={`/booking/${booking.bookingId}`}
+                              target="_blank"
+                              className="btn btn-sm btn-outline-primary"
+                            >
+                              <Eye size={14} />
+                            </Link>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+                {dashboardData?.latestBookings?.length === 0 && (
+                  <p className="text-center text-muted">No bookings yet</p>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+      </Row>
+
+      {/* 3. Fully Booked Dates */}
+      <Row className="mb-4">
+        <Col xs={12}>
+          <Accordion>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>
+                <Lock className="me-2" /> Fully Booked Dates
+              </Accordion.Header>
+              <Accordion.Body>
+                {dashboardData?.fullyBookedDates?.length > 0 ? (
+                  <div className="table-responsive">
+                    <Table striped hover size="sm">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Route</th>
+                          <th>Total Seats</th>
+                          <th>Available</th>
+                          <th>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {dashboardData.fullyBookedDates.map((item, idx) => (
+                          <tr key={idx}>
+                            <td>
+                              <Calendar className="me-2" />
+                              {item.date}
+                            </td>
+                            <td>{item.route}</td>
+                            <td>{item.totalSeats}</td>
+                            <td>{item.availableSeats}</td>
+                            <td>
+                              <Badge bg="danger">
+                                <Lock size={12} className="me-1" />
+                                Fully Booked
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted">No fully booked dates</p>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+      </Row>
+
+      {/* 4. Dispatcher Task Queue */}
+      <Row className="mb-4">
+        <Col xs={12}>
+          <Accordion>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Dispatcher Task Queue</Accordion.Header>
+              <Accordion.Body>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="mb-0">Active Tasks</h6>
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    onClick={() => setShowTaskModal(true)}
+                  >
+                    <Plus className="me-1" /> New Task
+                  </Button>
+                </div>
+
+                {tasksLoading ? (
+                  <LoadingSpinner />
+                ) : tasks.length > 0 ? (
+                  <div className="table-responsive">
+                    <Table striped hover size="sm">
+                      <thead>
+                        <tr>
+                          <th>Task</th>
+                          <th>Source</th>
+                          <th>Priority</th>
+                          <th>Status</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {tasks.map((task) => (
+                          <tr key={task._id}>
+                            <td>
+                              <strong>{task.title}</strong>
+                              {task.description && (
+                                <div>
+                                  <small className="text-muted">
+                                    {task.description.substring(0, 50)}
+                                    {task.description.length > 50 ? "..." : ""}
+                                  </small>
+                                </div>
+                              )}
+                            </td>
+                            <td>
+                              <Badge bg="secondary">{task.source}</Badge>
+                            </td>
+                            <td>
+                              <Badge bg={task.tag === "URGENT" ? "danger" : "info"}>
+                                {task.tag}
+                              </Badge>
+                            </td>
+                            <td>
+                              <Badge bg={getTaskStatusBadge(task.status)}>
+                                {task.status}
+                              </Badge>
+                            </td>
+                            <td>
+                              <div className="d-flex gap-1">
+                                {task.status === "Pending" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline-info"
+                                    onClick={() => updateTaskStatus(task._id, "Started")}
+                                    title="Mark as Started"
+                                  >
+                                    <PlayCircle size={14} />
+                                  </Button>
+                                )}
+                                {task.status === "Started" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline-success"
+                                    onClick={() => updateTaskStatus(task._id, "Completed")}
+                                    title="Mark as Completed"
+                                  >
+                                    <CheckCircle size={14} />
+                                  </Button>
+                                )}
+                                {task.status === "Completed" && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline-warning"
+                                    onClick={() => updateTaskStatus(task._id, "Pending")}
+                                    title="Reopen Task"
+                                  >
+                                    <XCircle size={14} />
+                                  </Button>
+                                )}
+                                <Button
+                                  size="sm"
+                                  variant="outline-danger"
+                                  onClick={() => deleteTask(task._id)}
+                                  title="Delete Task"
+                                >
+                                  <Trash size={14} />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </Table>
+                  </div>
+                ) : (
+                  <p className="text-center text-muted">No tasks yet</p>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+      </Row>
+
+      {/* 5. Live Trip Feed (Today Only) */}
+      <Row className="mb-4">
+        <Col xs={12}>
+          <Accordion>
+            <Accordion.Item eventKey="0">
+              <Accordion.Header>Live Trip Feed (Today)</Accordion.Header>
+              <Accordion.Body>
+                {dashboardData?.todayTrips?.length > 0 ? (
+                  <Row>
+                    {dashboardData.todayTrips.map((routeData, idx) => (
+                      <Col xs={12} md={6} key={idx} className="mb-3">
+                        <Card className="border-primary">
+                          <Card.Header className="bg-primary text-white">
+                            <strong>{routeData.routeName}</strong>
+                          </Card.Header>
+                          <Card.Body>
+                            <div className="mb-2">
+                              <strong>Active Trips:</strong> {routeData.trips.length}
+                            </div>
+                            <div className="mb-3">
+                              <strong>Total Passengers:</strong>{" "}
+                              {routeData.totalPassengers}
+                            </div>
+                            <div className="table-responsive">
+                              <Table size="sm" bordered>
+                                <thead>
+                                  <tr>
+                                    <th>Bus</th>
+                                    <th>Passengers</th>
+                                    <th>Capacity</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {routeData.trips.map((trip, tripIdx) => (
+                                    <tr key={tripIdx}>
+                                      <td>{trip.busName}</td>
+                                      <td>{trip.passengers}</td>
+                                      <td>
+                                        {trip.passengers}/{trip.totalSeats}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </Table>
+                            </div>
+                          </Card.Body>
+                        </Card>
+                      </Col>
+                    ))}
+                  </Row>
+                ) : (
+                  <p className="text-center text-muted">No trips scheduled for today</p>
+                )}
+              </Accordion.Body>
+            </Accordion.Item>
+          </Accordion>
+        </Col>
+      </Row>
+
+      {/* New Task Modal */}
+      <Modal show={showTaskModal} onHide={() => setShowTaskModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Create New Task</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Task Title *</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Enter task title"
+                value={newTask.title}
+                onChange={(e) => setNewTask({ ...newTask, title: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Description</Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                placeholder="Enter task description"
+                value={newTask.description}
+                onChange={(e) =>
+                  setNewTask({ ...newTask, description: e.target.value })
+                }
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Source</Form.Label>
+              <Form.Select
+                value={newTask.source}
+                onChange={(e) => setNewTask({ ...newTask, source: e.target.value })}
+              >
+                <option value="Admin">Admin</option>
+                <option value="Passenger">Passenger</option>
+              </Form.Select>
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Priority</Form.Label>
+              <Form.Select
+                value={newTask.tag}
+                onChange={(e) => setNewTask({ ...newTask, tag: e.target.value })}
+              >
+                <option value="Normal">Normal</option>
+                <option value="URGENT">URGENT</option>
+              </Form.Select>
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowTaskModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={createTask}>
+            Create Task
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 };

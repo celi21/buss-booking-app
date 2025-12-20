@@ -20,6 +20,7 @@ import {
   createPaymentIntent,
   deleteBooking,
   fetchDeletionLogs,
+  getDashboardStats,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -41,6 +42,7 @@ router.post("/change-booking-status", verifyAdmin, changeBookingStatus);
 router.post("/update-booking", verifyAdmin, updateBooking);
 router.post("/delete-booking", verifyAdmin, deleteBooking);
 router.post("/fetch-deletion-logs", verifyAdmin, fetchDeletionLogs);
+router.post("/get-dashboard-stats", verifyAdmin, getDashboardStats);
 
 router.post("/search", verifyUser, search);
 router.post("/create", verifyUser, create);

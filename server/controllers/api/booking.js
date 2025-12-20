@@ -1922,3 +1922,140 @@ export const fetchDeletionLogs = async (req, res, next) => {
     });
   }
 };
+
+export const getDashboardStats = async (req, res, next) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    // Format dates as strings (YYYY-MM-DD) to match booking date format
+    const todayStr = today.toISOString().split('T')[0];
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    // 1. New Bookings Today
+    const todayBookings = await Booking.countDocuments({
+      status: "confirmed",
+      createdAt: { $gte: today, $lt: tomorrow }
+    });
+
+    const yesterdayBookings = await Booking.countDocuments({
+      status: "confirmed",
+      createdAt: { $gte: yesterday, $lt: today }
+    });
+
+    // 2. Latest Bookings (last 10)
+    const latestBookings = await Booking.find()
+      .populate("route from to personalDetails")
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select("bookingId personalDetails route from to bookingDate status createdAt");
+
+    // 3. Fully Booked Dates
+    const fullyBookedDates = await BusAvailability.find({
+      availableSeats: { $lte: 0 },
+      date: { $gte: todayStr }
+    })
+      .populate({
+        path: "bus",
+        populate: {
+          path: "route locations.city"
+        }
+      })
+      .sort({ date: 1 });
+
+    // 4. Today's Trip Feed
+    const todayTrips = await BusAvailability.find({
+      date: todayStr
+    })
+      .populate({
+        path: "bus",
+        populate: {
+          path: "route locations.city busType"
+        }
+      })
+      .populate("busType");
+
+    // Get bookings for today's trips
+    const todayTripBookings = await Booking.find({
+      bookingDate: todayStr,
+      status: { $in: ["confirmed", "pending"] }
+    }).populate("bus route");
+
+    // Group trips by route
+    const tripsByRoute = {};
+    todayTrips.forEach(trip => {
+      if (trip.bus && trip.bus.route) {
+        const routeId = trip.bus.route._id.toString();
+        const routeName = trip.bus.route.name;
+
+        if (!tripsByRoute[routeId]) {
+          tripsByRoute[routeId] = {
+            routeId,
+            routeName,
+            trips: [],
+            totalPassengers: 0
+          };
+        }
+
+        // Count passengers for this trip
+        const tripBookings = todayTripBookings.filter(
+          b => b.bus && b.bus._id.toString() === trip.bus._id.toString()
+        );
+
+        let passengers = 0;
+        tripBookings.forEach(booking => {
+          booking.seatDetails.forEach(seat => {
+            passengers += seat.seats;
+          });
+        });
+
+        tripsByRoute[routeId].trips.push({
+          busId: trip.bus._id,
+          busName: trip.bus.busName || 'Bus',
+          passengers,
+          totalSeats: trip.totalSeats,
+          availableSeats: trip.availableSeats
+        });
+
+        tripsByRoute[routeId].totalPassengers += passengers;
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        newBookingsToday: todayBookings,
+        newBookingsYesterday: yesterdayBookings,
+        latestBookings: latestBookings.map(b => ({
+          bookingId: b.bookingId,
+          passengerName: `${b.personalDetails?.firstName || ''} ${b.personalDetails?.lastName || ''}`.trim(),
+          route: b.route?.name || 'N/A',
+          from: b.from?.name || 'N/A',
+          to: b.to?.name || 'N/A',
+          bookingDate: b.bookingDate,
+          status: b.status,
+          createdAt: b.createdAt
+        })),
+        fullyBookedDates: fullyBookedDates.map(fbd => ({
+          date: fbd.date,
+          busId: fbd.bus?._id,
+          route: fbd.bus?.route?.name || 'N/A',
+          totalSeats: fbd.totalSeats,
+          availableSeats: fbd.availableSeats
+        })),
+        todayTrips: Object.values(tripsByRoute)
+      }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
