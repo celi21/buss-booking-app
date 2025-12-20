@@ -257,6 +257,59 @@ const BookingRow = ({ booking, index }) => {
             >
               <EyeFill color="#fff" size={15} />
             </Link>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={async () => {
+                const confirmDelete = window.confirm(
+                  `Are you sure you want to delete this booking?\n\nBooking ID: ${booking.bookingId}\nCustomer: ${booking.personalDetails?.firstName} ${booking.personalDetails?.lastName || ''}\n\nThis action cannot be undone. The seats will be restored to availability.`
+                );
+
+                if (confirmDelete) {
+                  try {
+                    setIsLoading(true);
+                    const config = {
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                    };
+                    const response = await axios.post(
+                      `${process.env.REACT_APP_API_BASE_URL}/booking/delete-booking`,
+                      {
+                        bookingId: booking.bookingId,
+                      },
+                      config
+                    );
+                    if (response.data && response.data.success) {
+                      toast.success("Booking deleted successfully!", {
+                        duration: 4000,
+                      });
+                      dispatch(fetchAdminBookings());
+                    } else {
+                      toast.error(response.data.message || "Failed to delete booking", {
+                        duration: 4000,
+                      });
+                    }
+                  } catch (error) {
+                    if (error.response && error.response.data.message) {
+                      toast.error(error.response.data.message, {
+                        duration: 4000,
+                      });
+                    } else {
+                      toast.error(error.message || "Failed to delete booking", {
+                        duration: 4000,
+                      });
+                    }
+                  } finally {
+                    setIsLoading(false);
+                  }
+                }
+              }}
+              title="Delete Booking"
+            >
+              <Trash3 />
+            </Button>
           </div>
         </td>
       </tr>

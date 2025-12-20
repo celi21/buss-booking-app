@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import transporter from "../../utils/emailConfig.js";
 import Settings from "../../models/settings.js";
 import Stripe from "stripe";
+import DeletionLog from "../../models/deletionLog.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   maxNetworkRetries: 2,
@@ -484,39 +485,34 @@ const sendConfirmationEmail = async (booking, to) => {
 
                   <tr>
                     <td align="left" width="45%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking ID</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.bookingId
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.bookingId
+    }</td>
                   </tr>
                   
                   <tr>
                     <td align="left" width="45%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">First name</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.personalDetails.firstName
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.firstName
+    }</td>
                   </tr>
 
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Last name</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.personalDetails.lastName
-                        ? booking.personalDetails.lastName
-                        : ""
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.lastName
+      ? booking.personalDetails.lastName
+      : ""
+    }</td>
                   </tr>
 
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Phone</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.personalDetails.phone
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.phone
+    }</td>
                   </tr>
                   
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Email</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px"><a href="mailto:${
-                      booking.personalDetails.email
-                    }" target="_blank">${booking.personalDetails.email}</a></td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px"><a href="mailto:${booking.personalDetails.email
+    }" target="_blank">${booking.personalDetails.email}</a></td>
                   </tr>
                     <tr>
                     </tr><tr>
@@ -527,53 +523,48 @@ const sendConfirmationEmail = async (booking, to) => {
                   
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking Date</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.bookingDate
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.bookingDate
+    }</td>
                   </tr>
                   
                   
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Pickup address</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.personalDetails.pickupAddress
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.pickupAddress
+    }</td>
                   </tr>
   
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Dropoff address</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.personalDetails.dropoffAddress
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.dropoffAddress
+    }</td>
                   </tr>
 
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Suitcases</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${
-                      booking.personalDetails.suitcases
-                    }</td>
+                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.suitcases
+    }</td>
                   </tr>
                   
                   <tr>
                     <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Seats</td>
                     <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
                     ${booking.seatDetails
-                      .map(
-                        (seat) =>
-                          seat.seats > 0 && `${seat.name} x ${seat.seats}`
-                      )
-                      .filter(Boolean)
-                      .join("<br />")}
+      .map(
+        (seat) =>
+          seat.seats > 0 && `${seat.name} x ${seat.seats}`
+      )
+      .filter(Boolean)
+      .join("<br />")}
                     </td>
                   </tr>
                   
                   <tr>
                     <td align="left" width="75%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>Total Amount</strong></td>
-                    <td align="left" width="25%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>$${
-                      booking.flexOption == true
-                        ? booking.payment.amount + 8 + booking.payment.tax
-                        : booking.payment.amount + booking.payment.tax
-                    }</strong></td>
+                    <td align="left" width="25%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>$${booking.flexOption == true
+      ? booking.payment.amount + 8 + booking.payment.tax
+      : booking.payment.amount + booking.payment.tax
+    }</strong></td>
                   </tr>
                 </tbody></table>
               </td>
@@ -587,9 +578,8 @@ const sendConfirmationEmail = async (booking, to) => {
             <tbody>
             <tr>
               <td align="center" bgcolor="#1e90ff" style="padding:12px 24px;">
-                <a href="${process.env.FRONTEND_URL}/booking/${
-    booking.bookingId
-  }" target="_blank" style="
+                <a href="${process.env.FRONTEND_URL}/booking/${booking.bookingId
+    }" target="_blank" style="
                     display: block;
                     background: white;
                     color: #1e90ff;
@@ -808,9 +798,9 @@ export const confirmBooking = async (req, res, next) => {
       let ticketPriceInfo = ticketPrice.prices.find(
         (p) =>
           fromLocationCity?.city._id.toString() ===
-            new mongoose.Types.ObjectId(bookingData.from).toString() &&
+          new mongoose.Types.ObjectId(bookingData.from).toString() &&
           toLocationCity?.city._id.toString() ===
-            new mongoose.Types.ObjectId(bookingData.to).toString() &&
+          new mongoose.Types.ObjectId(bookingData.to).toString() &&
           fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
           toLocationCity?._id.toString() === p.toLocationId.toString()
       );
@@ -829,7 +819,7 @@ export const confirmBooking = async (req, res, next) => {
     let paymentResponse = await retrievePayment(stripeData.paymentId);
     if (paymentResponse && paymentResponse.id) {
       console.log(paymentResponse);
-      
+
       // Create shared payment and personal details records
       const paymentDetails = new Payment({
         transactionId: stripeData.paymentId,
@@ -852,16 +842,16 @@ export const confirmBooking = async (req, res, next) => {
 
       await personalDetails.save();
       await paymentDetails.save();
-      
+
       // Prepare outbound booking data
       const outboundData = {
         ...bookingData,
         transaction_session_id: stripeData.paymentId,
       };
-      
+
       // Create outbound booking
       const outboundBooking = await createSingleBooking(outboundData, paymentDetails._id, personalDetails._id);
-      
+
       let returnBooking = null;
       if (isRoundTrip) {
         // Prepare return booking data
@@ -874,14 +864,14 @@ export const confirmBooking = async (req, res, next) => {
           flexOption: bookingData.flexOption,
           transaction_session_id: stripeData.paymentId,
         };
-        
+
         returnBooking = await createSingleBooking(returnData, paymentDetails._id, personalDetails._id);
-        
+
         // Update outbound booking with linked return booking ID
         outboundBooking.linkedBookingId = returnBooking.bookingId.toString();
         await outboundBooking.save();
       }
-      
+
       // Populate and send response
       const populatedOutbound = await Booking.findById(outboundBooking._id)
         .populate("payment")
@@ -890,15 +880,15 @@ export const confirmBooking = async (req, res, next) => {
         .populate("route")
         .populate("from")
         .populate("to");
-      
+
       await sendConfirmationEmail(populatedOutbound, populatedOutbound.personalDetails.email);
-      
+
       const response = {
         success: true,
         message: isRoundTrip ? "Round-trip booking successfully added" : "Booking Successfully added",
         booking: populatedOutbound,
       };
-      
+
       if (returnBooking) {
         const populatedReturn = await Booking.findById(returnBooking._id)
           .populate("payment")
@@ -910,7 +900,7 @@ export const confirmBooking = async (req, res, next) => {
         response.returnBooking = populatedReturn;
         await sendConfirmationEmail(populatedReturn, populatedReturn.personalDetails.email);
       }
-      
+
       return res.status(200).json(response);
     } else {
       return res.status(200).json({
@@ -1058,9 +1048,9 @@ export const addBooking = async (req, res, next) => {
       let ticketPriceInfo = ticketPrice.prices.find(
         (p) =>
           fromLocationCity?.city._id.toString() ===
-            new mongoose.Types.ObjectId(bookingData.from).toString() &&
+          new mongoose.Types.ObjectId(bookingData.from).toString() &&
           toLocationCity?.city._id.toString() ===
-            new mongoose.Types.ObjectId(bookingData.to).toString() &&
+          new mongoose.Types.ObjectId(bookingData.to).toString() &&
           fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
           toLocationCity?._id.toString() === p.toLocationId.toString()
       );
@@ -1212,9 +1202,9 @@ export const updateBooking = async (req, res, next) => {
       let ticketPriceInfo = ticketPrice.prices.find(
         (p) =>
           fromLocationCity?.city._id.toString() ===
-            new mongoose.Types.ObjectId(bookingData.from).toString() &&
+          new mongoose.Types.ObjectId(bookingData.from).toString() &&
           toLocationCity?.city._id.toString() ===
-            new mongoose.Types.ObjectId(bookingData.to).toString() &&
+          new mongoose.Types.ObjectId(bookingData.to).toString() &&
           fromLocationCity?._id.toString() === p.fromLocationId.toString() &&
           toLocationCity?._id.toString() === p.toLocationId.toString()
       );
@@ -1231,7 +1221,7 @@ export const updateBooking = async (req, res, next) => {
     if (
       booking.bus.toString() !== bookingData.bus.toString() || // Bus change
       new Date(booking.bookingDate).getTime() !==
-        new Date(bookingData.selectedDate).getTime() // Date change
+      new Date(bookingData.selectedDate).getTime() // Date change
     ) {
       // Step 2: Handle Previous Bus Availability
       let previousAvailability = await BusAvailability.findOne({
@@ -1461,7 +1451,7 @@ const makeRefund = async (amount, transactionId, currency = "USD") => {
     const refund = await stripe.refunds.create({
       payment_intent: transactionId,
     });
-    
+
     // Return response in format expected by existing code
     return `response_code=100&response=1&transactionid=${refund.id}&responsetext=SUCCESS`;
   } catch (error) {
@@ -1669,7 +1659,7 @@ export const changeBookingStatus = async (req, res, next) => {
           // if its not added by admin then check if it is refunded.
           // if its refunded then just update the status as well as the seats
           const payment = await Payment.findById(booking.payment);
-          
+
           console.log('Payment object:', payment);
           console.log('Transaction ID:', payment?.transactionId);
           console.log('Transaction ID type:', typeof payment?.transactionId);
@@ -1823,6 +1813,104 @@ export const changeBookingStatus = async (req, res, next) => {
         message: `Booking status updated to ${status}.`,
       });
     }
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const deleteBooking = async (req, res, next) => {
+  try {
+    const { bookingId } = req.body;
+
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID is required.",
+      });
+    }
+
+    // Find the booking with all related data
+    const booking = await Booking.findOne({ bookingId })
+      .populate("bus route from to personalDetails payment busType");
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    // Restore seat availability
+    const busAvailability = await BusAvailability.findOne({
+      bus: booking.bus._id,
+      date: booking.bookingDate,
+    });
+
+    if (busAvailability) {
+      // Calculate total seats from seatDetails
+      let totalSeats = 0;
+      booking.seatDetails.forEach((seat) => {
+        totalSeats += parseInt(seat.seats);
+      });
+
+      busAvailability.availableSeats += totalSeats;
+      await busAvailability.save();
+    }
+
+    // Create deletion log
+    const deletionLog = new DeletionLog({
+      bookingId: booking.bookingId,
+      bookingDetails: {
+        customerName: `${booking.personalDetails?.firstName || ''} ${booking.personalDetails?.lastName || ''}`,
+        email: booking.personalDetails?.email,
+        phone: booking.personalDetails?.phone,
+        route: booking.route?.name,
+        from: booking.from?.name,
+        to: booking.to?.name,
+        bookingDate: booking.bookingDate,
+        seatDetails: booking.seatDetails,
+        status: booking.status,
+        totalAmount: booking.payment?.amount,
+      },
+      deletedBy: req.user.id,
+      reason: "Deleted by admin",
+    });
+
+    await deletionLog.save();
+
+    // Delete the booking
+    await Booking.findOneAndDelete({ bookingId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking deleted successfully and seats restored.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const fetchDeletionLogs = async (req, res, next) => {
+  try {
+    const logs = await DeletionLog.find()
+      .populate("deletedBy", "name email")
+      .sort({ deletedAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      message: "Deletion logs fetched successfully.",
+      data: {
+        logs,
+      },
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({

@@ -42,8 +42,8 @@ function AdminSidebar() {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <House className="me-2" />
@@ -55,8 +55,8 @@ function AdminSidebar() {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <Calendar className="me-2" />
@@ -68,8 +68,8 @@ function AdminSidebar() {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <Clipboard className="me-2" />
@@ -81,8 +81,8 @@ function AdminSidebar() {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <BusFront className="me-2" />
@@ -94,8 +94,8 @@ function AdminSidebar() {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <Diagram3 className="me-2" />
@@ -107,21 +107,21 @@ function AdminSidebar() {
             isPending
               ? "text-primary nav-link"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <Diagram3 className="me-2" />
           Bus Types
         </NavLink>
         <NavLink
-          to="/reports"
+          to="/admin/reports"
           className={({ isActive, isPending }) =>
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <BarChart className="me-2" />
@@ -170,8 +170,8 @@ function AdminSidebar() {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <BoxArrowRight className="me-2" />
