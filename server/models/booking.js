@@ -97,6 +97,15 @@ const bookingSchema = new Schema(
       type: String,
       default: null,
     },
+    boardingStatus: {
+      type: String,
+      enum: ['Not Boarded', 'Boarded', 'No-Show', 'Cancelled'],
+      default: 'Not Boarded',
+    },
+    pickupOrder: {
+      type: Number,
+      default: 0,
+    },
   },
   {
     timestamps: true,

@@ -21,6 +21,11 @@ import {
   deleteBooking,
   fetchDeletionLogs,
   getDashboardStats,
+  getDispatchTrips,
+  getPassengerManifest,
+  updatePassengerStatus,
+  updatePassengerDetails,
+  updatePickupOrder,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -43,6 +48,11 @@ router.post("/update-booking", verifyAdmin, updateBooking);
 router.post("/delete-booking", verifyAdmin, deleteBooking);
 router.post("/fetch-deletion-logs", verifyAdmin, fetchDeletionLogs);
 router.post("/get-dashboard-stats", verifyAdmin, getDashboardStats);
+router.post("/get-dispatch-trips", verifyAdmin, getDispatchTrips);
+router.post("/get-passenger-manifest", verifyAdmin, getPassengerManifest);
+router.post("/update-passenger-status", verifyAdmin, updatePassengerStatus);
+router.post("/update-passenger-details", verifyAdmin, updatePassengerDetails);
+router.post("/update-pickup-order", verifyAdmin, updatePickupOrder);
 
 router.post("/search", verifyUser, search);
 router.post("/create", verifyUser, create);

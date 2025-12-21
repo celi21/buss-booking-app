@@ -27,6 +27,7 @@ import EditBooking from "./pages/admin-dashboard/pages/edit-booking/EditBooking"
 import Booking from "./pages/booking/Booking";
 import SearchBooking from "./pages/search-booking/SearchBooking";
 import Reports from "./pages/admin-dashboard/pages/reports/Reports";
+import Dispatch from "./pages/admin-dashboard/pages/dispatch/Dispatch";
 
 function App() {
   const dispatch = useDispatch();
@@ -63,6 +64,7 @@ function App() {
           <Route path="add-booking" element={<AddBooking />} />
           <Route path="edit-booking/:bookingId" element={<EditBooking />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="dispatch" element={<Dispatch />} />
         </Route>
 
         <Route

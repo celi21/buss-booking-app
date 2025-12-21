@@ -2059,3 +2059,253 @@ export const getDashboardStats = async (req, res, next) => {
     });
   }
 };
+
+export const getDispatchTrips = async (req, res, next) => {
+  try {
+    const { date } = req.body;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "Date is required.",
+      });
+    }
+
+    // Get all bus availability for the selected date
+    const trips = await BusAvailability.find({ date })
+      .populate({
+        path: "bus",
+        populate: {
+          path: "route locations.city busType"
+        }
+      })
+      .sort({ "bus.route": 1 });
+
+    const formattedTrips = trips
+      .filter(trip => trip.bus && trip.bus.route)
+      .map(trip => {
+        const firstLocation = trip.bus.locations[0];
+        const lastLocation = trip.bus.locations[trip.bus.locations.length - 1];
+
+        return {
+          tripId: trip._id,
+          busId: trip.bus._id,
+          busName: trip.bus.busName || 'Bus',
+          route: trip.bus.route.name,
+          routeId: trip.bus.route._id,
+          departureTime: firstLocation?.departureTime || 'N/A',
+          arrivalTime: lastLocation?.arrivalTime || 'N/A',
+          totalSeats: trip.totalSeats,
+          availableSeats: trip.availableSeats,
+          date: trip.date
+        };
+      });
+
+    return res.status(200).json({
+      success: true,
+      data: { trips: formattedTrips }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const getPassengerManifest = async (req, res, next) => {
+  try {
+    const { busId, date } = req.body;
+
+    if (!busId || !date) {
+      return res.status(400).json({
+        success: false,
+        message: "Bus ID and date are required.",
+      });
+    }
+
+    // Get all bookings for this bus and date
+    const bookings = await Booking.find({
+      bus: busId,
+      bookingDate: date,
+      status: { $in: ["confirmed", "pending"] }
+    })
+      .populate("personalDetails payment")
+      .sort({ createdAt: 1 });
+
+    const manifest = bookings.map((booking, index) => ({
+      _id: booking._id,
+      bookingId: booking.bookingId,
+      clientName: `${booking.personalDetails?.firstName || ''} ${booking.personalDetails?.lastName || ''}`.trim(),
+      phone: booking.personalDetails?.phone || 'N/A',
+      email: booking.personalDetails?.email || 'N/A',
+      pickupAddress: booking.personalDetails?.pickupAddress || 'N/A',
+      dropoffAddress: booking.personalDetails?.dropoffAddress || 'N/A',
+      notes: booking.personalDetails?.notes || '',
+      suitcases: booking.personalDetails?.suitcases || 0,
+      numberOfPassengers: booking.seatDetails.reduce((sum, seat) => sum + seat.seats, 0),
+      paymentAmount: booking.payment?.amount || 0,
+      paymentStatus: booking.payment?.status || 'N/A',
+      flexOption: booking.flexOption || false,
+      boardingStatus: booking.boardingStatus || 'Not Boarded',
+      pickupOrder: booking.pickupOrder || index,
+      seatDetails: booking.seatDetails,
+      status: booking.status,
+      createdAt: booking.createdAt
+    }));
+
+    // Sort by pickup order
+    manifest.sort((a, b) => a.pickupOrder - b.pickupOrder);
+
+    return res.status(200).json({
+      success: true,
+      data: { manifest }
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const updatePassengerStatus = async (req, res, next) => {
+  try {
+    const { bookingId, status } = req.body;
+
+    if (!bookingId || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID and status are required.",
+      });
+    }
+
+    const booking = await Booking.findById(bookingId).populate("personalDetails");
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    booking.boardingStatus = status;
+    await booking.save();
+
+    // Auto-create task for No-Show or Cancelled
+    if (status === "No-Show" || status === "Cancelled") {
+      const Task = (await import("../../models/task.js")).default;
+
+      const taskTitle = status === "No-Show"
+        ? `No-Show: ${booking.personalDetails?.firstName} ${booking.personalDetails?.lastName || ''}`
+        : `Cancelled: ${booking.personalDetails?.firstName} ${booking.personalDetails?.lastName || ''}`;
+
+      const taskDescription = `Passenger ${status.toLowerCase()} for booking ${booking.bookingId}. Phone: ${booking.personalDetails?.phone || 'N/A'}`;
+
+      const newTask = new Task({
+        title: taskTitle,
+        description: taskDescription,
+        source: "Passenger",
+        tag: "URGENT",
+        status: "Pending",
+        relatedBooking: booking._id,
+        createdBy: req.user.id,
+        statusHistory: [
+          {
+            status: "Pending",
+            changedBy: req.user.id,
+            changedAt: new Date(),
+          },
+        ],
+      });
+
+      await newTask.save();
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Passenger status updated successfully.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const updatePassengerDetails = async (req, res, next) => {
+  try {
+    const { bookingId, phone, pickupAddress, dropoffAddress, notes } = req.body;
+
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID is required.",
+      });
+    }
+
+    const booking = await Booking.findById(bookingId).populate("personalDetails");
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    const personalDetails = await PersonalDetails.findById(booking.personalDetails._id);
+
+    if (phone) personalDetails.phone = phone;
+    if (pickupAddress) personalDetails.pickupAddress = pickupAddress;
+    if (dropoffAddress) personalDetails.dropoffAddress = dropoffAddress;
+    if (notes !== undefined) personalDetails.notes = notes;
+
+    await personalDetails.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Passenger details updated successfully.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const updatePickupOrder = async (req, res, next) => {
+  try {
+    const { manifestOrder } = req.body;
+
+    if (!manifestOrder || !Array.isArray(manifestOrder)) {
+      return res.status(400).json({
+        success: false,
+        message: "Manifest order array is required.",
+      });
+    }
+
+    // Update pickup order for each booking
+    const updatePromises = manifestOrder.map((item, index) =>
+      Booking.findByIdAndUpdate(item.bookingId, { pickupOrder: index })
+    );
+
+    await Promise.all(updatePromises);
+
+    return res.status(200).json({
+      success: true,
+      message: "Pickup order updated successfully.",
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};

@@ -13,6 +13,7 @@ import {
   People,
   CloudArrowDown,
   BoxArrowRight,
+  Truck,
 } from "react-bootstrap-icons";
 import "./admin-sidebar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
@@ -126,6 +127,19 @@ function AdminSidebar() {
         >
           <BarChart className="me-2" />
           Reports
+        </NavLink>
+        <NavLink
+          to="/admin/dispatch"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+                ? "active nav-link "
+                : "nav-link"
+          }
+        >
+          <Truck className="me-2" />
+          Dispatch
         </NavLink>
         {/* <NavLink
         to="/google-sheets"
