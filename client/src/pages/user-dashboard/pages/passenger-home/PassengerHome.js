@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import axios from "axios";
 import toast from "react-hot-toast";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
-import { Calendar, Clock, MapPin, CheckCircle } from "react-bootstrap-icons";
+import { Calendar, Clock, GeoAlt, CheckCircle } from "react-bootstrap-icons";
 
 const PassengerHome = () => {
     const [dashboardData, setDashboardData] = useState(null);
@@ -113,12 +113,12 @@ const PassengerHome = () => {
                         <Row className="mb-3">
                             <Col xs={12} md={6}>
                                 <div className="mb-3">
-                                    <MapPin className="me-2 text-primary" />
+                                    <GeoAlt className="me-2 text-primary" />
                                     <strong>From:</strong>
                                     <div className="ms-4">{nextTrip.from}</div>
                                 </div>
                                 <div className="mb-3">
-                                    <MapPin className="me-2 text-danger" />
+                                    <GeoAlt className="me-2 text-danger" />
                                     <strong>To:</strong>
                                     <div className="ms-4">{nextTrip.to}</div>
                                 </div>
