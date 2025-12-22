@@ -28,6 +28,10 @@ import Booking from "./pages/booking/Booking";
 import SearchBooking from "./pages/search-booking/SearchBooking";
 import Reports from "./pages/admin-dashboard/pages/reports/Reports";
 import Dispatch from "./pages/admin-dashboard/pages/dispatch/Dispatch";
+import PassengerHome from "./pages/user-dashboard/pages/passenger-home/PassengerHome";
+import PassengerWallet from "./pages/user-dashboard/pages/passenger-wallet/PassengerWallet";
+import PassengerSupport from "./pages/user-dashboard/pages/passenger-support/PassengerSupport";
+import PassengerProfile from "./pages/user-dashboard/pages/passenger-profile/PassengerProfile";
 
 function App() {
   const dispatch = useDispatch();
@@ -77,6 +81,10 @@ function App() {
         >
           <Route path="dashboard" element={<UserHome />} />
           <Route path="bookings" element={<UserBookings />} />
+          <Route path="home" element={<PassengerHome />} />
+          <Route path="wallet" element={<PassengerWallet />} />
+          <Route path="support" element={<PassengerSupport />} />
+          <Route path="profile" element={<PassengerProfile />} />
         </Route>
       </Routes>
     </BrowserRouter>

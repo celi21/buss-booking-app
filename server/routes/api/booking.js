@@ -26,6 +26,11 @@ import {
   updatePassengerStatus,
   updatePassengerDetails,
   updatePickupOrder,
+  getPassengerDashboard,
+  checkInPassenger,
+  getPassengerWallet,
+  submitPassengerRequest,
+  getPassengerRequests,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -53,6 +58,11 @@ router.post("/get-passenger-manifest", verifyAdmin, getPassengerManifest);
 router.post("/update-passenger-status", verifyAdmin, updatePassengerStatus);
 router.post("/update-passenger-details", verifyAdmin, updatePassengerDetails);
 router.post("/update-pickup-order", verifyAdmin, updatePickupOrder);
+router.post("/get-passenger-dashboard", verifyUser, getPassengerDashboard);
+router.post("/check-in-passenger", verifyUser, checkInPassenger);
+router.post("/get-passenger-wallet", verifyUser, getPassengerWallet);
+router.post("/submit-passenger-request", verifyUser, submitPassengerRequest);
+router.post("/get-passenger-requests", verifyUser, getPassengerRequests);
 
 router.post("/search", verifyUser, search);
 router.post("/create", verifyUser, create);

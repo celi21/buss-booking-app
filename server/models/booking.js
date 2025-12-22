@@ -106,6 +106,11 @@ const bookingSchema = new Schema(
       type: Number,
       default: 0,
     },
+    tripStatus: {
+      type: String,
+      enum: ['On Time', 'Delayed'],
+      default: 'On Time',
+    },
   },
   {
     timestamps: true,
