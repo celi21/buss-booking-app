@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../../store/slices/AuthSlice';
-import LoadingSpinner from '../../components/loading-spinner/LoadingSpinner';
+import { loginSuccess } from '../store/slices/AuthSlice';
+import LoadingSpinner from '../components/loading-spinner/LoadingSpinner';
 import { Container } from 'react-bootstrap';
 
 const AuthCallback = () => {
