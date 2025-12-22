@@ -79,7 +79,8 @@ function App() {
             </ProtectedUserRoute>
           }
         >
-          <Route path="dashboard" element={<UserHome />} />
+          <Route index element={<PassengerHome />} />
+          <Route path="dashboard" element={<PassengerHome />} />
           <Route path="bookings" element={<UserBookings />} />
           <Route path="home" element={<PassengerHome />} />
           <Route path="wallet" element={<PassengerWallet />} />

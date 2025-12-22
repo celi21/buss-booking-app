@@ -13,6 +13,9 @@ import {
   CloudArrowDown,
   BoxArrowRight,
   PlusCircle,
+  Wallet,
+  Person,
+  Headset,
 } from "react-bootstrap-icons";
 import "./user-sidebar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
@@ -46,8 +49,8 @@ const UserSidebar = () => {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <PlusCircle className="me-2" />
@@ -55,18 +58,60 @@ const UserSidebar = () => {
             translateText("New Booking", selectedLanguage.code)}
         </NavLink>
         <NavLink
-          to="/user/dashboard"
+          to="/user/home"
           className={({ isActive, isPending }) =>
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <House className="me-2" />
           {selectedLanguage &&
-            translateText("Dashboard", selectedLanguage.code)}
+            translateText("Home", selectedLanguage.code)}
+        </NavLink>
+        <NavLink
+          to="/user/wallet"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+                ? "active nav-link "
+                : "nav-link"
+          }
+        >
+          <Wallet className="me-2" />
+          {selectedLanguage &&
+            translateText("Wallet", selectedLanguage.code)}
+        </NavLink>
+        <NavLink
+          to="/user/profile"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+                ? "active nav-link "
+                : "nav-link"
+          }
+        >
+          <Person className="me-2" />
+          {selectedLanguage &&
+            translateText("Profile", selectedLanguage.code)}
+        </NavLink>
+        <NavLink
+          to="/user/support"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+                ? "active nav-link "
+                : "nav-link"
+          }
+        >
+          <Headset className="me-2" />
+          {selectedLanguage &&
+            translateText("Support", selectedLanguage.code)}
         </NavLink>
         <NavLink
           to="/user/bookings"
@@ -74,8 +119,8 @@ const UserSidebar = () => {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <Clipboard className="me-2" />
@@ -88,8 +133,8 @@ const UserSidebar = () => {
             isPending
               ? "text-muted"
               : isActive
-              ? "active nav-link "
-              : "nav-link"
+                ? "active nav-link "
+                : "nav-link"
           }
         >
           <BoxArrowRight className="me-2" />
