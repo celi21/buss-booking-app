@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/slices/AuthSlice";
 import { translateText } from "../utils/translation";
+import { Google, Apple } from "react-bootstrap-icons";
 
 function Login() {
   const navigate = useNavigate();
@@ -29,6 +30,14 @@ function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     dispatch(loginUser({ email, password }));
+  };
+
+  const handleGoogleLogin = () => {
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/oauth/google`;
+  };
+
+  const handleAppleLogin = () => {
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/oauth/apple`;
   };
 
   const selectedLanguage = useSelector(
@@ -79,6 +88,30 @@ function Login() {
               disabled={loading}
             >
               {loading ? <Spinner animation="border" /> : "Log In"}
+            </Button>
+
+            <div className="text-center my-3">
+              <span className="text-muted">or continue with</span>
+            </div>
+
+            <Button
+              variant="outline-danger"
+              className="w-100 mb-2 d-flex align-items-center justify-content-center"
+              onClick={handleGoogleLogin}
+              style={{ gap: '8px' }}
+            >
+              <Google size={20} />
+              Sign in with Google
+            </Button>
+
+            <Button
+              variant="outline-dark"
+              className="w-100 d-flex align-items-center justify-content-center"
+              onClick={handleAppleLogin}
+              style={{ gap: '8px' }}
+            >
+              <Apple size={20} />
+              Sign in with Apple
             </Button>
           </Form>
         </Col>

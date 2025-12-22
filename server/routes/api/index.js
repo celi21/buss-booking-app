@@ -7,6 +7,7 @@ import paymentRouter from "./payment.js";
 import routesRouter from "./routes.js";
 import settingsRouter from "./settings.js";
 import taskRouter from "./task.js";
+import oauthRouter from "./oauth.js";
 
 const router = express.Router();
 
@@ -18,5 +19,6 @@ router.use("/booking", bookingRouter);
 router.use("/coupon", couponRouter);
 router.use("/payment", paymentRouter);
 router.use("/task", taskRouter);
+router.use("/oauth", oauthRouter);
 
 export default router;

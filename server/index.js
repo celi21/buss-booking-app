@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import { errorMiddleware } from "./middlewares/error.js";
 import router from "./routes/index.js";
+import passport from "./config/passport.js";
 
 const app = express();
 
@@ -31,6 +32,9 @@ app.use(cookieParser());
 
 // Form parser
 app.use(express.json());
+
+// Initialize Passport
+app.use(passport.initialize());
 
 // Routes setup
 app.use("/", router);

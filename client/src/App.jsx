@@ -32,6 +32,7 @@ import PassengerHome from "./pages/user-dashboard/pages/passenger-home/Passenger
 import PassengerWallet from "./pages/user-dashboard/pages/passenger-wallet/PassengerWallet";
 import PassengerSupport from "./pages/user-dashboard/pages/passenger-support/PassengerSupport";
 import PassengerProfile from "./pages/user-dashboard/pages/passenger-profile/PassengerProfile";
+import AuthCallback from "./pages/AuthCallback";
 
 function App() {
   const dispatch = useDispatch();
@@ -49,6 +50,7 @@ function App() {
         <Route path="signup" element={<Signup />} />
         <Route path="booking" element={<Booking />} />
         <Route path="booking/:bookingId" element={<SearchBooking />} />
+        <Route path="auth/callback" element={<AuthCallback />} />
 
         <Route
           path="admin"
