@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { loginSuccess } from '../store/slices/AuthSlice';
+import { setAuthData } from '../store/slices/AuthSlice';
 import LoadingSpinner from '../components/loading-spinner/LoadingSpinner';
 import { Container } from 'react-bootstrap';
 
@@ -21,9 +21,9 @@ const AuthCallback = () => {
             try {
                 const payload = JSON.parse(atob(token.split('.')[1]));
 
-                // Dispatch login success
+                // Dispatch setAuthData to update Redux state
                 dispatch(
-                    loginSuccess({
+                    setAuthData({
                         user: {
                             id: payload.id,
                             email: payload.email,
