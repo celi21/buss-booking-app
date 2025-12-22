@@ -164,6 +164,9 @@ const translation = {
     "View your Booking Details": "View your Booking Details",
     "You did not provided any Booking ID":
       "You did not provided any Booking ID",
+    Wallet: "Wallet",
+    Profile: "Profile",
+    Support: "Support",
   },
   ES: {
     "You did not provided any Booking ID":
@@ -333,6 +336,9 @@ const translation = {
     "Invalid Captcha code.": "Código Captcha inválido.",
     "Your booking has been completed Successfully.":
       "Su reserva se ha completado con éxito.",
+    Wallet: "Cartera",
+    Profile: "Perfil",
+    Support: "Soporte",
   },
 };
 

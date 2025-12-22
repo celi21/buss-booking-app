@@ -68,8 +68,9 @@ const UserSidebar = () => {
           }
         >
           <House className="me-2" />
-          {selectedLanguage &&
-            translateText("Home", selectedLanguage.code)}
+          {selectedLanguage
+            ? translateText("Home", selectedLanguage.code)
+            : "Home"}
         </NavLink>
         <NavLink
           to="/user/wallet"
@@ -82,8 +83,9 @@ const UserSidebar = () => {
           }
         >
           <Wallet className="me-2" />
-          {selectedLanguage &&
-            translateText("Wallet", selectedLanguage.code)}
+          {selectedLanguage
+            ? translateText("Wallet", selectedLanguage.code)
+            : "Wallet"}
         </NavLink>
         <NavLink
           to="/user/profile"
@@ -96,8 +98,9 @@ const UserSidebar = () => {
           }
         >
           <Person className="me-2" />
-          {selectedLanguage &&
-            translateText("Profile", selectedLanguage.code)}
+          {selectedLanguage
+            ? translateText("Profile", selectedLanguage.code)
+            : "Profile"}
         </NavLink>
         <NavLink
           to="/user/support"
@@ -110,8 +113,9 @@ const UserSidebar = () => {
           }
         >
           <Headset className="me-2" />
-          {selectedLanguage &&
-            translateText("Support", selectedLanguage.code)}
+          {selectedLanguage
+            ? translateText("Support", selectedLanguage.code)
+            : "Support"}
         </NavLink>
         <NavLink
           to="/user/bookings"
@@ -124,7 +128,9 @@ const UserSidebar = () => {
           }
         >
           <Clipboard className="me-2" />
-          {selectedLanguage && translateText("Bookings", selectedLanguage.code)}
+          {selectedLanguage
+            ? translateText("Bookings", selectedLanguage.code)
+            : "Bookings"}
         </NavLink>
         <NavLink
           onClick={handleLogout}
@@ -138,7 +144,9 @@ const UserSidebar = () => {
           }
         >
           <BoxArrowRight className="me-2" />
-          {selectedLanguage && translateText("logout", selectedLanguage.code)}
+          {selectedLanguage
+            ? translateText("logout", selectedLanguage.code)
+            : "Logout"}
         </NavLink>
       </div>
     </Nav>
