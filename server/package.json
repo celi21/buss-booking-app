@@ -19,7 +19,7 @@
     "dotenv": "^16.0.3",
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.1",
-    "mongoose": "^7.2.0",
+    "mongoose": "^7.8.4",
     "nodemailer": "^6.9.15",
     "nodemon": "^2.0.22",
     "passport": "^0.7.0",
