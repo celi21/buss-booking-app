@@ -73,10 +73,10 @@ function Home() {
       {/* HERO SECTION */}
       <Row className="align-items-center mb-5 gy-4">
         <Col lg={6} className="d-flex flex-column justify-content-center">
-          <h1 className="display-5 fw-bold mb-3" style={{ color: "#000" }}>
+          <h1 className="display-5 fw-bold mb-3 homepage-text-black">
             {t("Reliable Transportation Between Upstate New York & New York City")}
           </h1>
-          <p className="lead mb-4" style={{ fontSize: "1.1rem", lineHeight: "1.6", color: "#111" }}>
+          <p className="lead mb-4 homepage-text-black" style={{ fontSize: "1.1rem", lineHeight: "1.6" }}>
             {t("For over 18 years, Bueno Transit has provided safe, comfortable, and dependable scheduled transportation connecting Upstate New York, New York City, and regional destinations.")}
           </p>
           <div className="d-flex flex-wrap gap-3">
@@ -109,8 +109,8 @@ function Home() {
       {/* SERVICE HIGHLIGHTS */}
       <div className="my-5 py-3">
         <div className="text-center mb-4">
-          <h3 className="fw-bold" style={{ color: "#000" }}>{t("Why Travel With Us")}</h3>
-          <p style={{ color: "#111" }}>{t("Safe, reliable, and convenient regional transit services")}</p>
+          <h3 className="fw-bold homepage-text-black">{t("Why Travel With Us")}</h3>
+          <p className="homepage-text-black">{t("Safe, reliable, and convenient regional transit services")}</p>
         </div>
         <Row className="g-3 justify-content-center">
           <Col className="col-12 col-sm-6 col-md-4 col-lg">
@@ -119,8 +119,8 @@ function Home() {
                 <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e3f2fd", color: "#0d6efd", width: "60px", height: "60px" }}>
                   <Calendar3 size={26} />
                 </div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Operating 7 Days a Week")}</h6>
-                <small style={{ color: "#222" }}>{t("Daily schedule options")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Operating 7 Days a Week")}</h6>
+                <small className="homepage-text-black">{t("Daily schedule options")}</small>
               </Card.Body>
             </Card>
           </Col>
@@ -130,8 +130,8 @@ function Home() {
                 <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e8f5e9", color: "#2e7d32", width: "60px", height: "60px" }}>
                   <BusFront size={26} />
                 </div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Scheduled Transportation")}</h6>
-                <small style={{ color: "#222" }}>{t("Reliable timetables")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Scheduled Transportation")}</h6>
+                <small className="homepage-text-black">{t("Reliable timetables")}</small>
               </Card.Body>
             </Card>
           </Col>
@@ -141,8 +141,8 @@ function Home() {
                 <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e0f7fa", color: "#00838f", width: "60px", height: "60px" }}>
                   <TicketPerforated size={26} />
                 </div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Easy Online Booking")}</h6>
-                <small style={{ color: "#222" }}>{t("Reserve in seconds")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Easy Online Booking")}</h6>
+                <small className="homepage-text-black">{t("Reserve in seconds")}</small>
               </Card.Body>
             </Card>
           </Col>
@@ -152,8 +152,8 @@ function Home() {
                 <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#fff8e1", color: "#ff8f00", width: "60px", height: "60px" }}>
                   <ShieldCheck size={26} />
                 </div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Secure Online Payments")}</h6>
-                <small style={{ color: "#222" }}>{t("Stripe integrated")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Secure Online Payments")}</h6>
+                <small className="homepage-text-black">{t("Stripe integrated")}</small>
               </Card.Body>
             </Card>
           </Col>
@@ -163,8 +163,8 @@ function Home() {
                 <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#ffebee", color: "#c62828", width: "60px", height: "60px" }}>
                   <Airplane size={26} />
                 </div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Airport Connections Available")}</h6>
-                <small style={{ color: "#222" }}>{t("Transit hub transfers")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Airport Connections Available")}</h6>
+                <small className="homepage-text-black">{t("Transit hub transfers")}</small>
               </Card.Body>
             </Card>
           </Col>
@@ -178,33 +178,33 @@ function Home() {
         <Col md={6}>
           <div className="d-flex align-items-center gap-2 mb-3">
             <GeoAltFill size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0" style={{ color: "#000" }}>{t("Where We Travel")}</h4>
+            <h4 className="fw-bold mb-0 homepage-text-black">{t("Where We Travel")}</h4>
           </div>
-          <p style={{ color: "#111" }}>
+          <p className="homepage-text-black">
             {t("We connect key Upstate New York cities directly with the New York metropolitan area.")}
           </p>
           <Card className="border-0 bg-light p-3 rounded-4 mb-4">
             <ul className="list-unstyled mb-0 d-flex flex-column gap-2">
               <li className="d-flex align-items-center gap-2">
                 <CheckCircleFill size={16} className="text-success" />
-                <span style={{ color: "#000" }}>{t("Upstate NY: Albany, Syracuse, Binghamton, Rochester, Buffalo")}</span>
+                <span className="homepage-text-black">{t("Upstate NY: Albany, Syracuse, Binghamton, Rochester, Buffalo")}</span>
               </li>
               <li className="d-flex align-items-center gap-2">
                 <CheckCircleFill size={16} className="text-success" />
-                <span style={{ color: "#000" }}>{t("New York City terminals and major regional transit stops")}</span>
+                <span className="homepage-text-black">{t("New York City terminals and major regional transit stops")}</span>
               </li>
               <li className="d-flex align-items-center gap-2">
                 <CheckCircleFill size={16} className="text-success" />
-                <span style={{ color: "#000" }}>{t("Regular daily regional and express connections")}</span>
+                <span className="homepage-text-black">{t("Regular daily regional and express connections")}</span>
               </li>
             </ul>
           </Card>
           
           <div className="d-flex align-items-center gap-2 mb-3 mt-4">
             <Airplane size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0" style={{ color: "#000" }}>{t("Available Connections")}</h4>
+            <h4 className="fw-bold mb-0 homepage-text-black">{t("Available Connections")}</h4>
           </div>
-          <p className="mb-0" style={{ color: "#111" }}>
+          <p className="mb-0 homepage-text-black">
             {t("Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional airports near each stop.")}
           </p>
         </Col>
@@ -212,37 +212,37 @@ function Home() {
         <Col md={6}>
           <div className="d-flex align-items-center gap-2 mb-3">
             <TicketPerforated size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0" style={{ color: "#000" }}>{t("How to Book Tickets")}</h4>
+            <h4 className="fw-bold mb-0 homepage-text-black">{t("How to Book Tickets")}</h4>
           </div>
           <div className="mb-4">
             <div className="d-flex gap-3 mb-3">
               <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: "30px", height: "30px", flexShrink: 0 }}>1</div>
               <div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Select Route & Date")}</h6>
-                <small style={{ color: "#222" }}>{t("Enter your starting and destination city to search departure lists.")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Select Route & Date")}</h6>
+                <small className="homepage-text-black">{t("Enter your starting and destination city to search departure lists.")}</small>
               </div>
             </div>
             <div className="d-flex gap-3 mb-3">
               <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: "30px", height: "30px", flexShrink: 0 }}>2</div>
               <div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Choose Bus & Pick Seats")}</h6>
-                <small style={{ color: "#222" }}>{t("Select your preferred timetable and pick seats from the interactive map.")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Choose Bus & Pick Seats")}</h6>
+                <small className="homepage-text-black">{t("Select your preferred timetable and pick seats from the interactive map.")}</small>
               </div>
             </div>
             <div className="d-flex gap-3">
               <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: "30px", height: "30px", flexShrink: 0 }}>3</div>
               <div>
-                <h6 className="fw-bold mb-1" style={{ color: "#000" }}>{t("Confirm & Pay Securely")}</h6>
-                <small style={{ color: "#222" }}>{t("Review booking, add personal details, and pay securely online.")}</small>
+                <h6 className="fw-bold mb-1 homepage-text-black">{t("Confirm & Pay Securely")}</h6>
+                <small className="homepage-text-black">{t("Review booking, add personal details, and pay securely online.")}</small>
               </div>
             </div>
           </div>
 
           <div className="d-flex align-items-center gap-2 mb-3 mt-4">
             <ClockFill size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0" style={{ color: "#000" }}>{t("Departure Schedules")}</h4>
+            <h4 className="fw-bold mb-0 homepage-text-black">{t("Departure Schedules")}</h4>
           </div>
-          <p className="mb-0" style={{ color: "#111" }}>
+          <p className="mb-0 homepage-text-black">
             {t("Schedules are designed to serve daily commuters and travelers. Check real-time schedules and timings via the online booking portal.")}
           </p>
         </Col>
@@ -254,14 +254,14 @@ function Home() {
       <div className="mb-4">
         <div className="d-flex align-items-center gap-2 mb-4 justify-content-center">
           <InfoCircleFill size={24} className="text-primary" />
-          <h3 className="fw-bold mb-0" style={{ color: "#000" }}>{t("Important Travel Rules")}</h3>
+          <h3 className="fw-bold mb-0 homepage-text-black">{t("Important Travel Rules")}</h3>
         </div>
         <Row className="g-3">
           <Col md={3} className="col-12 col-sm-6">
             <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
               <Card.Body className="p-2">
-                <h6 className="fw-bold mb-2" style={{ color: "#000" }}>{t("Arrive Early")}</h6>
-                <small className="d-block" style={{ color: "#111" }}>{t("Please arrive at the departure point 15-20 minutes before schedule. Boarding gates close 5 minutes prior to departure.")}</small>
+                <h6 className="fw-bold mb-2 homepage-text-black">{t("Arrive Early")}</h6>
+                <small className="d-block homepage-text-black">{t("Please arrive at the departure point 15-20 minutes before schedule. Boarding gates close 5 minutes prior to departure.")}</small>
               </Card.Body>
             </Card>
           </Col>
@@ -270,25 +270,25 @@ function Home() {
               <Card.Body className="p-2">
                 <div className="d-flex align-items-center gap-1 mb-2">
                   <Backpack size={16} className="text-primary" />
-                  <h6 className="fw-bold mb-0" style={{ color: "#000" }}>{t("Baggage Allowance")}</h6>
+                  <h6 className="fw-bold mb-0 homepage-text-black">{t("Baggage Allowance")}</h6>
                 </div>
-                <small className="d-block" style={{ color: "#111" }}>{t("Tickets include 1 personal carry-on item and 1 standard suitcase loaded in the luggage compartment.")}</small>
+                <small className="d-block homepage-text-black">{t("Tickets include 1 personal carry-on item and 1 standard suitcase loaded in the luggage compartment.")}</small>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3} className="col-12 col-sm-6">
             <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
               <Card.Body className="p-2">
-                <h6 className="fw-bold mb-2" style={{ color: "#000" }}>{t("Cancellation Policy")}</h6>
-                <small className="d-block" style={{ color: "#111" }}>{t("Cancellations are allowed before departure. Receive a 100% refund if 24h+ in advance, or 30% if less than 24h.")}</small>
+                <h6 className="fw-bold mb-2 homepage-text-black">{t("Cancellation Policy")}</h6>
+                <small className="d-block homepage-text-black">{t("Cancellations are allowed before departure. Receive a 100% refund if 24h+ in advance, or 30% if less than 24h.")}</small>
               </Card.Body>
             </Card>
           </Col>
           <Col md={3} className="col-12 col-sm-6">
             <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
               <Card.Body className="p-2">
-                <h6 className="fw-bold mb-2" style={{ color: "#000" }}>{t("No Smoking")}</h6>
-                <small className="d-block" style={{ color: "#111" }}>{t("Smoking and vaping are strictly prohibited inside all buses. Ensure guide dogs are documented if traveling.")}</small>
+                <h6 className="fw-bold mb-2 homepage-text-black">{t("No Smoking")}</h6>
+                <small className="d-block homepage-text-black">{t("Smoking and vaping are strictly prohibited inside all buses. Ensure guide dogs are documented if traveling.")}</small>
               </Card.Body>
             </Card>
           </Col>

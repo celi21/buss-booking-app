@@ -10,3 +10,7 @@ a:hover {
 #dropdown-language::after {
   display: none;
 }
+
+.homepage-text-black {
+  color: #000000 !important;
+}
