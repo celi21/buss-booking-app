@@ -7,6 +7,6 @@ router.get("/", (req, res) => {
   return res.send("Server is up and running");
 });
 
-router.use(apiRouter);
+router.use("/api", apiRouter);
 
 export default router;
