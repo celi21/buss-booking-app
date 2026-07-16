@@ -6,7 +6,7 @@ services:
     plan: free
     region: oregon
     rootDir: server
-    branch: main
+    branch: bueno
     autoDeploy: true
     buildCommand: npm install
     startCommand: node index.js
@@ -29,15 +29,9 @@ services:
       - key: EMAIL_PASS
         fromSecret: PROD_EMAIL_PASS
       - key: FRONTEND_URL
-        fromService:
-          type: static_site
-          name: buss-booking-web
-          property: url
+        value: https://www.buenotransit.com
       - key: CORS_ORIGINS
-        fromService:
-          type: static_site
-          name: buss-booking-web
-          property: url
+        value: https://www.buenotransit.com,https://buenotransit.com
 
   # Production Web (React static site)
   - type: static_site
@@ -45,10 +39,13 @@ services:
     plan: free
     region: oregon
     rootDir: client
-    branch: main
+    branch: bueno
     autoDeploy: true
     buildCommand: npm install && npm run build
     staticPublishPath: dist
+    customDomains:
+      - name: www.buenotransit.com
+      - name: buenotransit.com
     envVars:
       - key: REACT_APP_API_BASE_URL
         fromService:
