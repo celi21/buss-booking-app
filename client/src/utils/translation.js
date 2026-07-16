@@ -166,9 +166,12 @@ const translation = {
       "You did not provided any Booking ID",
     Wallet: "Wallet",
     Profile: "Profile",
-    Support: "Support",
+    "Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.":
+      "Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.",
   },
   ES: {
+    "Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.":
+      "Disfrute de transiciones rápidas a trenes de conexión, líneas de metro locales, rutas de cercanías y ciudades regionales como Pensilvania, Massachusetts, Delaware, Ohio, Rhode Island y Connecticut. En Pensilvania, la ruta incluye Allentown, Filadelfia, Reading, Harrisburg, York, Hazleton, los Poconos, Lebanon y Wilkes-Barre. En Massachusetts, se detiene en Boston, Lawrence y Worcester. El itinerario también incluye Utica en Nueva York, Providence en Rhode Island, Springfield en Massachusetts y Lancaster en Pensilvania.",
     "You did not provided any Booking ID":
       "No proporcionaste ningún ID de reserva",
     "View your Booking Details": "Ver los detalles de su reserva",
