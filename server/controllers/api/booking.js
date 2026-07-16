@@ -2025,11 +2025,17 @@ export const getDispatchTrips = async (req, res, next) => {
       })
       .sort({ "bus.route": 1 });
 
-    const formattedTrips = trips
+    const formattedTrips = await Promise.all(trips
       .filter(trip => trip.bus && trip.bus.route)
-      .map(trip => {
+      .map(async (trip) => {
         const firstLocation = trip.bus.locations[0];
         const lastLocation = trip.bus.locations[trip.bus.locations.length - 1];
+
+        // Find one booking to fetch the tripStatus
+        const sampleBooking = await Booking.findOne({
+          bus: trip.bus._id,
+          bookingDate: date,
+        });
 
         return {
           tripId: trip._id,
@@ -2041,9 +2047,10 @@ export const getDispatchTrips = async (req, res, next) => {
           arrivalTime: lastLocation?.arrivalTime || 'N/A',
           totalSeats: trip.totalSeats,
           availableSeats: trip.availableSeats,
-          date: trip.date
+          date: trip.date,
+          tripStatus: sampleBooking?.tripStatus || 'On Time',
         };
-      });
+      }));
 
     return res.status(200).json({
       success: true,
@@ -2622,6 +2629,43 @@ export const markRefunded = async (req, res, next) => {
     return res.status(200).json({
       success: true,
       message: "Booking has been marked as refunded successfully.",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const updateTripStatus = async (req, res, next) => {
+  try {
+    const { busId, date, status } = req.body;
+
+    if (!busId || !date || !status) {
+      return res.status(400).json({
+        success: false,
+        message: "Bus ID, date, and status are required.",
+      });
+    }
+
+    if (!["On Time", "Delayed"].includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: "Status must be 'On Time' or 'Delayed'.",
+      });
+    }
+
+    // Update all bookings for this bus and date
+    await Booking.updateMany(
+      { bus: busId, bookingDate: date },
+      { $set: { tripStatus: status } }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: `Trip status updated to ${status} for all bookings.`,
     });
   } catch (error) {
     console.error(error);

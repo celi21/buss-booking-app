@@ -27,6 +27,7 @@ import {
   updatePassengerStatus,
   updatePassengerDetails,
   updatePickupOrder,
+  updateTripStatus,
   getPassengerDashboard,
   checkInPassenger,
   getPassengerWallet,
@@ -58,6 +59,7 @@ router.post("/get-dashboard-stats", verifyAdmin, getDashboardStats);
 router.post("/get-dispatch-trips", verifyAdmin, getDispatchTrips);
 router.post("/get-passenger-manifest", verifyAdmin, getPassengerManifest);
 router.post("/update-passenger-status", verifyAdmin, updatePassengerStatus);
+router.post("/update-trip-status", verifyAdmin, updateTripStatus);
 router.post("/update-passenger-details", verifyAdmin, updatePassengerDetails);
 router.post("/update-pickup-order", verifyAdmin, updatePickupOrder);
 router.post("/get-passenger-dashboard", verifyUser, getPassengerDashboard);

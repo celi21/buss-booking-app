@@ -54,6 +54,42 @@ const Dispatch = () => {
         }
     }, [selectedTrip]);
 
+    const handleUpdateTripStatus = async (newStatus) => {
+        if (!selectedTrip) return;
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_BASE_URL}/booking/update-trip-status`,
+                {
+                    busId: selectedTrip.busId,
+                    date: selectedDate,
+                    status: newStatus,
+                },
+                config
+            );
+            if (response.data && response.data.success) {
+                toast.success("Trip status updated successfully");
+                // Update local state
+                setTrips(
+                    trips.map((t) =>
+                        t.tripId === selectedTrip.tripId
+                            ? { ...t, tripStatus: newStatus }
+                            : t
+                    )
+                );
+                setSelectedTrip({ ...selectedTrip, tripStatus: newStatus });
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error("Failed to update trip status");
+        }
+    };
+
     const fetchTrips = async () => {
         try {
             setLoading(true);
@@ -390,7 +426,7 @@ const Dispatch = () => {
                                 />
                             </Form.Group>
                         </Col>
-                        <Col md={6}>
+                        <Col md={5}>
                             <Form.Group>
                                 <Form.Label>Select Trip</Form.Label>
                                 <Form.Select
@@ -414,10 +450,25 @@ const Dispatch = () => {
                                 </Form.Select>
                             </Form.Group>
                         </Col>
-                        <Col md={3} className="d-flex align-items-end">
+                        {selectedTrip && (
+                            <Col md={2}>
+                                <Form.Group>
+                                    <Form.Label>Trip Status</Form.Label>
+                                    <Form.Select
+                                        value={selectedTrip.tripStatus || "On Time"}
+                                        onChange={(e) => handleUpdateTripStatus(e.target.value)}
+                                    >
+                                        <option value="On Time">On Time</option>
+                                        <option value="Delayed">Delayed</option>
+                                    </Form.Select>
+                                </Form.Group>
+                            </Col>
+                        )}
+                        <Col md={2} className="d-flex align-items-end">
                             <Button
                                 variant="outline-primary"
                                 size="sm"
+                                className="w-100"
                                 onClick={fetchManifest}
                                 disabled={!selectedTrip}
                             >
