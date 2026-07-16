@@ -28,6 +28,7 @@ import Booking from "./pages/booking/Booking";
 import SearchBooking from "./pages/search-booking/SearchBooking";
 import Reports from "./pages/admin-dashboard/pages/reports/Reports";
 import Dispatch from "./pages/admin-dashboard/pages/dispatch/Dispatch";
+import DispatchTaskQueue from "./pages/admin-dashboard/pages/dispatch-tasks/DispatchTaskQueue";
 import PassengerHome from "./pages/user-dashboard/pages/passenger-home/PassengerHome";
 import PassengerWallet from "./pages/user-dashboard/pages/passenger-wallet/PassengerWallet";
 import PassengerSupport from "./pages/user-dashboard/pages/passenger-support/PassengerSupport";
@@ -71,6 +72,7 @@ function App() {
           <Route path="edit-booking/:bookingId" element={<EditBooking />} />
           <Route path="reports" element={<Reports />} />
           <Route path="dispatch" element={<Dispatch />} />
+          <Route path="task-queue" element={<DispatchTaskQueue />} />
         </Route>
 
         <Route

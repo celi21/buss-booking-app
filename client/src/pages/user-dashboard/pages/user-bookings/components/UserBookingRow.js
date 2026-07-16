@@ -11,8 +11,8 @@ const UserBookingRow = ({ booking }) => {
     switch (status) {
       case "confirmed":
         return "bg-success";
-      case "pending":
-        return "bg-warning";
+      case "completed":
+        return "bg-info";
       case "refunded":
         return "bg-secondary";
       case "cancelled":
@@ -79,11 +79,14 @@ const UserBookingRow = ({ booking }) => {
         <td>
           <div
             className={`${getStatusColor(
-              booking.status
+              booking.status === "pending" ? "confirmed" : booking.status
             )} text-white p-1 rounded`}
           >
             {selectedLanguage &&
-              translateText(booking.status, selectedLanguage.code)}
+              translateText(
+                booking.status === "pending" ? "confirmed" : booking.status,
+                selectedLanguage.code
+              )}
           </div>
         </td>
         <td className="text-center">

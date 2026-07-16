@@ -26,8 +26,8 @@ const BookingRow = ({ booking, index }) => {
     switch (status) {
       case "confirmed":
         return "bg-success";
-      case "pending":
-        return "bg-warning";
+      case "completed":
+        return "bg-info";
       case "refunded":
         return "bg-secondary";
       case "cancelled":
@@ -195,10 +195,10 @@ const BookingRow = ({ booking, index }) => {
                 Confirmed
               </option>
               <option
-                value="pending"
-                selected={currentBookingStatus === "pending"}
+                value="completed"
+                selected={currentBookingStatus === "completed"}
               >
-                Pending
+                Completed
               </option>
               <option
                 value="refunded"
@@ -222,8 +222,8 @@ const BookingRow = ({ booking, index }) => {
               {currentBookingStatus === "confirmed" && (
                 <Check className="text-white" size={17} />
               )}
-              {currentBookingStatus === "pending" && (
-                <Clock className="text-white" size={17} />
+              {currentBookingStatus === "completed" && (
+                <Check className="text-white" size={17} />
               )}
               {currentBookingStatus === "refunded" && (
                 <ArrowClockwise className="text-white" size={17} />

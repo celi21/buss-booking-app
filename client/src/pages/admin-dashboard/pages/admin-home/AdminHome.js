@@ -26,6 +26,7 @@ import {
   XCircle,
   Trash,
   Eye,
+  CurrencyDollar,
 } from "react-bootstrap-icons";
 import { Link } from "react-router-dom";
 
@@ -41,6 +42,15 @@ const AdminHome = () => {
     description: "",
     source: "Admin",
     tag: "Normal",
+  });
+
+  // Refund Modal State
+  const [showRefundModal, setShowRefundModal] = useState(false);
+  const [selectedRefundTask, setSelectedRefundTask] = useState(null);
+  const [refundForm, setRefundForm] = useState({
+    refundAmount: "",
+    refundReason: "",
+    stripeRefundRef: "",
   });
 
   const { token } = useSelector((state) => state.auth);
@@ -96,6 +106,76 @@ const AdminHome = () => {
       console.error(error);
     } finally {
       setTasksLoading(false);
+    }
+  };
+
+  const handleOpenRefund = (task) => {
+    const parseRefundDetails = (description) => {
+      if (!description) return {};
+      const lines = description.split("\n");
+      const details = {};
+      lines.forEach((line) => {
+        const parts = line.split(":");
+        if (parts.length >= 2) {
+          const key = parts[0].trim();
+          const val = parts.slice(1).join(":").trim();
+          details[key] = val;
+        }
+      });
+      return {
+        customerName: details["Customer Name"] || "",
+        bookingId: details["Booking ID"] || "",
+        refundAmount: details["Refund Amount"] ? details["Refund Amount"].replace("$", "") : "",
+        refundPercentage: details["Refund Percentage"] ? details["Refund Percentage"].replace("%", "") : "",
+        refundReason: details["Refund Reason"] || "",
+        stripePaymentId: details["Stripe Payment ID"] || "",
+      };
+    };
+
+    const details = parseRefundDetails(task.description);
+    setSelectedRefundTask(task);
+    setRefundForm({
+      refundAmount: details.refundAmount || "",
+      refundReason: details.refundReason || "Manual refund",
+      stripeRefundRef: "",
+    });
+    setShowRefundModal(true);
+  };
+
+  const handleSubmitRefund = async () => {
+    if (!selectedRefundTask?.relatedBooking?._id) {
+      toast.error("Booking ID is required to mark as refunded");
+      return;
+    }
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/mark-refunded`,
+        {
+          taskId: selectedRefundTask._id,
+          bookingId: selectedRefundTask.relatedBooking._id,
+          refundAmount: refundForm.refundAmount,
+          refundReason: refundForm.refundReason,
+          stripeRefundRef: refundForm.stripeRefundRef,
+        },
+        config
+      );
+      if (response.data && response.data.success) {
+        toast.success("Booking marked as Refunded and task completed!");
+        setShowRefundModal(false);
+        setSelectedRefundTask(null);
+        fetchTasks();
+      } else {
+        toast.error(response.data.message || "Failed to mark as refunded");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to process refund action");
     }
   };
 
@@ -407,17 +487,28 @@ const AdminHome = () => {
                               </Badge>
                             </td>
                             <td>
-                              <div className="d-flex gap-1">
-                                {task.status === "Pending" && (
-                                  <Button
-                                    size="sm"
-                                    variant="outline-info"
-                                    onClick={() => updateTaskStatus(task._id, "Started")}
-                                    title="Mark as Started"
-                                  >
-                                    <PlayCircle size={14} />
-                                  </Button>
-                                )}
+                                <div className="d-flex gap-1">
+                                  {task.title && task.title.startsWith("Refund Request:") && task.status !== "Completed" && (
+                                    <Button
+                                      size="sm"
+                                      variant="warning"
+                                      className="text-white"
+                                      onClick={() => handleOpenRefund(task)}
+                                      title="Mark Refunded"
+                                    >
+                                      <CurrencyDollar size={14} className="me-1" /> Mark
+                                    </Button>
+                                  )}
+                                  {task.status === "Pending" && (
+                                    <Button
+                                      size="sm"
+                                      variant="outline-info"
+                                      onClick={() => updateTaskStatus(task._id, "Started")}
+                                      title="Mark as Started"
+                                    >
+                                      <PlayCircle size={14} />
+                                    </Button>
+                                  )}
                                 {task.status === "Started" && (
                                   <Button
                                     size="sm"
@@ -577,6 +668,56 @@ const AdminHome = () => {
           </Button>
           <Button variant="primary" onClick={createTask}>
             Create Task
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Manual Refund Confirmation Modal */}
+      <Modal show={showRefundModal} onHide={() => setShowRefundModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Process Manual Refund</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p className="text-muted mb-3">
+            Confirm that the refund has been processed manually in Stripe. Submitting this form updates the booking status to "Refunded" and marks the task as completed.
+          </p>
+          <Form>
+            <Form.Group className="mb-3">
+              <Form.Label>Refund Amount ($)</Form.Label>
+              <Form.Control
+                type="number"
+                step="0.01"
+                placeholder="Enter refund amount"
+                value={refundForm.refundAmount}
+                onChange={(e) => setRefundForm({ ...refundForm, refundAmount: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Stripe Refund Reference ID (optional)</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="e.g. re_3PtfqyAFFo9b3crI1QzKlVPT"
+                value={refundForm.stripeRefundRef}
+                onChange={(e) => setRefundForm({ ...refundForm, stripeRefundRef: e.target.value })}
+              />
+            </Form.Group>
+            <Form.Group className="mb-3">
+              <Form.Label>Refund Reason</Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="Reason for refund"
+                value={refundForm.refundReason}
+                onChange={(e) => setRefundForm({ ...refundForm, refundReason: e.target.value })}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRefundModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSubmitRefund}>
+            Mark Refunded
           </Button>
         </Modal.Footer>
       </Modal>

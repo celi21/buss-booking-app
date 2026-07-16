@@ -111,6 +111,13 @@ const bookingSchema = new Schema(
       enum: ['On Time', 'Delayed'],
       default: 'On Time',
     },
+    refundDetails: {
+      amount: { type: Number },
+      reason: { type: String },
+      date: { type: Date },
+      processedBy: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      stripeRefundRef: { type: String },
+    },
   },
   {
     timestamps: true,

@@ -141,6 +141,19 @@ function AdminSidebar() {
           <Truck className="me-2" />
           Dispatch
         </NavLink>
+        <NavLink
+          to="/admin/task-queue"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+                ? "active nav-link "
+                : "nav-link"
+          }
+        >
+          <Truck className="me-2" />
+          Dispatch Task Queue
+        </NavLink>
         {/* <NavLink
         to="/google-sheets"
         className={({ isActive, isPending }) =>

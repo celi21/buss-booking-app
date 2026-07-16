@@ -64,11 +64,11 @@ const CancelBookingModal = ({ showModal, setShowModal, booking }) => {
       );
       return;
     } else if (hoursDifference <= 24) {
-      setIsCancelPossible(false);
+      setIsCancelPossible(true);
       setCancelMessage(
         selectedLanguage &&
           translateText(
-            "Your booking cannot be canceled because it is within 24 hours of the departure time. Bookings must be canceled at least 24 hours before departure to be eligible for a refund. Please contact customer support for further assistance.",
+            "Your booking is eligible for cancellation. Since you are canceling within 24 hours of departure, you will receive a 30% refund. Please proceed if you'd like to cancel your booking.",
             selectedLanguage.code
           )
       );

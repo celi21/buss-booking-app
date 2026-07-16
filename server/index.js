@@ -5,6 +5,7 @@ import cors from "cors";
 import { errorMiddleware } from "./middlewares/error.js";
 import router from "./routes/index.js";
 import passport from "./config/passport.js";
+import { checkAndCompleteTrips } from "./utils/tripCompletion.js";
 
 const app = express();
 
@@ -46,4 +47,7 @@ app.use(errorMiddleware);
 const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is up and listening on PORT: ${PORT || 8000}.`);
+  // Start silent trip completion background job
+  checkAndCompleteTrips();
+  setInterval(checkAndCompleteTrips, 15 * 60 * 1000);
 });

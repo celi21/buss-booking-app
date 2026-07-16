@@ -16,6 +16,7 @@ import {
   fetchPassengersList,
   cancelBooking,
   changeBookingStatus,
+  markRefunded,
   updateBooking,
   createPaymentIntent,
   deleteBooking,
@@ -49,6 +50,7 @@ router.post("/fetch-admin-bookings", verifyAdmin, fetchAdminBookings);
 router.post("/fetch-passengers-list", verifyAdmin, fetchPassengersList);
 router.post("/cancel-booking", verifyUser, cancelBooking);
 router.post("/change-booking-status", verifyAdmin, changeBookingStatus);
+router.post("/mark-refunded", verifyAdmin, markRefunded);
 router.post("/update-booking", verifyAdmin, updateBooking);
 router.post("/delete-booking", verifyAdmin, deleteBooking);
 router.post("/fetch-deletion-logs", verifyAdmin, fetchDeletionLogs);

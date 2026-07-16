@@ -1438,8 +1438,6 @@ const isBookingCancelPossible = (booking) => {
 
   if (hoursDifference < 0) {
     return false;
-  } else if (hoursDifference <= 24) {
-    return false;
   } else {
     return true;
   }
@@ -1468,7 +1466,11 @@ export const cancelBooking = async (req, res, nex) => {
     const booking = await Booking.findOne({
       bookingId: bookingId,
       user: user.id,
-    }).populate("bus", "locations");
+    })
+      .populate("bus")
+      .populate("payment")
+      .populate("route")
+      .populate("personalDetails");
 
     if (!booking) {
       return res.status(200).json({
@@ -1484,86 +1486,110 @@ export const cancelBooking = async (req, res, nex) => {
       });
     }
 
-    const payment = await Payment.findById(booking.payment);
-    if (!payment) {
-      return res.status(200).json({
-        success: false,
-        message: "Payment for this booking cannot be found!",
-      });
-    }
-
-    if (!payment.transactionId) {
-      return res.status(200).json({
-        success: false,
-        message: "Transaction ID for this Payment cannot be found!",
-      });
-    }
-
-    // Process refund via Stripe API
-    let paymentResponse = await makeRefund(
-      payment.amount,
-      payment.transactionId
+    const fromLocation = booking.bus.locations.find(
+      (loc) => loc.city.toString() === booking.from.toString()
     );
 
-    if (paymentResponse) {
-      console.log(paymentResponse);
-      const decodedObject = paymentResponse.split("&").reduce((acc, curr) => {
-        const [key, value] = curr.split("=");
-        acc[key] = decodeURIComponent(value || "");
-        return acc;
-      }, {});
-
-      // check if refund success
-      if (
-        decodedObject.response_code === "100" &&
-        decodedObject.response === "1" &&
-        decodedObject.transactionid
-      ) {
-        // update the booking schema
-        booking.status = "cancelled";
-        payment.isRefunded = true;
-        // update the availability schema
-        const busAvailability = await BusAvailability.findOne({
-          bus: booking.bus._id,
-          date: booking.bookingDate,
-        });
-
-        let seatsDetails = booking.seatDetails;
-        let seatsToCancel = 0;
-        seatsDetails.map((seat) => {
-          seatsToCancel += seat.seats;
-        });
-
-        if (busAvailability.availableSeats >= busAvailability.totalSeats) {
-          busAvailability.availableSeats = busAvailability.totalSeats;
-        } else {
-          busAvailability.availableSeats += seatsToCancel;
-        }
-
-        await booking.save();
-        await busAvailability.save();
-        await payment.save();
-
-        return res.status(200).json({
-          success: true,
-          message: "Your Booking has been cancelled successfully!",
-        });
-      } else {
-        // Refund failed
-        return res.status(200).json({
-          success: false,
-          message: decodedObject.responsetext || "Payment Refund Failed. Please try again later.",
-        });
-      }
-    } else {
+    if (!fromLocation || !fromLocation.departureTime) {
       return res.status(200).json({
         success: false,
-        message: "Payment Refund Failed. Please try again later.",
+        message: "Departure time not found for this trip.",
       });
     }
+
+    let bookingDate = booking.bookingDate;
+    let departureTime = fromLocation.departureTime;
+    let bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
+    let currentDateTime = Date.now();
+
+    let timeDifference = bookingDateTime - currentDateTime;
+    let hoursDifference = timeDifference / (1000 * 60 * 60);
+
+    if (hoursDifference < 0) {
+      return res.status(200).json({
+        success: false,
+        message: "Your booking cannot be cancelled because the departure time has passed.",
+      });
+    }
+
+    // Determine refund percentage and amount
+    let refundPercentage = 100;
+    let reason = "Customer canceled 24 hours or more before departure";
+    if (hoursDifference < 24) {
+      refundPercentage = 30;
+      reason = "Customer canceled less than 24 hours before departure";
+    }
+
+    const amount = booking.payment?.amount || 0;
+    const stripePaymentId = booking.payment?.transactionId || "N/A";
+    const refundAmount = Number((amount * (refundPercentage / 100)).toFixed(2));
+
+    // Release seats
+    const busAvailability = await BusAvailability.findOne({
+      bus: booking.bus._id,
+      date: booking.bookingDate,
+    });
+
+    if (busAvailability) {
+      let seatsDetails = booking.seatDetails;
+      let seatsToCancel = 0;
+      seatsDetails.map((seat) => {
+        seatsToCancel += seat.seats;
+      });
+
+      if (busAvailability.availableSeats >= busAvailability.totalSeats) {
+        busAvailability.availableSeats = busAvailability.totalSeats;
+      } else {
+        busAvailability.availableSeats += seatsToCancel;
+      }
+      await busAvailability.save();
+    }
+
+    // Update status
+    booking.status = "cancelled";
+    await booking.save();
+
+    // Create Refund Task in Dispatch Queue
+    const Task = (await import("../../models/task.js")).default;
+    const taskTitle = `Refund Request: ${booking.bookingId}`;
+    const routeName = booking.route?.name || "N/A";
+    const departureStr = `${booking.bookingDate} ${departureTime}`;
+    const creationDateStr = new Date().toISOString().split("T")[0];
+
+    const taskDescription = `Customer Name: ${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}
+Booking ID: ${booking.bookingId}
+Trip Route/Details: ${routeName}
+Departure Date/Time: ${departureStr}
+Payment Amount: $${amount.toFixed(2)}
+Stripe Payment ID: ${stripePaymentId}
+Refund Amount: $${refundAmount.toFixed(2)}
+Refund Percentage: ${refundPercentage}%
+Refund Reason: ${reason}
+Booking Status: cancelled
+Task Creation Date: ${creationDateStr}`;
+
+    const newTask = new Task({
+      title: taskTitle,
+      description: taskDescription,
+      source: "Passenger",
+      tag: "URGENT",
+      status: "Pending",
+      relatedBooking: booking._id,
+      createdBy: booking.user || user.id,
+      statusHistory: [
+        {
+          status: "Pending",
+          changedBy: user.id,
+          changedAt: new Date(),
+        },
+      ],
+    });
+
+    await newTask.save();
 
     return res.status(200).json({
       success: true,
+      message: "Your Booking has been cancelled successfully! A refund task has been created for Admin review.",
     });
   } catch (error) {
     console.log(error);
@@ -1578,7 +1604,7 @@ export const changeBookingStatus = async (req, res, next) => {
   let { bookingId, status } = req.body;
   try {
     if (!bookingId || !status) {
-      return res.status(404).json({
+      return res.status(400).json({
         success: false,
         message: "Please provide booking Id and status.",
       });
@@ -1586,7 +1612,11 @@ export const changeBookingStatus = async (req, res, next) => {
     status = status.toLowerCase();
 
     // find booking
-    const booking = await Booking.findById(bookingId);
+    const booking = await Booking.findById(bookingId)
+      .populate("bus")
+      .populate("payment")
+      .populate("route")
+      .populate("personalDetails");
 
     if (!booking) {
       return res.status(200).json({
@@ -1595,224 +1625,138 @@ export const changeBookingStatus = async (req, res, next) => {
       });
     }
 
-    // if status is confirmed or pending then just update the status
-    if (status === "pending") {
-      booking.status = "pending";
-      await booking.save();
+    const oldStatus = booking.status;
+    if (oldStatus === status) {
       return res.status(200).json({
         success: true,
-        message: `Booking status updated to pending.`,
+        message: `Booking status is already ${status}.`,
       });
-    } else if (status === "confirmed") {
-      // if new status is confirm and if it was already cancel or refund then update to confirm and decrement the availability available seats
-      if (booking.status === "cancelled" || booking.status === "refunded") {
-        const busAvailability = await BusAvailability.findOne({
-          bus: booking.bus,
-          date: booking.bookingDate,
+    }
+
+    // 1. Release seats if moving from active (confirmed/completed) to inactive (cancelled/refunded)
+    const isOldActive = oldStatus === "confirmed" || oldStatus === "completed";
+    const isNewActive = status === "confirmed" || status === "completed";
+
+    if (isOldActive && !isNewActive) {
+      const busAvailability = await BusAvailability.findOne({
+        bus: booking.bus._id,
+        date: booking.bookingDate,
+      });
+      if (busAvailability) {
+        let seatsDetails = booking.seatDetails;
+        let seatsToCancel = 0;
+        seatsDetails.map((seat) => {
+          seatsToCancel += seat.seats;
         });
 
+        if (busAvailability.availableSeats >= busAvailability.totalSeats) {
+          busAvailability.availableSeats = busAvailability.totalSeats;
+        } else {
+          busAvailability.availableSeats += seatsToCancel;
+        }
+        await busAvailability.save();
+      }
+    }
+
+    // 2. Re-claim seats if moving from inactive (cancelled/refunded) to active (confirmed/completed)
+    if (!isOldActive && isNewActive) {
+      const busAvailability = await BusAvailability.findOne({
+        bus: booking.bus._id,
+        date: booking.bookingDate,
+      });
+      if (busAvailability) {
         let seatsDetails = booking.seatDetails;
         let seatsToConfirm = 0;
         seatsDetails.map((seat) => {
           seatsToConfirm += seat.seats;
         });
         busAvailability.availableSeats -= seatsToConfirm;
-        booking.status = status;
-        await booking.save();
         await busAvailability.save();
-      } else if (
-        booking.status === "confirmed" ||
-        booking.status === "pending"
-      ) {
-        booking.status = status;
-        await booking.save();
       }
-      return res.status(200).json({
-        success: true,
-        message: `Booking status updated to ${status}.`,
-      });
-    } else if (status === "cancelled" || status === "refunded") {
-      if (booking.status === "pending" || booking.status === "confirmed") {
-        // if current status is pending or confirmed then first check if booking is added by admin.
-        // if booking added by admin then just update the status and available seats
-        if (booking.isAddedByAdmin === true) {
-          booking.status = status;
-          const busAvailability = await BusAvailability.findOne({
-            bus: booking.bus,
-            date: booking.bookingDate,
-          });
-
-          let seatsDetails = booking.seatDetails;
-          let seatsToCancel = 0;
-          seatsDetails.map((seat) => {
-            seatsToCancel += seat.seats;
-          });
-          busAvailability.availableSeats += seatsToCancel;
-          await booking.save();
-          await busAvailability.save();
-
-          return res.status(200).json({
-            success: true,
-            message: `Booking status updated to ${status}.`,
-          });
-        } else {
-          // if its not added by admin then check if it is refunded.
-          // if its refunded then just update the status as well as the seats
-          const payment = await Payment.findById(booking.payment);
-
-          console.log('Payment object:', payment);
-          console.log('Transaction ID:', payment?.transactionId);
-          console.log('Transaction ID type:', typeof payment?.transactionId);
-
-          if (!payment) {
-            // If no payment record exists, just update status without refund
-            booking.status = status;
-            const busAvailability = await BusAvailability.findOne({
-              bus: booking.bus,
-              date: booking.bookingDate,
-            });
-
-            let seatsDetails = booking.seatDetails;
-            let seatsToCancel = 0;
-            seatsDetails.map((seat) => {
-              seatsToCancel += seat.seats;
-            });
-            busAvailability.availableSeats += seatsToCancel;
-            await booking.save();
-            await busAvailability.save();
-
-            return res.status(200).json({
-              success: true,
-              message: `Booking status updated to ${status}. No payment record found.`,
-            });
-          }
-
-          if (payment.isRefunded === true) {
-            booking.status = status;
-            const busAvailability = await BusAvailability.findOne({
-              bus: booking.bus,
-              date: booking.bookingDate,
-            });
-
-            let seatsDetails = booking.seatDetails;
-            let seatsToCancel = 0;
-            seatsDetails.map((seat) => {
-              seatsToCancel += seat.seats;
-            });
-            busAvailability.availableSeats += seatsToCancel;
-            await booking.save();
-            await busAvailability.save();
-
-            return res.status(200).json({
-              success: true,
-              message: `Booking status updated to ${status}. Payment has already been refunded.`,
-            });
-          } else if (!payment.transactionId || (typeof payment.transactionId === 'string' && !payment.transactionId.startsWith('pi_')) || typeof payment.transactionId === 'number') {
-            // If there's no valid Stripe transaction ID, just update status without refund
-            console.log('Skipping refund - invalid transaction ID');
-            booking.status = status;
-            const busAvailability = await BusAvailability.findOne({
-              bus: booking.bus,
-              date: booking.bookingDate,
-            });
-
-            let seatsDetails = booking.seatDetails;
-            let seatsToCancel = 0;
-            seatsDetails.map((seat) => {
-              seatsToCancel += seat.seats;
-            });
-            busAvailability.availableSeats += seatsToCancel;
-            await booking.save();
-            await busAvailability.save();
-
-            return res.status(200).json({
-              success: true,
-              message: `Booking status updated to ${status}. No payment to refund.`,
-            });
-          } else {
-            // if not refunded then run the makeRefund function to refund to user
-            // and update the status as well as seats
-            // Process refund via Stripe API
-            let paymentResponse = await makeRefund(
-              payment.amount,
-              payment.transactionId
-            );
-
-            if (paymentResponse) {
-              console.log(paymentResponse);
-              const decodedObject = paymentResponse
-                .split("&")
-                .reduce((acc, curr) => {
-                  const [key, value] = curr.split("=");
-                  acc[key] = decodeURIComponent(value || "");
-                  return acc;
-                }, {});
-
-              // check if refund success
-              if (
-                decodedObject.response_code === "100" &&
-                decodedObject.response === "1" &&
-                decodedObject.transactionid
-              ) {
-                // update the booking schema
-                booking.status = status;
-                payment.isRefunded = true;
-                // update the availability schema
-                const busAvailability = await BusAvailability.findOne({
-                  bus: booking.bus,
-                  date: booking.bookingDate,
-                });
-
-                let seatsDetails = booking.seatDetails;
-                let seatsToCancel = 0;
-                seatsDetails.map((seat) => {
-                  seatsToCancel += seat.seats;
-                });
-
-                if (
-                  busAvailability.availableSeats >= busAvailability.totalSeats
-                ) {
-                  busAvailability.availableSeats = busAvailability.totalSeats;
-                } else {
-                  busAvailability.availableSeats += seatsToCancel;
-                }
-
-                await booking.save();
-                await busAvailability.save();
-                await payment.save();
-
-                return res.status(200).json({
-                  success: true,
-                  message: `Your Booking has been ${status} successfully! Refund if applicable is being processed.`,
-                });
-              } else {
-                // Refund failed
-                return res.status(200).json({
-                  success: false,
-                  message: decodedObject.responsetext || "Payment Refund Failed. Please try again later.",
-                });
-              }
-            } else {
-              return res.status(200).json({
-                success: false,
-                message: "Payment Refund Failed. Please try again later.",
-              });
-            }
-          }
-        }
-      } else if (
-        booking.status === "cancelled" ||
-        booking.status === "refunded"
-      ) {
-        // if current status is cancelled or refunded then just update the status
-        booking.status = status;
-        await booking.save();
-      }
-      return res.status(200).json({
-        success: true,
-        message: `Booking status updated to ${status}.`,
-      });
     }
+
+    // 3. Update status
+    booking.status = status;
+
+    // 4. Save default refund details if manually marking as refunded without a task
+    if (status === "refunded" && !booking.refundDetails?.amount) {
+      booking.refundDetails = {
+        amount: booking.payment?.amount || 0,
+        reason: "Manually set to Refunded by Admin",
+        date: new Date(),
+        processedBy: req.user.id,
+        stripeRefundRef: "N/A",
+      };
+    }
+
+    await booking.save();
+
+    // 5. Automatically create a Refund Task if marked as cancelled and none exists
+    if (status === "cancelled") {
+      const Task = (await import("../../models/task.js")).default;
+      const existingTask = await Task.findOne({
+        relatedBooking: booking._id,
+        title: `Refund Request: ${booking.bookingId}`,
+      });
+
+      if (!existingTask) {
+        const fromLocation = booking.bus.locations.find(
+          (loc) => loc.city.toString() === booking.from.toString()
+        );
+        const departureTime = fromLocation?.departureTime || "00:00";
+        const bookingDate = booking.bookingDate;
+        const bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
+        const hoursDifference = (bookingDateTime - Date.now()) / (1000 * 60 * 60);
+
+        let refundPercentage = 100;
+        let reason = "Admin manually cancelled the booking 24 hours or more before departure";
+        if (hoursDifference < 24) {
+          refundPercentage = 30;
+          reason = "Admin manually cancelled the booking less than 24 hours before departure";
+        }
+        const amount = booking.payment?.amount || 0;
+        const stripePaymentId = booking.payment?.transactionId || "N/A";
+        const refundAmount = Number((amount * (refundPercentage / 100)).toFixed(2));
+        const routeName = booking.route?.name || "N/A";
+        const departureStr = `${booking.bookingDate} ${departureTime}`;
+        const creationDateStr = new Date().toISOString().split("T")[0];
+
+        const taskDescription = `Customer Name: ${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}
+Booking ID: ${booking.bookingId}
+Trip Route/Details: ${routeName}
+Departure Date/Time: ${departureStr}
+Payment Amount: $${amount.toFixed(2)}
+Stripe Payment ID: ${stripePaymentId}
+Refund Amount: $${refundAmount.toFixed(2)}
+Refund Percentage: ${refundPercentage}%
+Refund Reason: ${reason}
+Booking Status: cancelled
+Task Creation Date: ${creationDateStr}`;
+
+        const newTask = new Task({
+          title: `Refund Request: ${booking.bookingId}`,
+          description: taskDescription,
+          source: "Admin",
+          tag: "URGENT",
+          status: "Pending",
+          relatedBooking: booking._id,
+          createdBy: req.user.id,
+          statusHistory: [
+            {
+              status: "Pending",
+              changedBy: req.user.id,
+              changedAt: new Date(),
+            },
+          ],
+        });
+        await newTask.save();
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Booking status updated to ${status}.`,
+    });
   } catch (error) {
     console.log(error);
     return res.status(500).json({
@@ -2182,7 +2126,11 @@ export const updatePassengerStatus = async (req, res, next) => {
       });
     }
 
-    const booking = await Booking.findById(bookingId).populate("personalDetails");
+    const booking = await Booking.findById(bookingId)
+      .populate("personalDetails")
+      .populate("bus")
+      .populate("payment")
+      .populate("route");
 
     if (!booking) {
       return res.status(404).json({
@@ -2194,34 +2142,82 @@ export const updatePassengerStatus = async (req, res, next) => {
     booking.boardingStatus = status;
     await booking.save();
 
-    // Auto-create task for No-Show or Cancelled
+    // Auto-create refund task for No-Show or Cancelled
     if (status === "No-Show" || status === "Cancelled") {
       const Task = (await import("../../models/task.js")).default;
-
-      const taskTitle = status === "No-Show"
-        ? `No-Show: ${booking.personalDetails?.firstName} ${booking.personalDetails?.lastName || ''}`
-        : `Cancelled: ${booking.personalDetails?.firstName} ${booking.personalDetails?.lastName || ''}`;
-
-      const taskDescription = `Passenger ${status.toLowerCase()} for booking ${booking.bookingId}. Phone: ${booking.personalDetails?.phone || 'N/A'}`;
-
-      const newTask = new Task({
-        title: taskTitle,
-        description: taskDescription,
-        source: "Passenger",
-        tag: "URGENT",
-        status: "Pending",
+      const existingTask = await Task.findOne({
         relatedBooking: booking._id,
-        createdBy: req.user.id,
-        statusHistory: [
-          {
-            status: "Pending",
-            changedBy: req.user.id,
-            changedAt: new Date(),
-          },
-        ],
+        title: `Refund Request: ${booking.bookingId}`,
       });
 
-      await newTask.save();
+      if (!existingTask) {
+        let refundPercentage = 100;
+        let reason = "";
+
+        if (status === "No-Show") {
+          refundPercentage = 10;
+          reason = "Passenger did not show up (No-Show)";
+        } else {
+          // Cancelled: calculate based on time
+          const fromLocation = booking.bus?.locations?.find(
+            (loc) => loc.city.toString() === booking.from.toString()
+          );
+          const departureTime = fromLocation?.departureTime || "00:00";
+          const bookingDate = booking.bookingDate;
+          const bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
+          const hoursDifference = (bookingDateTime - Date.now()) / (1000 * 60 * 60);
+
+          if (hoursDifference < 24) {
+            refundPercentage = 30;
+            reason = "Passenger cancelled less than 24 hours before departure";
+          } else {
+            refundPercentage = 100;
+            reason = "Passenger cancelled 24 hours or more before departure";
+          }
+        }
+
+        const amount = booking.payment?.amount || 0;
+        const stripePaymentId = booking.payment?.transactionId || "N/A";
+        const refundAmount = Number((amount * (refundPercentage / 100)).toFixed(2));
+        const routeName = booking.route?.name || "N/A";
+        const departureTimeLoc = booking.bus?.locations?.find(
+          (loc) => loc.city.toString() === booking.from.toString()
+        )?.departureTime || "00:00";
+        const departureStr = `${booking.bookingDate} ${departureTimeLoc}`;
+        const creationDateStr = new Date().toISOString().split("T")[0];
+
+        const taskTitle = `Refund Request: ${booking.bookingId}`;
+        const taskDescription = `Customer Name: ${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}
+Booking ID: ${booking.bookingId}
+Trip Route/Details: ${routeName}
+Departure Date/Time: ${departureStr}
+Payment Amount: $${amount.toFixed(2)}
+Stripe Payment ID: ${stripePaymentId}
+Refund Amount: $${refundAmount.toFixed(2)}
+Refund Percentage: ${refundPercentage}%
+Refund Reason: ${reason}
+Booking Status: ${booking.status} (Boarding Status: ${status})
+Task Creation Date: ${creationDateStr}`;
+
+        const newTask = new Task({
+          title: taskTitle,
+          description: taskDescription,
+          source: "Passenger",
+          tag: "URGENT",
+          status: "Pending",
+          relatedBooking: booking._id,
+          createdBy: req.user.id,
+          statusHistory: [
+            {
+              status: "Pending",
+              changedBy: req.user.id,
+              changedAt: new Date(),
+            },
+          ],
+        });
+
+        await newTask.save();
+      }
     }
 
     return res.status(200).json({
@@ -2549,6 +2545,86 @@ export const getPassengerRequests = async (req, res, next) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Please try again later.",
+    });
+  }
+};
+
+export const markRefunded = async (req, res, next) => {
+  const { taskId, bookingId, refundAmount, refundReason, stripeRefundRef } = req.body;
+  try {
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID is required.",
+      });
+    }
+
+    const booking = await Booking.findById(bookingId);
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    // Release seats if not already cancelled or refunded
+    const oldStatus = booking.status;
+    if (oldStatus !== "cancelled" && oldStatus !== "refunded") {
+      const busAvailability = await BusAvailability.findOne({
+        bus: booking.bus,
+        date: booking.bookingDate,
+      });
+      if (busAvailability) {
+        let seatsDetails = booking.seatDetails;
+        let seatsToCancel = 0;
+        seatsDetails.map((seat) => {
+          seatsToCancel += seat.seats;
+        });
+
+        if (busAvailability.availableSeats >= busAvailability.totalSeats) {
+          busAvailability.availableSeats = busAvailability.totalSeats;
+        } else {
+          busAvailability.availableSeats += seatsToCancel;
+        }
+        await busAvailability.save();
+      }
+    }
+
+    // Update booking status and save refund details
+    booking.status = "refunded";
+    booking.refundDetails = {
+      amount: Number(refundAmount) || 0,
+      reason: refundReason || "Manual refund",
+      date: new Date(),
+      processedBy: req.user.id,
+      stripeRefundRef: stripeRefundRef || "",
+    };
+    await booking.save();
+
+    // Mark task as Completed if taskId provided
+    if (taskId) {
+      const Task = (await import("../../models/task.js")).default;
+      const task = await Task.findById(taskId);
+      if (task) {
+        task.status = "Completed";
+        task.statusHistory.push({
+          status: "Completed",
+          changedBy: req.user.id,
+          changedAt: new Date(),
+        });
+        await task.save();
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking has been marked as refunded successfully.",
+    });
+  } catch (error) {
+    console.error(error);
     return res.status(500).json({
       success: false,
       message: "Internal server error. Please try again later.",

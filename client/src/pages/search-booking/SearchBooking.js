@@ -74,14 +74,15 @@ const SearchBooking = () => {
 
   useEffect(() => {
     if (bookingData) {
-      setBookingStatus(bookingData.status);
+      const effectiveStatus = bookingData.status === "pending" ? "confirmed" : bookingData.status;
+      setBookingStatus(effectiveStatus);
 
-      switch (bookingData.status) {
+      switch (effectiveStatus) {
         case "confirmed":
           setStatusColor("bg-success");
           break;
-        case "pending":
-          setStatusColor("bg-warning");
+        case "completed":
+          setStatusColor("bg-info");
           break;
         case "refunded":
           setStatusColor("bg-secondary");
@@ -134,7 +135,10 @@ const SearchBooking = () => {
                   :{" "}
                   <span className="text-uppercase">
                     {selectedLanguage &&
-                      translateText(bookingData.status, selectedLanguage.code)}
+                      translateText(
+                        bookingData.status === "pending" ? "confirmed" : bookingData.status,
+                        selectedLanguage.code
+                      )}
                   </span>
                 </div>
               </div>
