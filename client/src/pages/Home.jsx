@@ -59,8 +59,11 @@ function Home() {
     }
   };
 
+  // Fallback to original text if translation is undefined in translation.js
   const t = (text) => {
-    return selectedLanguage ? translateText(text, selectedLanguage.code) : text;
+    if (!selectedLanguage) return text;
+    const translated = translateText(text, selectedLanguage.code);
+    return translated ? translated : text;
   };
 
   return (
