@@ -45,10 +45,10 @@ function Home() {
     if (!bookingId) {
       toast.error(
         selectedLanguage &&
-          translateText(
-            "You did not provided any Booking ID",
-            selectedLanguage.code
-          ),
+        translateText(
+          "You did not provided any Booking ID",
+          selectedLanguage.code
+        ),
         {
           duration: 2000,
           position: "top-right",
@@ -202,13 +202,15 @@ function Home() {
               </li>
             </ul>
           </Card>
-          
+
           <div className="d-flex align-items-center gap-2 mb-3 mt-4">
             <Airplane size={20} className="text-primary" />
             <h4 className="fw-bold mb-0 homepage-text-black">{t("Available Connections")}</h4>
           </div>
           <p className="mb-0 homepage-text-black">
-            {t("Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional airports near each stop.")}
+            {t("Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.
+
+")}
           </p>
         </Col>
 
