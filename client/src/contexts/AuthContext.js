@@ -1,5 +1,5 @@
 import { createContext, useEffect, useReducer } from "react";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 const INITIAL_STATE = {
   user: null,
