@@ -9,6 +9,7 @@ import {
   InputGroup,
   Row,
   Table,
+  Collapse,
 } from "react-bootstrap";
 import {
   ArrowRightCircleFill,
@@ -18,11 +19,9 @@ import {
   CurrencyDollar,
   GeoAltFill,
   QuestionCircleFill,
-  SignTurnRightFill,
   TicketPerforatedFill,
 } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
-import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
 import {
   checkIfBusAvailable,
   setCurrentBookingStep,
@@ -61,6 +60,7 @@ const Tickets = ({
   const dispatch = useDispatch();
   const [showRouteModal, setShowRouteModal] = useState(false);
   const [localError, setLocalError] = useState(null);
+  const [isRouteOpen, setIsRouteOpen] = useState(false);
 
   const handleFlexChange = (e) => {
     setFlexOption(e.target.checked);
@@ -275,7 +275,7 @@ const Tickets = ({
       priceSum = priceSum * 2;
     }
 
-    priceSum = flexOption == true ? (priceSum += 8) : priceSum;
+    priceSum = flexOption == true ? (priceSum += flexCharge) : priceSum;
 
     setTicketsPrice(priceSum);
   };
@@ -399,28 +399,52 @@ const Tickets = ({
           )}
         </Card.Header>
         <Card.Body>
-          <Row>
-            <Col className="col-12 col-md-12 d-flex align-items-center justify-content-between">
-              <p>
-                {availableBus?.locations.length > 0 && (
-                  <span className="h6">
-                    <SignTurnRightFill className="me-2" />
-                    {selectedLanguage &&
-                      translateText("route", selectedLanguage.code)}
-                    :&nbsp;
-                  </span>
-                )}
-                {availableBus?.locations.map((loc, index) => (
-                  <span key={loc._id}>
-                    {loc.city.name}
-                    {index !== availableBus.locations.length - 1 && (
-                      <ArrowRightShort size={20} className="mx-2" />
-                    )}
-                  </span>
-                ))}
-              </p>
-            </Col>
-          </Row>
+          {/* Collapsible Route Section */}
+          <div className="mb-4">
+            <button
+              type="button"
+              className="bg-transparent border-0 p-0 text-primary fw-bold d-inline-flex align-items-center gap-1 hover-scale"
+              style={{ outline: "none", fontSize: "0.95rem" }}
+              onClick={() => setIsRouteOpen(!isRouteOpen)}
+              aria-expanded={isRouteOpen}
+              aria-controls="route-collapse-stops"
+              onKeyDown={(e) => {
+                if (e.key === " " || e.key === "Enter") {
+                  e.preventDefault();
+                  setIsRouteOpen(!isRouteOpen);
+                }
+              }}
+            >
+              <span>{(selectedLanguage && translateText("Route", selectedLanguage.code)) || "Route (Click to View)"}</span>
+              <span
+                style={{
+                  display: "inline-block",
+                  transform: isRouteOpen ? "rotate(180deg)" : "rotate(0deg)",
+                  transition: "transform 0.2s ease",
+                  fontSize: "0.8rem",
+                }}
+              >
+                ▼
+              </span>
+            </button>
+            
+            <Collapse in={isRouteOpen}>
+              <div id="route-collapse-stops" className="bg-white p-3 rounded border mt-2">
+                <div className="d-flex flex-column align-items-center gap-2">
+                  {availableBus?.locations.map((loc, index) => (
+                    <React.Fragment key={loc._id}>
+                      <div className="fw-semibold text-dark p-2 rounded bg-light border w-100 text-center" style={{ maxWidth: "300px" }}>
+                        {loc.city.name}
+                      </div>
+                      {index !== availableBus.locations.length - 1 && (
+                        <div className="text-secondary fw-bold" style={{ fontSize: "1.1rem", lineHeight: "1" }}>↓</div>
+                      )}
+                    </React.Fragment>
+                  ))}
+                </div>
+              </div>
+            </Collapse>
+          </div>
 
           <Row className="mb-4">
             <Col className="col-12 col-md-6">
@@ -457,7 +481,7 @@ const Tickets = ({
             </Col>
           </Row>
 
-          <Row>
+          <Row className="mb-4">
             <Col className="d-flex flex-column justify-content-center align-items-center">
               <p className="h4 text-center">
                 {availableBus?.locations
@@ -486,148 +510,217 @@ const Tickets = ({
             </Col>
           </Row>
 
-          <Row className="align-items-center mt-4">
-            {busAvailabilityData &&
-              totalAvailableSeats > 0 &&
-              availableBus.ticketPrices.map((price) => {
-                let ticketInfo = availableBus.ticketTypes.find(
-                  (t) => t._id === price.ticketType
-                );
-                let fromLocationCity = availableBus.locations.find(
-                  (loc) => loc.city._id === selectedFromCity
-                );
-                let toLocationCity = availableBus.locations.find(
-                  (loc) => loc.city._id === selectedToCity
-                );
-                let ticketPriceInfo = price.prices.find(
-                  (p) =>
-                    fromLocationCity?.city._id === selectedFromCity &&
-                    toLocationCity?.city._id === selectedToCity &&
-                    fromLocationCity?._id === p.fromLocationId &&
-                    toLocationCity?._id === p.toLocationId
-                );
-
-                if (ticketInfo && ticketPriceInfo) {
-                  // Determine seat options for each ticket type
-                  const seatOptions = Array.from(
-                    { length: totalAvailableSeats + 1 },
-                    (_, i) => i
+          {/* Section 1: Passenger Selection */}
+          <div className="mb-4 p-3 bg-white rounded shadow-sm border">
+            <h5 className="fw-bold mb-3 text-secondary text-uppercase" style={{ fontSize: "0.9rem", letterSpacing: "1px" }}>
+              {(selectedLanguage && translateText("Passenger Selection", selectedLanguage.code)) || "Passenger Selection"}
+            </h5>
+            <Row className="align-items-center">
+              {busAvailabilityData &&
+                totalAvailableSeats > 0 &&
+                availableBus.ticketPrices.map((price) => {
+                  let ticketInfo = availableBus.ticketTypes.find(
+                    (t) => t._id === price.ticketType
                   );
-                  let seats = selectedSeats?.find(
-                    (seat) => seat.name === ticketInfo.name
-                  )?.seats;
-
-                  return (
-                    <Col>
-                      <div htmlFor={`${ticketInfo.name}-seats`} className="h6">
-                        {ticketInfo.name}
-                      </div>
-                      <InputGroup className="mb-3">
-                        <Form.Select
-                          id={`${ticketInfo.name}-seats`}
-                          value={seats || 0}
-                          onChange={(e) =>
-                            handleSeatSelection(
-                              ticketInfo._id,
-                              e,
-                              ticketPriceInfo.price
-                            )
-                          }
-                        >
-                          {/* Render options for each ticket type */}
-                          {seatOptions
-                            .slice(
-                              0,
-                              totalAvailableSeats -
-                                seatsTaken +
-                                (seats || 0) +
-                                1
-                            )
-                            .map((option) => (
-                              <option
-                                key={option}
-                                value={option}
-                                selected={seats === option}
-                              >
-                                {option}
-                              </option>
-                            ))}
-                        </Form.Select>
-                        <InputGroup.Text className="fw-semibold">
-                          x ${ticketPriceInfo.price}
-                        </InputGroup.Text>
-                      </InputGroup>
-                    </Col>
+                  let fromLocationCity = availableBus.locations.find(
+                    (loc) => loc.city._id === selectedFromCity
                   );
-                }
-              })}
+                  let toLocationCity = availableBus.locations.find(
+                    (loc) => loc.city._id === selectedToCity
+                  );
+                  let ticketPriceInfo = price.prices.find(
+                    (p) =>
+                      fromLocationCity?.city._id === selectedFromCity &&
+                      toLocationCity?.city._id === selectedToCity &&
+                      fromLocationCity?._id === p.fromLocationId &&
+                      toLocationCity?._id === p.toLocationId
+                  );
 
-            <Col className="d-flex flex-column align-items-end">
-              <h3 className="d-flex align-items-center display-6">
-                <CurrencyDollar />
-                {ticketsPrice}
-              </h3>
-            </Col>
-          </Row>
+                  if (ticketInfo && ticketPriceInfo) {
+                    const seatOptions = Array.from(
+                      { length: totalAvailableSeats + 1 },
+                      (_, i) => i
+                    );
+                    let seats = selectedSeats?.find(
+                      (seat) => seat.name === ticketInfo.name
+                    )?.seats;
 
-          <Row>
-            <Col xs={12} sm={12} md={12} lg={6}>
-              <h6 className="text-uppercase mb-0">
-                {selectedLanguage &&
-                  translateText("Flex Option", selectedLanguage.code)}
-              </h6>
-              <div className="mt-3">
-                <Form.Check
-                  type={"checkbox"}
-                  id={`flex-checkbox`}
-                  label={
-                    selectedLanguage &&
-                    translateText("flexOptionLabel", selectedLanguage.code)
+                    return (
+                      <Col key={ticketInfo._id} xs={12} md={6} className="mb-2">
+                        <div htmlFor={`${ticketInfo.name}-seats`} className="h6 mb-1">
+                          {ticketInfo.name}
+                        </div>
+                        <InputGroup>
+                          <Form.Select
+                            id={`${ticketInfo.name}-seats`}
+                            value={seats || 0}
+                            onChange={(e) =>
+                              handleSeatSelection(
+                                ticketInfo._id,
+                                e,
+                                ticketPriceInfo.price
+                              )
+                            }
+                          >
+                            {seatOptions
+                              .slice(
+                                0,
+                                totalAvailableSeats -
+                                  seatsTaken +
+                                  (seats || 0) +
+                                  1
+                              )
+                              .map((option) => (
+                                <option
+                                  key={option}
+                                  value={option}
+                                  selected={seats === option}
+                                >
+                                  {option}
+                                </option>
+                              ))}
+                          </Form.Select>
+                          <InputGroup.Text className="fw-semibold">
+                            x ${ticketPriceInfo.price}
+                          </InputGroup.Text>
+                        </InputGroup>
+                      </Col>
+                    );
                   }
-                  checked={flexOption}
-                  onChange={handleFlexChange}
-                />
-              </div>
-              <div>
-                <p className="m-0 mt-2">
-                  {selectedLanguage &&
-                    translateText("whyChooseFlex", selectedLanguage.code)}
-                </p>
-                <ul>
-                  <li>
-                    {selectedLanguage &&
-                      translateText("flexDescription", selectedLanguage.code)}
-                  </li>
-                  <li>
-                    {selectedLanguage &&
-                      translateText("freeCancellations", selectedLanguage.code)}
-                  </li>
-                  <li>
-                    {selectedLanguage &&
-                      translateText("dateChange", selectedLanguage.code)}
-                  </li>
-                </ul>
-              </div>
-            </Col>
+                })}
 
-            <Col xs={12} sm={12} md={12} lg={6}>
-              <h6 className="text-uppercase mb-0">
-                {selectedLanguage &&
-                  translateText("Baggage Policy", selectedLanguage.code)}
-              </h6>
-              <p className="mt-0">
-                {selectedLanguage &&
-                  translateText("Baggage Message", selectedLanguage.code)}
-              </p>
+              <Col xs={12} className="d-flex justify-content-end align-items-center mt-3">
+                <span className="text-muted me-2" style={{ fontSize: "0.95rem" }}>Total:</span>
+                <h3 className="d-flex align-items-center display-6 mb-0 text-primary fw-bold">
+                  <CurrencyDollar size={32} />
+                  {ticketsPrice}
+                </h3>
+              </Col>
+            </Row>
+          </div>
+
+          {/* Section 2: Flex Option */}
+          <Card className="border shadow-sm p-4 mb-4 rounded-4 bg-white">
+            <div className="d-flex justify-content-between align-items-center mb-3">
+              <h5 className="fw-bold text-dark mb-0">
+                {(selectedLanguage && translateText("Flex Option", selectedLanguage.code)) || "Flex Option"} (+${flexCharge})
+              </h5>
+              <Form.Check
+                type="switch"
+                id="flex-switch"
+                checked={flexOption}
+                onChange={handleFlexChange}
+                style={{ transform: "scale(1.25)", cursor: "pointer" }}
+              />
+            </div>
+            <p className="text-secondary mb-3" style={{ fontSize: "0.95rem" }}>
+              {(selectedLanguage && translateText("flexOptionDescriptionShort", selectedLanguage.code)) || `Add Flex Option for +$${flexCharge} and enjoy more flexibility.`}
+            </p>
+            
+            <div className="d-flex flex-column gap-3 text-secondary" style={{ fontSize: "0.9rem" }}>
               <div>
-                <img
-                  src={require("../../../../assets/bags.png")}
-                  alt=""
-                  className="border border-primary object-contain"
-                />
+                <span className="fw-bold text-success">✅ {(selectedLanguage && translateText("Free Cancellation", selectedLanguage.code)) || "Free Cancellation"}</span>
+                <div className="ms-4 text-muted">{(selectedLanguage && translateText("flexFreeCancelDesc", selectedLanguage.code)) || "Cancel up to 24 hours before departure at no extra cost."}</div>
               </div>
-            </Col>
-          </Row>
+              <div>
+                <span className="fw-bold text-success">✅ {(selectedLanguage && translateText("Free Rescheduling", selectedLanguage.code)) || "Free Rescheduling"}</span>
+                <div className="ms-4 text-muted">{(selectedLanguage && translateText("flexFreeRescheduleDesc", selectedLanguage.code)) || "Change your travel date at no extra charge by contacting Dispatch."}</div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Section 3: Baggage Policy */}
+          <Card className="border shadow-sm p-4 mb-4 rounded-4 bg-white">
+            <h5 className="fw-bold text-dark mb-3">
+              {(selectedLanguage && translateText("Baggage Policy", selectedLanguage.code)) || "Baggage Policy"}
+            </h5>
+            
+            <Row className="g-4 align-items-stretch">
+              {/* Included Section */}
+              <Col md={6}>
+                <div className="p-3 bg-light rounded-4 border border-success h-100" style={{ borderWidth: "1.5px" }}>
+                  <div className="d-flex align-items-center gap-2 mb-3 text-success fw-bold">
+                    <span style={{ fontSize: "1.2rem" }}>✅</span>
+                    <span>{(selectedLanguage && translateText("INCLUDED", selectedLanguage.code)) || "INCLUDED"}</span>
+                  </div>
+                  
+                  <div className="d-flex flex-column gap-3 text-secondary" style={{ fontSize: "0.9rem" }}>
+                    {/* Carry-On Luggage SVG */}
+                    <div className="d-flex align-items-center gap-3">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <rect x="5" y="7" width="14" height="13" rx="2" />
+                        <path d="M9 7V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3" />
+                        <circle cx="8" cy="20" r="1" />
+                        <circle cx="16" cy="20" r="1" />
+                      </svg>
+                      <div>
+                        <strong className="text-dark">{(selectedLanguage && translateText("1 Carry-On Luggage", selectedLanguage.code)) || "1 Carry-On Luggage"}</strong>
+                        <div className="small text-muted">{(selectedLanguage && translateText("carryOnDesc", selectedLanguage.code)) || "Fits in overhead bin/compartment"}</div>
+                      </div>
+                    </div>
+                    
+                    {/* Personal Item SVG */}
+                    <div className="d-flex align-items-center gap-3">
+                      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#2e7d32" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                        <path d="M4 20V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" />
+                        <path d="M9 4v18" />
+                        <path d="M15 4v18" />
+                        <path d="M4 10h16" />
+                        <path d="M4 16h16" />
+                      </svg>
+                      <div>
+                        <strong className="text-dark">{(selectedLanguage && translateText("1 Personal Item", selectedLanguage.code)) || "1 Personal Item"}</strong>
+                        <div className="small text-muted">{(selectedLanguage && translateText("personalItemDesc", selectedLanguage.code)) || "Backpack, purse, laptop bag, small tote"}</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+              
+              {/* Not Allowed Section */}
+              <Col md={6}>
+                <div className="p-3 bg-light rounded-4 border border-danger h-100" style={{ borderWidth: "1.5px" }}>
+                  <div className="d-flex align-items-center gap-2 mb-3 text-danger fw-bold">
+                    <span style={{ fontSize: "1.2rem" }}>❌</span>
+                    <span>{(selectedLanguage && translateText("NOT ALLOWED", selectedLanguage.code)) || "NOT ALLOWED"}</span>
+                  </div>
+                  
+                  <div className="d-flex flex-column gap-3 text-secondary" style={{ fontSize: "0.9rem" }}>
+                    {/* Large Suitcase with red diagonal bar SVG */}
+                    <div className="d-flex align-items-center gap-3">
+                      <div className="position-relative" style={{ width: "40px", height: "40px", flexShrink: 0 }}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c62828" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="5" y="7" width="14" height="13" rx="2" />
+                          <path d="M9 7V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v3" />
+                          <circle cx="8" cy="20" r="1" />
+                          <circle cx="16" cy="20" r="1" />
+                          <line x1="2" y1="2" x2="22" y2="22" stroke="#c62828" strokeWidth="2.5" />
+                        </svg>
+                      </div>
+                      <div>
+                        <strong className="text-dark">{(selectedLanguage && translateText("NO BULKY OR OVERSIZED ITEMS", selectedLanguage.code)) || "NO BULKY OR OVERSIZED ITEMS"}</strong>
+                      </div>
+                    </div>
+                    
+                    {/* Large Package Box with red diagonal bar SVG */}
+                    <div className="d-flex align-items-center gap-3">
+                      <div className="position-relative" style={{ width: "40px", height: "40px", flexShrink: 0 }}>
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c62828" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+                          <line x1="12" y1="22.08" x2="12" y2="12" />
+                          <line x1="2" y1="2" x2="22" y2="22" stroke="#c62828" strokeWidth="2.5" />
+                        </svg>
+                      </div>
+                      <div>
+                        <strong className="text-dark">{(selectedLanguage && translateText("NO LARGE PACKAGES", selectedLanguage.code)) || "NO LARGE PACKAGES"}</strong>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </Col>
+            </Row>
+          </Card>
 
           {localError && (
             <Alert variant="danger" className="mt-3">

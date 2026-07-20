@@ -93,7 +93,7 @@ const Booking = () => {
   const [isTimerStarted, setIsTimerStarted] = useState(false);
   const [flexOption, setFlexOption] = useState(false);
 
-  const flexCharge = 8;
+  const flexCharge = 5;
   const cheapestLocations = [
     "66da9290114dd9be8eaf8a59",
     "66da9249114dd9be8eaf8a4a",
