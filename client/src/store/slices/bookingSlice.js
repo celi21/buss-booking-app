@@ -42,6 +42,9 @@ const initialState = {
     //   isCompleted: false,
     // },
   },
+  selectedDate: null,
+  selectedFromCity: null,
+  selectedToCity: null,
 };
 
 export const fetchCities = createAsyncThunk(
@@ -244,6 +247,15 @@ const bookingSlice = createSlice({
     resetBookingForm: (state) => {
       Object.assign(state, initialState);
     },
+    setSelectedDateState: (state, action) => {
+      state.selectedDate = action.payload;
+    },
+    setSelectedFromCityState: (state, action) => {
+      state.selectedFromCity = action.payload;
+    },
+    setSelectedToCityState: (state, action) => {
+      state.selectedToCity = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -329,6 +341,9 @@ export const {
   resetBusAvailabilityData,
   setTripType,
   setReturnDate,
+  setSelectedDateState,
+  setSelectedFromCityState,
+  setSelectedToCityState,
 } = bookingSlice.actions;
 
 export default bookingSlice.reducer;

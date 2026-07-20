@@ -3,13 +3,14 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
-import busStopImage from "../assets/busstop.png";
+import buenoBusHero from "../assets/bueno_bus_hero.png";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/esm/Button";
 import GuestRegisterModal from "./components/GuestRegisterModal";
 import { useSelector } from "react-redux";
 import { translateText } from "../utils/translation";
 import toast, { Toaster } from "react-hot-toast";
+import BookingSearch from "../components/shared/BookingSearch/BookingSearch";
 import {
   Calendar3,
   BusFront,
@@ -32,13 +33,6 @@ function Home() {
   );
 
   const navigate = useNavigate();
-  const handleBookNow = () => {
-    if (user) {
-      navigate("/booking");
-      return;
-    }
-    setShowModal(true);
-  };
 
   const handleBookingDetails = () => {
     let bookingId = window.prompt("Please enter your Booking ID:");
@@ -67,47 +61,60 @@ function Home() {
   };
 
   return (
-    <Container className="py-5">
+    <div className="homepage-wrapper">
       <Toaster />
       {showModal && (
         <GuestRegisterModal showModal={showModal} handleClose={handleClose} />
       )}
 
       {/* HERO SECTION */}
-      <Row className="align-items-center mb-5 gy-4">
-        <Col lg={6} className="d-flex flex-column justify-content-center">
-          <h1 className="display-5 fw-bold mb-3 homepage-text-black">
-            {t("Reliable Transportation Between Upstate New York & New York City")}
-          </h1>
-          <p className="lead mb-4 homepage-text-black" style={{ fontSize: "1.1rem", lineHeight: "1.6" }}>
-            {t("For over 18 years, Bueno Transit has provided safe, comfortable, and dependable scheduled transportation connecting Upstate New York, New York City, and regional destinations.")}
-          </p>
-          <div className="d-flex flex-wrap gap-3">
-            <Button
-              variant="primary"
-              className="p-3 px-5 fw-bold shadow-sm"
-              style={{ fontSize: "1.05rem", borderRadius: "8px" }}
-              onClick={() => handleBookNow()}
-            >
-              {t("Book Now")}
-            </Button>
-            <Button
-              variant="outline-primary"
-              className="p-3 px-4 fw-bold bg-white"
-              style={{ fontSize: "1.05rem", borderRadius: "8px", borderWidth: "2px" }}
-              onClick={() => handleBookingDetails()}
-            >
-              {t("View your Booking Details")}
-            </Button>
+      <div 
+        className="hero-section position-relative d-flex align-items-center justify-content-center text-white" 
+        style={{
+          width: "100%",
+          minHeight: "80vh",
+          backgroundImage: `url(${buenoBusHero})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          padding: "80px 20px"
+        }}
+      >
+        {/* Dark overlay at 55% opacity */}
+        <div 
+          className="position-absolute top-0 start-0 w-100 h-100" 
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.55)",
+            zIndex: 1
+          }}
+        />
+
+        {/* Hero Content */}
+        <div className="position-relative text-center d-flex flex-column align-items-center gap-4 w-100" style={{ zIndex: 2 }}>
+          <div style={{ maxWidth: "800px" }}>
+            <h1 className="display-4 fw-bold mb-3 text-white">
+              {t("Reliable Transportation Between Upstate New York & New York City")}
+            </h1>
+            <p className="lead mb-0 text-white-50" style={{ fontSize: "1.2rem", lineHeight: "1.6" }}>
+              {t("For over 18 years, Bueno Transit has provided safe, comfortable, and dependable scheduled transportation connecting Upstate New York, New York City, and regional destinations.")}
+            </p>
           </div>
-        </Col>
-        <Col lg={6}>
-          <div className="position-relative">
-            {/* Remove shadow from the logo/image */}
-            <img src={busStopImage} alt="Bus Stop" className="w-100 rounded-4" style={{ objectFit: "cover" }} />
-          </div>
-        </Col>
-      </Row>
+
+          {/* Reusable Booking Search Widget */}
+          <BookingSearch isCheckoutFlow={false} />
+
+          {/* View Booking Details Action */}
+          <Button
+            variant="link"
+            className="text-white mt-1 text-decoration-none fw-semibold"
+            onClick={handleBookingDetails}
+            style={{ fontSize: "0.95rem" }}
+          >
+            {t("View your Booking Details")} →
+          </Button>
+        </div>
+      </div>
+
+      <Container className="py-5">
 
       {/* SERVICE HIGHLIGHTS */}
       <div className="my-5 py-3">
@@ -298,7 +305,8 @@ function Home() {
         </Row>
       </div>
     </Container>
-  );
+  </div>
+);
 }
 
 export default Home;

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
 import { ArrowRight } from "react-bootstrap-icons";
-import DatesAndLocations from "./components/dates-and-locations/DatesAndLocations";
+import BookingSearch from "../../components/shared/BookingSearch/BookingSearch";
 import Tickets from "./components/tickets/Tickets";
 import PersonalDetails from "./components/personal-details/PersonalDetails";
 import ConfirmBooking from "./components/confirm-booking/ConfirmBooking";
@@ -12,6 +12,9 @@ import {
   fetchCities,
   resetBookingForm,
   setCurrentBookingStep,
+  setSelectedDateState,
+  setSelectedFromCityState,
+  setSelectedToCityState,
 } from "../../store/slices/bookingSlice";
 import BookingConfirmationModal from "./components/booking-payment/booking-confirmation-modal/BookingConfirmationModal";
 import { translateText } from "../../utils/translation";
@@ -26,16 +29,42 @@ const Booking = () => {
     (state) => state.settings.selectedLanguage
   );
 
+  const reduxSelectedDate = useSelector((state) => state.booking.selectedDate);
+  const reduxSelectedFromCity = useSelector((state) => state.booking.selectedFromCity);
+  const reduxSelectedToCity = useSelector((state) => state.booking.selectedToCity);
+
   const [ticketsPrice, setTicketsPrice] = useState(0);
   const [bookingTimeout, setBookingTimeout] = useState("7:00");
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [selectedFromCity, setSelectedFromCity] = useState(null);
-  const [selectedToCity, setSelectedToCity] = useState(null);
+  const [selectedDate, setSelectedDate] = useState(reduxSelectedDate);
+  const [selectedFromCity, setSelectedFromCity] = useState(reduxSelectedFromCity);
+  const [selectedToCity, setSelectedToCity] = useState(reduxSelectedToCity);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [totalDuration, setTotalDuration] = useState(null);
   const [departureTime, setDepartureTime] = useState(null);
   const [arrivalTime, setArrivalTime] = useState(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+
+  // Sync with Redux changes
+  useEffect(() => {
+    if (reduxSelectedDate) setSelectedDate(reduxSelectedDate);
+    if (reduxSelectedFromCity) setSelectedFromCity(reduxSelectedFromCity);
+    if (reduxSelectedToCity) setSelectedToCity(reduxSelectedToCity);
+  }, [reduxSelectedDate, reduxSelectedFromCity, reduxSelectedToCity]);
+
+  const handleSetSelectedDate = (val) => {
+    setSelectedDate(val);
+    dispatch(setSelectedDateState(val));
+  };
+
+  const handleSetSelectedFromCity = (val) => {
+    setSelectedFromCity(val);
+    dispatch(setSelectedFromCityState(val));
+  };
+
+  const handleSetSelectedToCity = (val) => {
+    setSelectedToCity(val);
+    dispatch(setSelectedToCityState(val));
+  };
 
   // ✅ Initialize booking with safe defaults to prevent null errors
   const [booking, SetBooking] = useState({
@@ -233,16 +262,17 @@ const Booking = () => {
       {/* Booking Steps Components */}
       <div className="my-4">
         {currentBookingStep === "dates-and-locations" && (
-          <DatesAndLocations
+          <BookingSearch
             selectedDate={selectedDate}
-            setSelectedDate={setSelectedDate}
+            setSelectedDate={handleSetSelectedDate}
             selectedFromCity={selectedFromCity}
-            setSelectedFromCity={setSelectedFromCity}
+            setSelectedFromCity={handleSetSelectedFromCity}
             selectedToCity={selectedToCity}
-            setSelectedToCity={setSelectedToCity}
+            setSelectedToCity={handleSetSelectedToCity}
             cheapestLocations={cheapestLocations}
             personalDetails={personalDetails}
             setPersonalDetails={setPersonalDetails}
+            isCheckoutFlow={true}
           />
         )}
 
