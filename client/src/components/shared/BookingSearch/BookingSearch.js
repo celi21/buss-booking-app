@@ -557,27 +557,26 @@ const BookingSearch = ({
                 />
               </Form.Group>
             </Col>
-
-            {/* Search Submit Button */}
-            <Col lg={2} md={4} xs={12}>
-              <Button
-                variant="primary"
-                type="submit"
-                className="w-100 py-3 rounded-3 fw-bold d-flex align-items-center justify-content-center gap-2 shadow-sm"
-                style={{ fontSize: "16px" }}
-                disabled={isBusAvailableLoading}
-              >
-                {isBusAvailableLoading ? (
-                  <Spinner size="sm" />
-                ) : (
-                  <>
-                    <Search size={18} />
-                    <span>{t("Search")}</span>
-                  </>
-                )}
-              </Button>
-            </Col>
           </Row>
+          
+          <div className="text-center mt-4">
+            <Button
+              variant="primary"
+              type="submit"
+              className="px-5 py-3 rounded-3 fw-bold d-inline-flex align-items-center justify-content-center gap-2 shadow-sm hover-scale"
+              style={{ fontSize: "16px", minWidth: "220px", backgroundColor: "#0d6efd", borderColor: "#0d6efd" }}
+              disabled={isBusAvailableLoading}
+            >
+              {isBusAvailableLoading ? (
+                <Spinner size="sm" />
+              ) : (
+                <>
+                  <Search size={18} />
+                  <span>{t("Search")}</span>
+                </>
+              )}
+            </Button>
+          </div>
         </Form>
       )}
     </Card>

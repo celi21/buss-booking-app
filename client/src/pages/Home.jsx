@@ -30,29 +30,7 @@ import {
   QuestionCircleFill,
 } from "react-bootstrap-icons";
 
-// Inline Logo Component
-const Logo = () => (
-  <div className="d-flex align-items-center justify-content-center gap-3 mb-3">
-    <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100" height="100" rx="20" fill="#0d6efd" />
-      {/* Sleek bus shape */}
-      <rect x="25" y="30" width="50" height="35" rx="5" fill="white" />
-      <rect x="30" y="35" width="18" height="12" rx="2" fill="#333" />
-      <rect x="52" y="35" width="18" height="12" rx="2" fill="#333" />
-      <circle cx="38" cy="72" r="8" fill="#333" />
-      <circle cx="62" cy="72" r="8" fill="#333" />
-      {/* Gold details */}
-      <circle cx="38" cy="72" r="4" fill="#ffc107" />
-      <circle cx="62" cy="72" r="4" fill="#ffc107" />
-      <rect x="20" y="48" width="5" height="8" rx="1" fill="#ffc107" />
-      <rect x="75" y="48" width="5" height="8" rx="1" fill="#ffc107" />
-    </svg>
-    <div className="text-start">
-      <h3 className="fw-bold text-white mb-0 tracking-wide" style={{ fontFamily: "'Outfit', 'Inter', sans-serif" }}>BUENO EXPRESS</h3>
-      <small className="text-white-50 fw-semibold tracking-widest uppercase" style={{ fontSize: "0.65rem", display: "block", marginTop: "-3px" }}>TRANSPORTATION</small>
-    </div>
-  </div>
-);
+import buenoLogo from "../assets/bueno_logo.png";
 
 function Home() {
   const [showModal, setShowModal] = useState(false);
@@ -136,8 +114,7 @@ function Home() {
 
         {/* Hero Content */}
         <div className="position-relative text-center d-flex flex-column align-items-center gap-4 w-100" style={{ zIndex: 2 }}>
-          {/* Logo Centered above Hero Text */}
-          <Logo />
+          <img src={buenoLogo} alt="Bueno Express Logo" style={{ maxHeight: "160px", width: "auto", objectFit: "contain", marginBottom: "-10px" }} />
 
           <div style={{ maxWidth: "800px" }}>
             <h1 className="display-4 fw-bold mb-3 text-white">
