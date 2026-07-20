@@ -2675,3 +2675,55 @@ export const updateTripStatus = async (req, res, next) => {
     });
   }
 };
+
+export const getPublicTripStatuses = async (req, res, next) => {
+  try {
+    const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+    const { date = today } = req.body;
+
+    const bookings = await Booking.find({ bookingDate: date });
+
+    const busStatuses = {};
+    bookings.forEach((b) => {
+      if (b.bus && b.tripStatus === "Delayed") {
+        busStatuses[b.bus.toString()] = "Delayed";
+      }
+    });
+
+    const buses = await Bus.find({ status: "active" }).populate("route locations.city");
+    
+    const schedules = buses.map((bus) => {
+      const initialLocation = bus.locations.find((l) => l.departureTime);
+      const departureTime = initialLocation ? initialLocation.departureTime : "00:00";
+      
+      const fromCity = bus.locations[0]?.city?.name || "";
+      const toCity = bus.locations[bus.locations.length - 1]?.city?.name || "";
+      
+      const status = busStatuses[bus._id.toString()] || "On Time";
+      
+      return {
+        busId: bus._id,
+        routeName: bus.route ? bus.route.name : `${fromCity} - ${toCity}`,
+        departureTime,
+        fromCity,
+        toCity,
+        status,
+      };
+    });
+
+    schedules.sort((a, b) => a.departureTime.localeCompare(b.departureTime));
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        schedules,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error.",
+    });
+  }
+};

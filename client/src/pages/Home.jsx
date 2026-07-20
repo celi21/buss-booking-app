@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import { translateText } from "../utils/translation";
 import toast, { Toaster } from "react-hot-toast";
 import BookingSearch from "../components/shared/BookingSearch/BookingSearch";
+import api from "../utils/api";
 import {
   Calendar3,
   BusFront,
@@ -22,7 +23,36 @@ import {
   CheckCircleFill,
   InfoCircleFill,
   Backpack,
+  BoxSeam,
+  ArrowRight,
+  ShieldLock,
+  CursorFill,
+  QuestionCircleFill,
 } from "react-bootstrap-icons";
+
+// Inline Logo Component
+const Logo = () => (
+  <div className="d-flex align-items-center justify-content-center gap-3 mb-3">
+    <svg width="45" height="45" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" rx="20" fill="#0d6efd" />
+      {/* Sleek bus shape */}
+      <rect x="25" y="30" width="50" height="35" rx="5" fill="white" />
+      <rect x="30" y="35" width="18" height="12" rx="2" fill="#333" />
+      <rect x="52" y="35" width="18" height="12" rx="2" fill="#333" />
+      <circle cx="38" cy="72" r="8" fill="#333" />
+      <circle cx="62" cy="72" r="8" fill="#333" />
+      {/* Gold details */}
+      <circle cx="38" cy="72" r="4" fill="#ffc107" />
+      <circle cx="62" cy="72" r="4" fill="#ffc107" />
+      <rect x="20" y="48" width="5" height="8" rx="1" fill="#ffc107" />
+      <rect x="75" y="48" width="5" height="8" rx="1" fill="#ffc107" />
+    </svg>
+    <div className="text-start">
+      <h3 className="fw-bold text-white mb-0 tracking-wide" style={{ fontFamily: "'Outfit', 'Inter', sans-serif" }}>BUENO EXPRESS</h3>
+      <small className="text-white-50 fw-semibold tracking-widest uppercase" style={{ fontSize: "0.65rem", display: "block", marginTop: "-3px" }}>TRANSPORTATION</small>
+    </div>
+  </div>
+);
 
 function Home() {
   const [showModal, setShowModal] = useState(false);
@@ -32,7 +62,23 @@ function Home() {
     (state) => state.settings.selectedLanguage
   );
 
+  const [liveSchedules, setLiveSchedules] = useState([]);
   const navigate = useNavigate();
+
+  // Load today's live schedules
+  useEffect(() => {
+    const fetchSchedules = async () => {
+      try {
+        const res = await api.post("/booking/public-trip-statuses");
+        if (res.data && res.data.success) {
+          setLiveSchedules(res.data.data.schedules);
+        }
+      } catch (err) {
+        console.error("Error loading trip statuses:", err);
+      }
+    };
+    fetchSchedules();
+  }, []);
 
   const handleBookingDetails = () => {
     let bookingId = window.prompt("Please enter your Booking ID:");
@@ -72,7 +118,7 @@ function Home() {
         className="hero-section position-relative d-flex align-items-center justify-content-center text-white" 
         style={{
           width: "100%",
-          minHeight: "80vh",
+          minHeight: "85vh",
           backgroundImage: `url(${buenoBusHero})`,
           backgroundSize: "cover",
           backgroundPosition: "center",
@@ -90,6 +136,9 @@ function Home() {
 
         {/* Hero Content */}
         <div className="position-relative text-center d-flex flex-column align-items-center gap-4 w-100" style={{ zIndex: 2 }}>
+          {/* Logo Centered above Hero Text */}
+          <Logo />
+
           <div style={{ maxWidth: "800px" }}>
             <h1 className="display-4 fw-bold mb-3 text-white">
               {t("Reliable Transportation Between Upstate New York & New York City")}
@@ -102,211 +151,446 @@ function Home() {
           {/* Reusable Booking Search Widget */}
           <BookingSearch isCheckoutFlow={false} />
 
-          {/* View Booking Details Action */}
+          {/* Manage Booking Action Button */}
           <Button
-            variant="link"
-            className="text-white mt-1 text-decoration-none fw-semibold"
+            variant="primary"
+            className="px-5 py-3 fw-bold rounded-pill text-white shadow hover-scale"
             onClick={handleBookingDetails}
-            style={{ fontSize: "0.95rem" }}
+            style={{
+              backgroundColor: "#0d6efd",
+              borderColor: "#0d6efd",
+              fontSize: "1.05rem",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "8px"
+            }}
           >
-            {t("View your Booking Details")} →
+            {t("Manage Booking")}
           </Button>
         </div>
       </div>
 
       <Container className="py-5">
-
-      {/* SERVICE HIGHLIGHTS */}
-      <div className="my-5 py-3">
-        <div className="text-center mb-4">
-          <h3 className="fw-bold homepage-text-black">{t("Why Travel With Us")}</h3>
-          <p className="homepage-text-black">{t("Safe, reliable, and convenient regional transit services")}</p>
+        {/* WHY TRAVEL WITH US (SERVICE HIGHLIGHTS) */}
+        <div className="my-5 py-3">
+          <div className="text-center mb-4">
+            <h3 className="fw-bold homepage-text-black">{t("Why Travel With Us")}</h3>
+            <p className="homepage-text-black">{t("Safe, reliable, and convenient regional transit services")}</p>
+          </div>
+          <Row className="g-3 justify-content-center">
+            <Col className="col-12 col-sm-6 col-md-4 col-lg-2">
+              <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="d-flex flex-column align-items-center p-2">
+                  <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e3f2fd", color: "#0d6efd", width: "60px", height: "60px" }}>
+                    <Calendar3 size={26} />
+                  </div>
+                  <h6 className="fw-bold mb-1 homepage-text-black" style={{ fontSize: "0.95rem" }}>{t("Operating 7 Days a Week")}</h6>
+                  <small className="homepage-text-black">{t("Daily schedule options")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col className="col-12 col-sm-6 col-md-4 col-lg-2">
+              <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="d-flex flex-column align-items-center p-2">
+                  <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e8f5e9", color: "#2e7d32", width: "60px", height: "60px" }}>
+                    <BusFront size={26} />
+                  </div>
+                  <h6 className="fw-bold mb-1 homepage-text-black" style={{ fontSize: "0.95rem" }}>{t("Scheduled Transportation")}</h6>
+                  <small className="homepage-text-black">{t("Reliable timetables")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col className="col-12 col-sm-6 col-md-4 col-lg-2">
+              <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="d-flex flex-column align-items-center p-2">
+                  <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e0f7fa", color: "#00838f", width: "60px", height: "60px" }}>
+                    <TicketPerforated size={26} />
+                  </div>
+                  <h6 className="fw-bold mb-1 homepage-text-black" style={{ fontSize: "0.95rem" }}>{t("Easy Online Booking")}</h6>
+                  <small className="homepage-text-black">{t("Reserve in seconds")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col className="col-12 col-sm-6 col-md-4 col-lg-2">
+              <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="d-flex flex-column align-items-center p-2">
+                  <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#fff8e1", color: "#ff8f00", width: "60px", height: "60px" }}>
+                    <ShieldCheck size={26} />
+                  </div>
+                  <h6 className="fw-bold mb-1 homepage-text-black" style={{ fontSize: "0.95rem" }}>{t("Secure Online Payments")}</h6>
+                  <small className="homepage-text-black">{t("Stripe integrated")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col className="col-12 col-sm-6 col-md-4 col-lg-2">
+              <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="d-flex flex-column align-items-center p-2">
+                  <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#ffebee", color: "#c62828", width: "60px", height: "60px" }}>
+                    <Airplane size={26} />
+                  </div>
+                  <h6 className="fw-bold mb-1 homepage-text-black" style={{ fontSize: "0.95rem" }}>{t("Airport Connections Available")}</h6>
+                  <small className="homepage-text-black">{t("Transit hub transfers")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            {/* Added Package Delivery Available Highlight */}
+            <Col className="col-12 col-sm-6 col-md-4 col-lg-2">
+              <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="d-flex flex-column align-items-center p-2">
+                  <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#f3e5f5", color: "#8e24aa", width: "60px", height: "60px" }}>
+                    <BoxSeam size={26} />
+                  </div>
+                  <h6 className="fw-bold mb-1 homepage-text-black" style={{ fontSize: "0.95rem" }}>{t("Package Delivery Available")}</h6>
+                  <small className="homepage-text-black">{t("Fast parcel shipping")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
         </div>
-        <Row className="g-3 justify-content-center">
-          <Col className="col-12 col-sm-6 col-md-4 col-lg">
-            <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="d-flex flex-column align-items-center p-2">
-                <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e3f2fd", color: "#0d6efd", width: "60px", height: "60px" }}>
-                  <Calendar3 size={26} />
+
+        <hr className="my-5 text-black-50" />
+
+        {/* HOW TO BOOK TICKETS (Redesigned Step flow with big circular step badges) */}
+        <div className="my-5">
+          <div className="text-center mb-5">
+            <h3 className="fw-bold homepage-text-black">{t("How to Book Tickets")}</h3>
+            <p className="homepage-text-black">{t("Three simple steps to secure your seats online")}</p>
+          </div>
+          <Row className="g-4 text-center">
+            <Col md={4}>
+              <div className="d-flex flex-column align-items-center">
+                <div className="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mb-3 shadow hover-scale" style={{ width: "80px", height: "80px" }}>
+                  <GeoAltFill size={36} />
                 </div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Operating 7 Days a Week")}</h6>
-                <small className="homepage-text-black">{t("Daily schedule options")}</small>
-              </Card.Body>
+                <h5 className="fw-bold homepage-text-black">{t("1. Select Route & Date")}</h5>
+                <p className="text-muted px-3" style={{ fontSize: "0.95rem" }}>
+                  {t("Enter your starting and destination city to search departure lists.")}
+                </p>
+              </div>
+            </Col>
+            <Col md={4}>
+              <div className="d-flex flex-column align-items-center">
+                <div className="rounded-circle bg-success text-white d-flex align-items-center justify-content-center mb-3 shadow hover-scale" style={{ width: "80px", height: "80px" }}>
+                  <BusFront size={36} />
+                </div>
+                <h5 className="fw-bold homepage-text-black">{t("2. Choose Bus & Pick Seats")}</h5>
+                <p className="text-muted px-3" style={{ fontSize: "0.95rem" }}>
+                  {t("Select your preferred timetable and pick seats from the interactive map.")}
+                </p>
+              </div>
+            </Col>
+            <Col md={4}>
+              <div className="d-flex flex-column align-items-center">
+                <div className="rounded-circle bg-warning text-white d-flex align-items-center justify-content-center mb-3 shadow hover-scale" style={{ width: "80px", height: "80px" }}>
+                  <ShieldCheck size={36} />
+                </div>
+                <h5 className="fw-bold homepage-text-black">{t("3. Confirm & Pay Securely")}</h5>
+                <p className="text-muted px-3" style={{ fontSize: "0.95rem" }}>
+                  {t("Review booking, add personal details, and pay securely online.")}
+                </p>
+              </div>
+            </Col>
+          </Row>
+        </div>
+
+        <hr className="my-5 text-black-50" />
+
+        {/* WHERE WE TRAVEL & CONNECTIONS */}
+        <Row className="gy-5">
+          <Col lg={7}>
+            <div className="d-flex align-items-center gap-2 mb-3">
+              <GeoAltFill size={20} className="text-primary" />
+              <h4 className="fw-bold mb-0 homepage-text-black">{t("Where We Travel")}</h4>
+            </div>
+            
+            <Row className="g-3">
+              <Col md={6}>
+                <Card className="border-0 bg-light p-3 rounded-4 h-100">
+                  <h6 className="fw-bold text-primary mb-2">{t("Upstate New York pickup locations")}</h6>
+                  <ul className="list-unstyled mb-0 d-flex flex-column gap-1 text-secondary" style={{ fontSize: "0.95rem" }}>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Utica")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Frankfort")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Ilion")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Herkimer")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Albany (Guilderland Travel Plaza, Schenectady)")}</li>
+                  </ul>
+                </Card>
+              </Col>
+              <Col md={6}>
+                <Card className="border-0 bg-light p-3 rounded-4 h-100">
+                  <h6 className="fw-bold text-success mb-2">{t("New York City / Downstate pickup locations")}</h6>
+                  <ul className="list-unstyled mb-0 d-flex flex-column gap-1 text-secondary" style={{ fontSize: "0.95rem" }}>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> <strong>{t("Main stop: Pablo Express")}</strong></li>
+                    <li className="ms-4 text-muted">{t("1218 St. Nicholas Ave, Manhattan")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Fort Lee, New Jersey (near the George Washington Bridge)")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Route 4, Paramus, New Jersey")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Manhattan (third-party transfer/drop-off)")}</li>
+                    <li><CheckCircleFill size={12} className="text-success me-2" /> {t("Bronx (third-party transfer/drop-off)")}</li>
+                  </ul>
+                </Card>
+              </Col>
+            </Row>
+
+            <Card className="border-0 bg-light p-3 rounded-4 mt-3">
+              <h6 className="fw-bold text-info mb-2">{t("Airport connections")}</h6>
+              <p className="mb-2 text-secondary" style={{ fontSize: "0.95rem" }}>
+                {t("The website also advertises connections to:")}
+              </p>
+              <ul className="list-unstyled mb-2 d-flex flex-wrap gap-3 text-secondary fw-semibold" style={{ fontSize: "0.9rem" }}>
+                <li>✈️ {t("JFK Airport")}</li>
+                <li>✈️ {t("LaGuardia Airport")}</li>
+                <li>✈️ {t("Newark Liberty International Airport")}</li>
+              </ul>
+              <small className="text-muted d-block" style={{ fontSize: "0.85rem", lineHeight: "1.4" }}>
+                {t("These airport transfers are provided through a third-party service for an additional fee.")}
+              </small>
             </Card>
+
+            <div className="alert alert-info mt-3 border-0 rounded-4 p-3 d-flex align-items-start gap-2" style={{ fontSize: "0.9rem" }}>
+              <InfoCircleFill className="text-info mt-1" size={18} style={{ flexShrink: 0 }} />
+              <span>
+                <strong>{t("Package Shipping Note")}:</strong> {t("Packages can only travel to and from 1218 St Nicholas Avenue and Picked up or Droped off Door to Door in Utica, New York .")}
+              </span>
+            </div>
           </Col>
-          <Col className="col-12 col-sm-6 col-md-4 col-lg">
-            <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="d-flex flex-column align-items-center p-2">
-                <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e8f5e9", color: "#2e7d32", width: "60px", height: "60px" }}>
-                  <BusFront size={26} />
-                </div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Scheduled Transportation")}</h6>
-                <small className="homepage-text-black">{t("Reliable timetables")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col className="col-12 col-sm-6 col-md-4 col-lg">
-            <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="d-flex flex-column align-items-center p-2">
-                <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#e0f7fa", color: "#00838f", width: "60px", height: "60px" }}>
-                  <TicketPerforated size={26} />
-                </div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Easy Online Booking")}</h6>
-                <small className="homepage-text-black">{t("Reserve in seconds")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col className="col-12 col-sm-6 col-md-4 col-lg">
-            <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="d-flex flex-column align-items-center p-2">
-                <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#fff8e1", color: "#ff8f00", width: "60px", height: "60px" }}>
-                  <ShieldCheck size={26} />
-                </div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Secure Online Payments")}</h6>
-                <small className="homepage-text-black">{t("Stripe integrated")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col className="col-12 col-sm-6 col-md-4 col-lg">
-            <Card className="h-100 text-center border-0 shadow-sm p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="d-flex flex-column align-items-center p-2">
-                <div className="p-3 rounded-circle mb-3 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#ffebee", color: "#c62828", width: "60px", height: "60px" }}>
-                  <Airplane size={26} />
-                </div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Airport Connections Available")}</h6>
-                <small className="homepage-text-black">{t("Transit hub transfers")}</small>
-              </Card.Body>
+
+          <Col lg={5}>
+            <div className="d-flex align-items-center gap-2 mb-3">
+              <Airplane size={20} className="text-primary" />
+              <h4 className="fw-bold mb-0 homepage-text-black">{t("Available Connections")}</h4>
+            </div>
+            <Card className="border-0 bg-light p-3 rounded-4 h-100">
+              <p className="mb-0 text-secondary" style={{ fontSize: "0.98rem", lineHeight: "1.6" }}>
+                {t("Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.")}
+              </p>
             </Card>
           </Col>
         </Row>
-      </div>
 
-      <hr className="my-5 text-black-50" />
+        <hr className="my-5 text-black-50" />
 
-      {/* TRAVEL & CONNECTIONS & HOW TO BOOK */}
-      <Row className="gy-5">
-        <Col md={6}>
-          <div className="d-flex align-items-center gap-2 mb-3">
-            <GeoAltFill size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0 homepage-text-black">{t("Where We Travel")}</h4>
-          </div>
-          <p className="homepage-text-black">
-            {t("We connect key Upstate New York cities directly with the New York metropolitan area.")}
-          </p>
-          <Card className="border-0 bg-light p-3 rounded-4 mb-4">
-            <ul className="list-unstyled mb-0 d-flex flex-column gap-2">
-              <li className="d-flex align-items-center gap-2">
-                <CheckCircleFill size={16} className="text-success" />
-                <span className="homepage-text-black">{t("Upstate NY: Albany, Syracuse, Binghamton, Rochester, Buffalo")}</span>
-              </li>
-              <li className="d-flex align-items-center gap-2">
-                <CheckCircleFill size={16} className="text-success" />
-                <span className="homepage-text-black">{t("New York City terminals and major regional transit stops")}</span>
-              </li>
-              <li className="d-flex align-items-center gap-2">
-                <CheckCircleFill size={16} className="text-success" />
-                <span className="homepage-text-black">{t("Regular daily regional and express connections")}</span>
-              </li>
-            </ul>
-          </Card>
-
-          <div className="d-flex align-items-center gap-2 mb-3 mt-4">
-            <Airplane size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0 homepage-text-black">{t("Available Connections")}</h4>
-          </div>
-          <p className="mb-0 homepage-text-black">
-            {t("Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.")}
-          </p>
-        </Col>
-
-        <Col md={6}>
-          <div className="d-flex align-items-center gap-2 mb-3">
-            <TicketPerforated size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0 homepage-text-black">{t("How to Book Tickets")}</h4>
-          </div>
-          <div className="mb-4">
-            <div className="d-flex gap-3 mb-3">
-              <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: "30px", height: "30px", flexShrink: 0 }}>1</div>
-              <div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Select Route & Date")}</h6>
-                <small className="homepage-text-black">{t("Enter your starting and destination city to search departure lists.")}</small>
-              </div>
-            </div>
-            <div className="d-flex gap-3 mb-3">
-              <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: "30px", height: "30px", flexShrink: 0 }}>2</div>
-              <div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Choose Bus & Pick Seats")}</h6>
-                <small className="homepage-text-black">{t("Select your preferred timetable and pick seats from the interactive map.")}</small>
-              </div>
-            </div>
-            <div className="d-flex gap-3">
-              <div className="bg-primary text-white rounded-circle d-flex justify-content-center align-items-center fw-bold" style={{ width: "30px", height: "30px", flexShrink: 0 }}>3</div>
-              <div>
-                <h6 className="fw-bold mb-1 homepage-text-black">{t("Confirm & Pay Securely")}</h6>
-                <small className="homepage-text-black">{t("Review booking, add personal details, and pay securely online.")}</small>
-              </div>
-            </div>
-          </div>
-
-          <div className="d-flex align-items-center gap-2 mb-3 mt-4">
-            <ClockFill size={20} className="text-primary" />
-            <h4 className="fw-bold mb-0 homepage-text-black">{t("Departure Schedules")}</h4>
-          </div>
-          <p className="mb-0 homepage-text-black">
+        {/* DEPARTURE SCHEDULES & LIVE TRIP STATUS */}
+        <div className="my-5">
+          <Row className="align-items-center mb-4">
+            <Col md={8} className="d-flex align-items-center gap-2">
+              <ClockFill size={22} className="text-primary" />
+              <h4 className="fw-bold mb-0 homepage-text-black">{t("Departure Schedules & Live Status")}</h4>
+            </Col>
+            <Col md={4} className="text-md-end mt-2 mt-md-0">
+              <small className="text-muted">🕒 {t("Showing today's departures")}</small>
+            </Col>
+          </Row>
+          
+          <p className="homepage-text-black mb-4">
             {t("Schedules are designed to serve daily commuters and travelers. Check real-time schedules and timings via the online booking portal.")}
           </p>
-        </Col>
-      </Row>
 
-      <hr className="my-5 text-black-50" />
-
-      {/* TRAVEL RULES SECTION */}
-      <div className="mb-4">
-        <div className="d-flex align-items-center gap-2 mb-4 justify-content-center">
-          <InfoCircleFill size={24} className="text-primary" />
-          <h3 className="fw-bold mb-0 homepage-text-black">{t("Important Travel Rules")}</h3>
+          <Row className="g-3">
+            {liveSchedules.length > 0 ? (
+              liveSchedules.map((sched, idx) => (
+                <Col md={6} lg={3} key={idx}>
+                  <Card className="border shadow-sm rounded-4 p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <span className="fw-bold text-dark h5 mb-0">{sched.departureTime}</span>
+                      {sched.status === "Delayed" ? (
+                        <span className="badge bg-danger d-flex align-items-center gap-1 py-2 px-3 rounded-pill text-white">
+                          <span className="spinner-grow spinner-grow-sm text-white" style={{ width: "8px", height: "8px" }} />
+                          {t("Delayed")}
+                        </span>
+                      ) : (
+                        <span className="badge bg-success d-flex align-items-center gap-1 py-2 px-3 rounded-pill text-white">
+                          <CheckCircleFill size={10} />
+                          {t("On Time")}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-muted small mb-1">{sched.routeName}</div>
+                    <div className="fw-semibold text-secondary d-flex align-items-center gap-1">
+                      <span>{sched.fromCity}</span>
+                      <ArrowRight size={12} />
+                      <span>{sched.toCity}</span>
+                    </div>
+                  </Card>
+                </Col>
+              ))
+            ) : (
+              // Default Fallback schedules if no dynamic bookings on DB yet
+              <>
+                <Col md={6} lg={3}>
+                  <Card className="border shadow-sm rounded-4 p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <span className="fw-bold text-dark h5 mb-0">5:00 AM</span>
+                      <span className="badge bg-success d-flex align-items-center gap-1 py-2 px-3 rounded-pill text-white">
+                        <CheckCircleFill size={10} />
+                        {t("On Time")}
+                      </span>
+                    </div>
+                    <div className="text-muted small mb-1">{t("Upstate NY to NYC")}</div>
+                    <div className="fw-semibold text-secondary d-flex align-items-center gap-1">
+                      <span>Utica</span> <ArrowRight size={12} /> <span>Manhattan</span>
+                    </div>
+                  </Card>
+                </Col>
+                <Col md={6} lg={3}>
+                  <Card className="border shadow-sm rounded-4 p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <span className="fw-bold text-dark h5 mb-0">7:30 AM</span>
+                      <span className="badge bg-success d-flex align-items-center gap-1 py-2 px-3 rounded-pill text-white">
+                        <CheckCircleFill size={10} />
+                        {t("On Time")}
+                      </span>
+                    </div>
+                    <div className="text-muted small mb-1">{t("Albany to NYC")}</div>
+                    <div className="fw-semibold text-secondary d-flex align-items-center gap-1">
+                      <span>Albany</span> <ArrowRight size={12} /> <span>Manhattan</span>
+                    </div>
+                  </Card>
+                </Col>
+                <Col md={6} lg={3}>
+                  <Card className="border shadow-sm rounded-4 p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <span className="fw-bold text-dark h5 mb-0">11:20 AM</span>
+                      <span className="badge bg-success d-flex align-items-center gap-1 py-2 px-3 rounded-pill text-white">
+                        <CheckCircleFill size={10} />
+                        {t("On Time")}
+                      </span>
+                    </div>
+                    <div className="text-muted small mb-1">{t("NYC to Upstate NY")}</div>
+                    <div className="fw-semibold text-secondary d-flex align-items-center gap-1">
+                      <span>Manhattan stop</span> <ArrowRight size={12} /> <span>Utica</span>
+                    </div>
+                  </Card>
+                </Col>
+                <Col md={6} lg={3}>
+                  <Card className="border shadow-sm rounded-4 p-3 h-100">
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <span className="fw-bold text-dark h5 mb-0">11:25 AM</span>
+                      <span className="badge bg-success d-flex align-items-center gap-1 py-2 px-3 rounded-pill text-white">
+                        <CheckCircleFill size={10} />
+                        {t("On Time")}
+                      </span>
+                    </div>
+                    <div className="text-muted small mb-1">{t("NYC/NJ to Upstate NY")}</div>
+                    <div className="fw-semibold text-secondary d-flex align-items-center gap-1">
+                      <span>Fort Lee / Paramus</span> <ArrowRight size={12} /> <span>Utica</span>
+                    </div>
+                  </Card>
+                </Col>
+              </>
+            )}
+          </Row>
         </div>
-        <Row className="g-3">
-          <Col md={3} className="col-12 col-sm-6">
-            <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="p-2">
-                <h6 className="fw-bold mb-2 homepage-text-black">{t("Arrive Early")}</h6>
-                <small className="d-block homepage-text-black">{t("Please arrive at the departure point 15-20 minutes before schedule. Boarding gates close 5 minutes prior to departure.")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3} className="col-12 col-sm-6">
-            <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="p-2">
-                <div className="d-flex align-items-center gap-1 mb-2">
-                  <Backpack size={16} className="text-primary" />
-                  <h6 className="fw-bold mb-0 homepage-text-black">{t("Baggage Allowance")}</h6>
-                </div>
-                <small className="d-block homepage-text-black">{t("Tickets include 1 personal carry-on item and 1 standard suitcase loaded in the luggage compartment.")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3} className="col-12 col-sm-6">
-            <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="p-2">
-                <h6 className="fw-bold mb-2 homepage-text-black">{t("Cancellation Policy")}</h6>
-                <small className="d-block homepage-text-black">{t("Cancellations are allowed before departure. Receive a 100% refund if 24h+ in advance, or 30% if less than 24h.")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-          <Col md={3} className="col-12 col-sm-6">
-            <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
-              <Card.Body className="p-2">
-                <h6 className="fw-bold mb-2 homepage-text-black">{t("No Smoking")}</h6>
-                <small className="d-block homepage-text-black">{t("Smoking and vaping are strictly prohibited inside all buses. Ensure guide dogs are documented if traveling.")}</small>
-              </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </div>
-    </Container>
-  </div>
-);
+
+        <hr className="my-5 text-black-50" />
+
+        {/* TRAVEL RULES SECTION */}
+        <div className="mb-5">
+          <div className="d-flex align-items-center gap-2 mb-4 justify-content-center">
+            <InfoCircleFill size={24} className="text-primary" />
+            <h3 className="fw-bold mb-0 homepage-text-black">{t("Important Travel Rules")}</h3>
+          </div>
+          <Row className="g-3">
+            <Col md={3} className="col-12 col-sm-6">
+              <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="p-2">
+                  <h6 className="fw-bold mb-2 homepage-text-black">{t("Arrive Early")}</h6>
+                  <small className="d-block homepage-text-black">{t("Please arrive at the departure point 15-20 minutes before schedule. Boarding doors close 5 minutes prior to departure.")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="col-12 col-sm-6">
+              <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="p-2">
+                  <div className="d-flex align-items-center gap-1 mb-2">
+                    <Backpack size={16} className="text-primary" />
+                    <h6 className="fw-bold mb-0 homepage-text-black">{t("Baggage Allowance")}</h6>
+                  </div>
+                  <small className="d-block homepage-text-black">{t("Tickets include 1 personal carry-on Luggage and 1 Personal Item. Large Bulky Luggage is NOT allowed.")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="col-12 col-sm-6">
+              <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="p-2">
+                  <h6 className="fw-bold mb-2 homepage-text-black">{t("Cancellation & Refund Policy")}</h6>
+                  <small className="d-block homepage-text-black">{t("Cancellations are allowed before departure. Receive a 100% refund with flex option. 50% if 24h+ in advance, 30% if less than 24h. Same-day or no-show: 10% refund.")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={3} className="col-12 col-sm-6">
+              <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body className="p-2">
+                  <h6 className="fw-bold mb-2 homepage-text-black">{t("No Pets, No Smoking")}</h6>
+                  <small className="d-block homepage-text-black">{t("Smoking and vaping are strictly prohibited inside all buses. Pets are not allowed on any routes.")}</small>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+
+        <hr className="my-5 text-black-50" />
+
+        {/* FAQ PREVIEW SECTION */}
+        <div className="my-5 text-center">
+          <div className="d-flex align-items-center justify-content-center gap-2 mb-3">
+            <QuestionCircleFill size={24} className="text-primary" />
+            <h3 className="fw-bold mb-0 homepage-text-black">{t("Frequently Asked Questions")}</h3>
+          </div>
+          <p className="text-muted mb-4 mx-auto" style={{ maxWidth: "600px" }}>
+            {t("Find quick answers about ticket pricing, schedules, luggage restrictions, and cancellation rules.")}
+          </p>
+
+          <Row className="g-4 text-start justify-content-center mb-4" style={{ maxWidth: "900px", margin: "0 auto" }}>
+            <Col md={4}>
+              <Card className="h-100 border-0 bg-white shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body>
+                  <h6 className="fw-bold text-dark">{t("How much does a ticket cost?")}</h6>
+                  <p className="text-secondary small mb-0">
+                    {t("Adult / Standard fares are $60 + tax. Infants 1 year & under are $40 + tax.")}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4}>
+              <Card className="h-100 border-0 bg-white shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body>
+                  <h6 className="fw-bold text-dark">{t("What is the luggage allowance?")}</h6>
+                  <p className="text-secondary small mb-0">
+                    {t("1 personal item (max 25 lbs) and 1 carry-on suitcase (max 50 lbs, under 24 in). Large bulky bags are not allowed.")}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+            <Col md={4}>
+              <Card className="h-100 border-0 bg-white shadow-sm p-3" style={{ borderRadius: "12px" }}>
+                <Card.Body>
+                  <h6 className="fw-bold text-dark">{t("What is the refund policy?")}</h6>
+                  <p className="text-secondary small mb-0">
+                    {t("100% refund with Flex Option. 50% refund at least 24h prior to travel. 30% same-day or no-show.")}
+                  </p>
+                </Card.Body>
+              </Card>
+            </Col>
+          </Row>
+
+          <div className="d-flex flex-column align-items-center justify-content-center gap-2 mt-4">
+            <span className="text-secondary" style={{ fontSize: "0.95rem" }}>
+              {t("Please read Frequently asked questions for more")}
+            </span>
+            <Button
+              variant="outline-primary"
+              className="fw-bold px-4 py-2 hover-scale bg-white"
+              onClick={() => navigate("/faq")}
+              style={{ borderRadius: "8px", borderWidth: "2px" }}
+            >
+              {t("View All FAQs")}
+            </Button>
+          </div>
+        </div>
+      </Container>
+    </div>
+  );
 }
 
 export default Home;

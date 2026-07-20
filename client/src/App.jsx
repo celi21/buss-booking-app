@@ -34,6 +34,7 @@ import PassengerWallet from "./pages/user-dashboard/pages/passenger-wallet/Passe
 import PassengerSupport from "./pages/user-dashboard/pages/passenger-support/PassengerSupport";
 import PassengerProfile from "./pages/user-dashboard/pages/passenger-profile/PassengerProfile";
 import AuthCallback from "./pages/AuthCallback";
+import FAQ from "./pages/FAQ";
 
 function App() {
   const dispatch = useDispatch();
@@ -52,6 +53,7 @@ function App() {
         <Route path="booking" element={<Booking />} />
         <Route path="booking/:bookingId" element={<SearchBooking />} />
         <Route path="auth/callback" element={<AuthCallback />} />
+        <Route path="faq" element={<FAQ />} />
 
         <Route
           path="admin"

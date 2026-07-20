@@ -33,6 +33,7 @@ import {
   getPassengerWallet,
   submitPassengerRequest,
   getPassengerRequests,
+  getPublicTripStatuses,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -40,6 +41,7 @@ import verifyUser from "../../middlewares/verifyUser.js";
 const router = express.Router();
 
 router.post("/fetch-cities", fetchCities);
+router.post("/public-trip-statuses", getPublicTripStatuses);
 router.post("/check-bus-availability", checkBusAvailability);
 router.post("/confirm-bus-seats-availability", confirmBusSeatsAvailability);
 router.post("/confirm-booking", confirmBooking);
