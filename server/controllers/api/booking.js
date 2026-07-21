@@ -610,7 +610,7 @@ const sendConfirmationEmail = async (booking, to) => {
   `;
 
   const mailOptions = {
-    from: "joharkhan2001@gmail.com",
+    from: process.env.EMAIL_USER || "buenotransit@gmail.com",
     to: to,
     subject: "Bueno Express Bus Booking Details",
     html: html,
