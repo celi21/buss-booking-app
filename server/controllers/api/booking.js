@@ -437,17 +437,18 @@ const sendConfirmationEmail = async (booking, to) => {
   let fullRouteAndTime = routeName + ", " + departureTime + " - " + arrivalTime;
 
   const html = `
-  <div style="background-color:#d2c7ba">
+  <div style="background-color:#f5f3ef">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tbody>
+        <!-- Header with Logo -->
         <tr>
-          <td align="center" bgcolor="#1e90ff">
+          <td align="center" style="background-color:#1a1a2e; padding:24px 0">
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
               <tbody>
                 <tr>
-                  <td align="center" valign="top" style="padding:36px 24px">
-                    <a href="https://buenoexpresstransport.com" style="display:inline-block" target="_blank">
-                      <img src="https://buenoexpresstransport.com/logo.png" alt="Logo" border="0" style="display:block;width:100px;max-width:100px;min-width:100px">
+                  <td align="center" valign="top" style="padding:0 24px">
+                    <a href="https://buenotransit.com" style="display:inline-block" target="_blank">
+                      <img src="https://buenotransit.com/logo.png" alt="Bueno Transit" border="0" style="display:block;width:130px;max-width:130px">
                     </a>
                   </td>
                 </tr>
@@ -455,157 +456,188 @@ const sendConfirmationEmail = async (booking, to) => {
             </table>
           </td>
         </tr>
+        
+        <!-- Main Content -->
         <tr>
-          <td align="center" bgcolor="#1e90ff">
+          <td align="center" style="padding:0 16px">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;background-color:#ffffff;border-radius:12px;margin-top:-20px">
+              <tbody>
+                <!-- Title -->
+                <tr>
+                  <td align="left" style="padding:32px 32px 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif">
+                    <h1 style="margin:0;font-size:28px;font-weight:700;color:#1a1a2e;line-height:36px">Booking Confirmed ✓</h1>
+                    <p style="margin:8px 0 0;font-size:16px;color:#666666;line-height:24px">Your trip is all set. Review your details below.</p>
+                  </td>
+                </tr>
+                
+                <!-- Booking Details Card -->
+                <tr>
+                  <td align="left" style="padding:24px 32px 32px">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="border:1px solid #e8e5df;border-radius:8px">
+                      <tbody>
+                        <!-- Card Header -->
+                        <tr>
+                          <td colspan="2" style="padding:16px 20px;background-color:#1a1a2e;border-radius:8px 8px 0 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff;text-align:center;letter-spacing:0.5px">
+                            BOOKING DETAILS
+                          </td>
+                        </tr>
+                        
+                        <!-- Booking ID -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Booking ID</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:600;border-bottom:1px solid #f0ede8">${booking.bookingId}</td>
+                        </tr>
+                        
+                        <!-- Name -->
+                        <tr>
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Passenger</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0ede8">${booking.personalDetails.firstName} ${booking.personalDetails.lastName || ""}</td>
+                        </tr>
+                        
+                        <!-- Phone -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Phone</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0ede8">${booking.personalDetails.phone}</td>
+                        </tr>
+                        
+                        <!-- Email -->
+                        <tr>
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Email</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0ede8">
+                            <a href="mailto:${booking.personalDetails.email}" target="_blank" style="color:#1a1a2e;text-decoration:underline">${booking.personalDetails.email}</a>
+                          </td>
+                        </tr>
+                        
+                        <!-- Route -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Route</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:600;border-bottom:1px solid #f0ede8">${fullRouteAndTime}</td>
+                        </tr>
+                        
+                        <!-- Date -->
+                        <tr>
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Date</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:600;border-bottom:1px solid #f0ede8">${booking.bookingDate}</td>
+                        </tr>
+                        
+                        <!-- Pickup -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Pickup</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0ede8">${booking.personalDetails.pickupAddress}</td>
+                        </tr>
+                        
+                        <!-- Dropoff -->
+                        <tr>
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Dropoff</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0ede8">${booking.personalDetails.dropoffAddress}</td>
+                        </tr>
+                        
+                        <!-- Seats -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Seats</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;border-bottom:1px solid #f0ede8">
+                            ${booking.seatDetails.map((seat) => seat.seats > 0 && `${seat.name} x ${seat.seats}`).filter(Boolean).join("<br />")}
+                          </td>
+                        </tr>
+                        
+                        <!-- Total -->
+                        <tr>
+                          <td colspan="2" style="padding:18px 20px;background-color:#1a1a2e;border-radius:0 0 8px 8px">
+                            <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                              <tbody>
+                                <tr>
+                                  <td width="50%" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff">Total Amount</td>
+                                  <td width="50%" align="right" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#ffffff">
+                                    $${booking.flexOption == true ? booking.payment.amount + 5 + booking.payment.tax : booking.payment.amount + booking.payment.tax}
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+                
+                <!-- CTA Button -->
+                <tr>
+                  <td align="center" style="padding:0 32px 24px">
+                    <a href="${process.env.FRONTEND_URL}/booking/${booking.bookingId}" target="_blank" style="
+                      display: inline-block;
+                      background-color: #1a1a2e;
+                      color: #ffffff;
+                      text-align: center;
+                      padding: 14px 36px;
+                      border-radius: 8px;
+                      text-decoration: none;
+                      font-family: 'Segoe UI', Helvetica, Arial, sans-serif;
+                      font-size: 15px;
+                      font-weight: 600;
+                      letter-spacing: 0.3px;
+                    ">View Full Booking Details →</a>
+                  </td>
+                </tr>
+                
+                <!-- Contact Info -->
+                <tr>
+                  <td align="center" style="padding:8px 32px 32px">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color:#f8f7f5;border-radius:8px;border:1px solid #e8e5df">
+                      <tbody>
+                        <tr>
+                          <td align="center" style="padding:20px 24px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#444444">
+                            <p style="margin:0 0 8px;font-size:15px;font-weight:700;color:#1a1a2e">If you need to make any changes</p>
+                            <p style="margin:0 0 4px">Contact us: <a href="tel:3157971010" style="color:#1a1a2e;font-weight:700;text-decoration:none">315-797-1010</a></p>
+                            <p style="margin:0 0 8px;font-size:13px;color:#888888">Mon-Sunday 4:30 AM to 9:30 PM</p>
+                            <p style="margin:0">Or send an <a href="mailto:${booking.personalDetails.email}" style="color:#1e90ff;font-weight:600;text-decoration:underline">Email</a></p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+        
+        <!-- Footer -->
+        <tr>
+          <td align="center" style="padding:24px">
             <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
               <tbody>
-              <tr>
-                <td align="left" bgcolor="#ffffff" style="padding:36px 24px 0;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;border-top:3px solid #d4dadf">
-                  <h1 style="margin:0;font-size:32px;font-weight:700;letter-spacing:-1px;line-height:48px">Thank you for your booking!</h1>
-                </td>
-            </tr>
-          </tbody></table>
-        </td>
-      </tr>
-      <tr>
-        <td align="center" bgcolor="#1e90ff">
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
-  
-            <tbody><tr>
-              <td align="left" bgcolor="#ffffff" style="padding:24px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
-                <p style="margin:0">Here is a summary of your recent booking. If you have any questions or concerns about your booking, please <a href="https://www.buenoexpresstransport.com" target="_blank">Contact Us</a>.</p>
-              </td>
-            </tr>
-            <tr>
-              <td align="left" bgcolor="#ffffff" style="padding:24px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
-                <table border="0" cellpadding="0" cellspacing="0" width="100%">
-                  <tbody><tr>
-                    <td colspan="2" bgcolor="#1e90ff" width="75%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;color:#fff;text-align:center"><strong>Booking Details</strong></td>
-                  </tr>
-
-                  <tr>
-                    <td align="left" width="45%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking ID</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.bookingId
-    }</td>
-                  </tr>
-                  
-                  <tr>
-                    <td align="left" width="45%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">First name</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.firstName
-    }</td>
-                  </tr>
-
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Last name</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.lastName
-      ? booking.personalDetails.lastName
-      : ""
-    }</td>
-                  </tr>
-
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Phone</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.phone
-    }</td>
-                  </tr>
-                  
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Email</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px"><a href="mailto:${booking.personalDetails.email
-    }" target="_blank">${booking.personalDetails.email}</a></td>
-                  </tr>
-                    <tr>
-                    </tr><tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking Route</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${fullRouteAndTime}</td>
-                  </tr>
-                  
-                  
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Booking Date</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.bookingDate
-    }</td>
-                  </tr>
-                  
-                  
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Pickup address</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.pickupAddress
-    }</td>
-                  </tr>
-  
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Dropoff address</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.dropoffAddress
-    }</td>
-                  </tr>
-
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Suitcases</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">${booking.personalDetails.suitcases
-    }</td>
-                  </tr>
-                  
-                  <tr>
-                    <td align="left" width="75%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">Seats</td>
-                    <td align="left" width="25%" style="padding:6px 12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px">
-                    ${booking.seatDetails
-      .map(
-        (seat) =>
-          seat.seats > 0 && `${seat.name} x ${seat.seats}`
-      )
-      .filter(Boolean)
-      .join("<br />")}
-                    </td>
-                  </tr>
-                  
-                  <tr>
-                    <td align="left" width="75%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>Total Amount</strong></td>
-                    <td align="left" width="25%" style="padding:12px;font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:16px;line-height:24px;border-top:2px dashed #1e90ff;border-bottom:2px dashed #1e90ff"><strong>$${booking.flexOption == true
-      ? booking.payment.amount + 8 + booking.payment.tax
-      : booking.payment.amount + booking.payment.tax
-    }</strong></td>
-                  </tr>
-                </tbody></table>
-              </td>
-            </tr>
-          </tbody></table>
-        </td>
-      </tr>
-      <tr>
-        <td align="center" bgcolor="#1e90ff" style="padding:24px">
-          <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
-            <tbody>
-            <tr>
-              <td align="center" bgcolor="#1e90ff" style="padding:12px 24px;">
-                <a href="${process.env.FRONTEND_URL}/booking/${booking.bookingId
-    }" target="_blank" style="
-                    display: block;
-                    background: white;
-                    color: #1e90ff;
-                    text-align: center;
-                    padding: 10px 30px;
-                    border-radius: 5px;
-                    text-decoration: none;
-                    font-weight: 600;
-                    width: fit-content;
-                    margin: auto;
-                    margin-top: 0px;
-                    font-size: 16px;
-                ">View Complete Details on Website</a>
-              </td>
-            </tr>
-
-            <tr>
-              <td align="center" bgcolor="#1e90ff" style="padding:12px 24px;">
-                <p style="margin:0"><a href="http://buenoexpresstransport.com" target="_blank" style="font-family:Source Sans Pro,Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;color:#fff">buenoexpresstransport.com</a></p>
-              </td>
-            </tr>
-          </tbody></table>
-        </td>
-      </tr>
-    </tbody></table><div class="yj6qo"></div><div class="adL">
-  </div>
+                <tr>
+                  <td align="center" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:13px;color:#999999;line-height:20px">
+                    <p style="margin:0">© 2024 Bueno Transit. All rights reserved.</p>
+                    <p style="margin:4px 0 0">
+                      <a href="https://buenotransit.com" target="_blank" style="color:#1a1a2e;text-decoration:none;font-weight:600">buenotransit.com</a>
+                    </p>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </td>
+        </tr>
+      </tbody>
+    </table>
   </div>
   `;
 
