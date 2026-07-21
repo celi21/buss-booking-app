@@ -454,7 +454,7 @@ const sendConfirmationEmail = async (booking, to) => {
                       <tbody>
                         <tr>
                           <td valign="middle" style="width:80px;padding-right:16px">
-                            <img src="https://buenotransit.com/bueno_logo.png" alt="Bueno Express Transportation" style="display:block;width:72px;height:72px;border-radius:8px;object-fit:contain">
+                            <img src="${process.env.FRONTEND_URL}/bueno_logo.png" alt="Bueno Express Transportation" style="display:block;width:72px;height:72px;border-radius:8px;object-fit:contain">
                           </td>
                           <td valign="middle">
                             <h1 style="margin:0;font-size:26px;font-weight:700;color:#1a1a2e;line-height:34px">Booking Confirmed ✓</h1>
