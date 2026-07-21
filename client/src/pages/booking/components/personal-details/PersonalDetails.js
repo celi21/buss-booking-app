@@ -46,7 +46,7 @@ const PersonalDetails = ({
     dispatch(setCurrentBookingStep("tickets"));
   };
 
-  const { availableBus, isBusAvailableLoading, busAvailabilityData } =
+  const { availableBus, isBusAvailableLoading, busAvailabilityData, cities } =
     useSelector((state) => state.booking);
 
   const [firstName, setFirstName] = useState(personalDetails.firstName);
@@ -54,11 +54,29 @@ const PersonalDetails = ({
   const [phone, setPhone] = useState(personalDetails.phone);
   const [email, setEmail] = useState(personalDetails.email);
   const [pickupAddress, setPickupAddress] = useState(
-    personalDetails.pickupAddress
+    personalDetails.pickupAddress || ""
   );
   const [dropoffAddress, setDropoffAddress] = useState(
-    personalDetails.dropoffAddress
+    personalDetails.dropoffAddress || ""
   );
+
+  // Auto-populate pickup and dropoff addresses based on booking search origin/destination
+  useEffect(() => {
+    if (cities && cities.length > 0) {
+      if (!pickupAddress && !personalDetails.pickupAddress) {
+        const fromCity = cities.find((city) => city._id === selectedFromCity);
+        if (fromCity) {
+          setPickupAddress(fromCity.name);
+        }
+      }
+      if (!dropoffAddress && !personalDetails.dropoffAddress) {
+        const toCity = cities.find((city) => city._id === selectedToCity);
+        if (toCity) {
+          setDropoffAddress(toCity.name);
+        }
+      }
+    }
+  }, [cities, selectedFromCity, selectedToCity, personalDetails.pickupAddress, personalDetails.dropoffAddress]);
   const [notes, setNotes] = useState(personalDetails.notes);
   const [suitcases, setSuitcases] = useState(personalDetails.suitcases);
   const [captcha, setCaptcha] = useState(personalDetails.captcha);
@@ -537,7 +555,7 @@ const PersonalDetails = ({
                 </Form.Label>
                 <Autocomplete
                   apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-                  defaultValue={pickupAddress}
+                  value={pickupAddress}
                   onPlaceSelected={(place) =>
                     setPickupAddress(place.formatted_address)
                   }
@@ -561,7 +579,7 @@ const PersonalDetails = ({
                 </Form.Label>
                 <Autocomplete
                   apiKey={process.env.REACT_APP_GOOGLE_MAPS_API_KEY}
-                  defaultValue={dropoffAddress}
+                  value={dropoffAddress}
                   onPlaceSelected={(place) =>
                     setDropoffAddress(place.formatted_address)
                   }
