@@ -440,33 +440,29 @@ const sendConfirmationEmail = async (booking, to) => {
   <div style="background-color:#f5f3ef">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
       <tbody>
-        <!-- Header with Logo -->
-        <tr>
-          <td align="center" style="background-color:#1a1a2e; padding:24px 0">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px">
-              <tbody>
-                <tr>
-                  <td align="center" valign="top" style="padding:0 24px">
-                    <a href="https://buenotransit.com" style="display:inline-block" target="_blank">
-                      <img src="https://buenotransit.com/logo.png" alt="Bueno Transit" border="0" style="display:block;width:130px;max-width:130px">
-                    </a>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
         
+
         <!-- Main Content -->
         <tr>
-          <td align="center" style="padding:0 16px">
-            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;background-color:#ffffff;border-radius:12px;margin-top:-20px">
+          <td align="center" style="padding:16px 16px 0">
+            <table border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width:600px;background-color:#ffffff;border-radius:12px">
               <tbody>
                 <!-- Title -->
                 <tr>
-                  <td align="left" style="padding:32px 32px 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif">
-                    <h1 style="margin:0;font-size:28px;font-weight:700;color:#1a1a2e;line-height:36px">Booking Confirmed ✓</h1>
-                    <p style="margin:8px 0 0;font-size:16px;color:#666666;line-height:24px">Your trip is all set. Review your details below.</p>
+                  <td align="left" style="padding:28px 32px 0;font-family:'Segoe UI',Helvetica,Arial,sans-serif">
+                    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+                      <tbody>
+                        <tr>
+                          <td valign="middle" style="width:80px;padding-right:16px">
+                            <img src="https://buenotransit.com/bueno_logo.png" alt="Bueno Express Transportation" style="display:block;width:72px;height:72px;border-radius:8px;object-fit:contain">
+                          </td>
+                          <td valign="middle">
+                            <h1 style="margin:0;font-size:26px;font-weight:700;color:#1a1a2e;line-height:34px">Booking Confirmed ✓</h1>
+                            <p style="margin:6px 0 0;font-size:15px;color:#666666;line-height:22px">Your trip is all set. Review your details below.</p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
                   </td>
                 </tr>
                 
