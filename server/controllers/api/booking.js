@@ -421,18 +421,18 @@ const retrievePayment = async (paymentIntentId) => {
 
 const sendConfirmationEmail = async (booking, to) => {
   console.log(booking.bus.locations);
+  // booking.from and booking.to may be populated objects or raw IDs
+  const fromId = booking.from?._id ? booking.from._id.toString() : booking.from?.toString();
+  const toId = booking.to?._id ? booking.to._id.toString() : booking.to?.toString();
   let departureCity = booking.bus.locations.find(
-    (loc) =>
-      loc.city.toString() ===
-      new mongoose.Types.ObjectId(booking.from).toString()
+    (loc) => loc.city.toString() === fromId
   );
   let arrivalCity = booking.bus.locations.find(
-    (loc) =>
-      loc.city.toString() === new mongoose.Types.ObjectId(booking.to).toString()
+    (loc) => loc.city.toString() === toId
   );
   const routeName = booking.route.name;
-  let departureTime = departureCity.departureTime;
-  let arrivalTime = arrivalCity.arrivalTime;
+  let departureTime = departureCity?.departureTime || "TBD";
+  let arrivalTime = arrivalCity?.arrivalTime || "TBD";
 
   let fullRouteAndTime = routeName + ", " + departureTime + " - " + arrivalTime;
 
@@ -617,7 +617,11 @@ const sendConfirmationEmail = async (booking, to) => {
   };
 
   transporter.sendMail(mailOptions, (error, info) => {
-    console.log(info);
+    if (error) {
+      console.error("[EMAIL ERROR] Failed to send confirmation email:", error);
+    } else {
+      console.log("[EMAIL SUCCESS] Confirmation email sent:", info.response);
+    }
   });
 };
 
