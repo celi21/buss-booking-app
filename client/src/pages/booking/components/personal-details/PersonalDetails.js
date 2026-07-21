@@ -63,16 +63,35 @@ const PersonalDetails = ({
   // Auto-populate pickup and dropoff addresses based on booking search origin/destination
   useEffect(() => {
     if (cities && cities.length > 0) {
+      const isManualStop = (cityName) => {
+        if (!cityName) return false;
+        const cleaned = cityName.trim().toLowerCase();
+        return [
+          "upstate door service",
+          "rome, ny",
+          "package delivery utica",
+          "package delivery nyc"
+        ].includes(cleaned);
+      };
+
       if (!pickupAddress && !personalDetails.pickupAddress) {
         const fromCity = cities.find((city) => city._id === selectedFromCity);
         if (fromCity) {
-          setPickupAddress(fromCity.name);
+          if (isManualStop(fromCity.name)) {
+            setPickupAddress("");
+          } else {
+            setPickupAddress(fromCity.name);
+          }
         }
       }
       if (!dropoffAddress && !personalDetails.dropoffAddress) {
         const toCity = cities.find((city) => city._id === selectedToCity);
         if (toCity) {
-          setDropoffAddress(toCity.name);
+          if (isManualStop(toCity.name)) {
+            setDropoffAddress("");
+          } else {
+            setDropoffAddress(toCity.name);
+          }
         }
       }
     }
