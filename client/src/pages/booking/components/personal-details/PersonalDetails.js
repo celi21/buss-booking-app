@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Button, Col, Form, Row } from "react-bootstrap";
-import { ArrowRepeat } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setCurrentBookingStep,
@@ -372,38 +371,7 @@ const PersonalDetails = ({
     //   );
     //   return;
     // }
-    if (!captcha || captcha.trim() == "") {
-      toast.error(
-        selectedLanguage &&
-          translateText(
-            "Please enter the Captcha code.",
-            selectedLanguage.code
-          ),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText("Please enter the Captcha code.", selectedLanguage.code)
-      );
-      return;
-    }
 
-    if (captcha !== captchaCode) {
-      toast.error(
-        selectedLanguage &&
-          translateText("Invalid Captcha code.", selectedLanguage.code),
-        {
-          duration: 4000,
-        }
-      );
-      setLocalError(
-        selectedLanguage &&
-          translateText("Invalid Captcha code.", selectedLanguage.code)
-      );
-      return;
-    }
 
     const details = {
       firstName,
@@ -612,48 +580,7 @@ const PersonalDetails = ({
             </Col>
           </Row>
 
-          <Row className="mb-3">
-            <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-              <Form.Group>
-                <Form.Label className="m-0 fw-semibold" htmlFor="notes">
-                  {selectedLanguage &&
-                    translateText("Notes", selectedLanguage.code)}
-                  :
-                </Form.Label>
-                <textarea
-                  cols="30"
-                  rows="5"
-                  id="notes"
-                  className="form-control"
-                  placeholder="Enter Notes"
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                ></textarea>
-              </Form.Group>
-            </Col>
-            <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-              <Form.Group>
-                <Form.Label className="m-0 fw-semibold" htmlFor="suitcases">
-                  {selectedLanguage &&
-                    translateText("Suitcases", selectedLanguage.code)}
-                  :
-                </Form.Label>
-                <Form.Select
-                  id="suitcases"
-                  value={suitcases}
-                  onChange={(e) => setSuitcases(e.target.value)}
-                >
-                  {Array.from({ length: 20 }, (_, i) => i).map((i) => {
-                    return (
-                      <option value={i} key={i}>
-                        {i}
-                      </option>
-                    );
-                  })}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
+
         </Form>
       </div>
 
@@ -679,115 +606,7 @@ const PersonalDetails = ({
         setLocalError={setLocalError}
       />
 
-      <Row className="mb-3 mt-5">
-        <Col lg={6} xl={6} md={12} sm={12} xs={12}>
-          <Form.Group>
-            <div className="d-flex align-items-center gap-3 mb-1">
-              <Form.Label className="m-0 fw-semibold" htmlFor="Captcha">
-                {selectedLanguage &&
-                  translateText("Captcha", selectedLanguage.code)}
-                :<span className="text-danger ms-1">*</span>
-              </Form.Label>
-              <div
-                className="bg-secondary p-3 py-1 text-white"
-                style={{
-                  position: "relative",
-                  display: "inline-block",
-                  padding: "0.5rem",
-                  backgroundColor: "#6c757d",
-                  color: "#fff",
-                  fontSize: "1.25rem",
-                  fontWeight: "bold",
-                  userSelect: "none",
-                  cursor: "default",
-                  pointerEvents: "none",
-                  overflow: "hidden",
-                }}
-              >
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "10%",
-                    left: "40%",
-                    transform: "rotate(-10deg)",
-                    color: "rgba(255,255,255,0.3)",
-                    fontSize: "1.5rem",
-                  }}
-                >
-                  |
-                </span>
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-20%",
-                    left: "10%",
-                    transform: "rotate(-40deg)",
-                    color: "rgba(255,255,255,0.3)",
-                    fontSize: "2.5rem",
-                  }}
-                >
-                  |
-                </span>
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-20%",
-                    right: "10%",
-                    transform: "rotate(-40deg)",
-                    color: "rgba(255,255,255,0.3)",
-                    fontSize: "2.5rem",
-                  }}
-                >
-                  |
-                </span>
-                <span
-                  style={{
-                    position: "absolute",
-                    bottom: "20%",
-                    right: "20%",
-                    transform: "rotate(15deg)",
-                    color: "rgba(255,255,255,0.4)",
-                    fontSize: "1.5rem",
-                  }}
-                >
-                  /
-                </span>
-                <span
-                  style={{
-                    fontFamily: "Courier New, Courier, monospace",
-                  }}
-                >
-                  {captchaCode}
-                </span>
-              </div>
 
-              <Button
-                className="p-0 bg-transparent border-0 outline-none text-primary"
-                title="Generate New Captcha Code"
-                onClick={() => {
-                  setCaptchaCode(generateCaptcha(7));
-                }}
-              >
-                <ArrowRepeat size={24} />
-              </Button>
-            </div>
-            <Form.Control
-              type="text"
-              id="Captcha"
-              placeholder="Enter Captcha Code"
-              value={captcha}
-              onChange={(e) => {
-                setCaptcha(e.target.value);
-                setLocalError(null);
-              }}
-              style={{
-                fontFamily: "Courier New, Courier, monospace",
-              }}
-              className="fw-bold"
-            />
-          </Form.Group>
-        </Col>
-      </Row>
 
       {localError && <Alert variant="danger">{localError}</Alert>}
 
