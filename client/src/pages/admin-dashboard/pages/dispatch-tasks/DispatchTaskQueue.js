@@ -21,6 +21,7 @@ import {
   XCircle,
   Trash,
   CurrencyDollar,
+  PersonFillDash,
 } from "react-bootstrap-icons";
 
 // Helper function to parse refund details from task description
@@ -46,6 +47,31 @@ const parseRefundDetails = (description) => {
   };
 };
 
+// Helper function to parse account deletion details from task description
+const parseDeletionDetails = (description) => {
+  if (!description) return {};
+  const lines = description.split("\n");
+  const details = {};
+  lines.forEach((line) => {
+    const parts = line.split(":");
+    if (parts.length >= 2) {
+      const key = parts[0].trim();
+      const val = parts.slice(1).join(":").trim();
+      details[key] = val;
+    }
+  });
+  return {
+    userId: details["User ID"] || "",
+    customerName: details["Customer Name"] || "",
+    customerEmail: details["Customer Email"] || "",
+    loginProvider: details["Login Provider"] || "",
+    requestDate: details["Request Date"] || "",
+    requestTime: details["Request Time"] || "",
+    activeReservations: details["Active Reservations"] || "0",
+    completedReservations: details["Completed/Cancelled Reservations"] || "0",
+  };
+};
+
 const DispatchTaskQueue = () => {
   const [tasks, setTasks] = useState([]);
   const [tasksLoading, setTasksLoading] = useState(true);
@@ -65,6 +91,11 @@ const DispatchTaskQueue = () => {
     refundReason: "",
     stripeRefundRef: "",
   });
+
+  // Account Deletion Modal State
+  const [showDeletionModal, setShowDeletionModal] = useState(false);
+  const [selectedDeletionTask, setSelectedDeletionTask] = useState(null);
+  const [deletionLoading, setDeletionLoading] = useState(false);
 
   const { token } = useSelector((state) => state.auth);
 
@@ -179,6 +210,49 @@ const DispatchTaskQueue = () => {
     setShowRefundModal(true);
   };
 
+  // Open account deletion confirmation
+  const handleOpenDeletion = (task) => {
+    setSelectedDeletionTask(task);
+    setShowDeletionModal(true);
+  };
+
+  // Execute permanent account deletion
+  const handleDeleteUserAccount = async () => {
+    if (!selectedDeletionTask) return;
+    const details = parseDeletionDetails(selectedDeletionTask.description);
+    if (!details.userId) {
+      toast.error("User ID not found in task. Cannot proceed with deletion.");
+      return;
+    }
+    setDeletionLoading(true);
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/task/delete-user-account`,
+        { taskId: selectedDeletionTask._id, targetUserId: details.userId },
+        config
+      );
+      if (response.data && response.data.success) {
+        toast.success(response.data.message);
+        setShowDeletionModal(false);
+        setSelectedDeletionTask(null);
+        fetchTasks();
+      } else {
+        toast.error(response.data.message || "Failed to delete account.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(error.response?.data?.message || "Failed to delete account.");
+    } finally {
+      setDeletionLoading(false);
+    }
+  };
+
   // Submit manual refund details
   const handleSubmitRefund = async () => {
     if (!selectedRefundTask?.relatedBooking?._id) {
@@ -259,8 +333,9 @@ const DispatchTaskQueue = () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {tasks.map((task) => {
+                        {tasks.map((task) => {
                         const isRefund = task.title && task.title.startsWith("Refund Request:");
+                        const isDeletion = task.title && task.title.startsWith("Account Deletion Request:");
                         return (
                           <tr key={task._id}>
                             <td>
@@ -295,6 +370,16 @@ const DispatchTaskQueue = () => {
                                     title="Mark Refunded"
                                   >
                                     <CurrencyDollar size={14} className="me-1" /> Mark Refunded
+                                  </Button>
+                                )}
+                                {isDeletion && task.status !== "Completed" && (
+                                  <Button
+                                    size="sm"
+                                    variant="danger"
+                                    onClick={() => handleOpenDeletion(task)}
+                                    title="Delete Account Permanently"
+                                  >
+                                    <PersonFillDash size={14} className="me-1" /> Delete Account
                                   </Button>
                                 )}
                                 {task.status === "Pending" && (
@@ -460,6 +545,77 @@ const DispatchTaskQueue = () => {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Account Deletion Confirmation Modal */}
+      {selectedDeletionTask && (() => {
+        const details = parseDeletionDetails(selectedDeletionTask.description);
+        return (
+          <Modal
+            show={showDeletionModal}
+            onHide={() => setShowDeletionModal(false)}
+            centered
+          >
+            <Modal.Header closeButton className="border-danger">
+              <Modal.Title className="text-danger">
+                <PersonFillDash className="me-2" />
+                Delete Account Permanently
+              </Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="alert alert-danger py-2 mb-3">
+                <strong>⚠️ This action is irreversible.</strong> The user's account will be permanently deleted.
+              </div>
+              <table className="table table-sm table-bordered mb-3">
+                <tbody>
+                  <tr>
+                    <th style={{ width: "40%" }}>Customer Name</th>
+                    <td>{details.customerName || "—"}</td>
+                  </tr>
+                  <tr>
+                    <th>Customer Email</th>
+                    <td>{details.customerEmail || "—"}</td>
+                  </tr>
+                  <tr>
+                    <th>Login Provider</th>
+                    <td>{details.loginProvider || "—"}</td>
+                  </tr>
+                  <tr>
+                    <th>Request Date</th>
+                    <td>{details.requestDate} {details.requestTime}</td>
+                  </tr>
+                  <tr>
+                    <th>Active Reservations</th>
+                    <td>{details.activeReservations}</td>
+                  </tr>
+                  <tr>
+                    <th>Completed/Cancelled</th>
+                    <td>{details.completedReservations}</td>
+                  </tr>
+                </tbody>
+              </table>
+              <p className="text-muted small mb-0">
+                All bookings, payments, and audit records will be preserved. Only the user account and authentication data will be deleted.
+              </p>
+            </Modal.Body>
+            <Modal.Footer>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeletionModal(false)}
+                disabled={deletionLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="danger"
+                onClick={handleDeleteUserAccount}
+                disabled={deletionLoading}
+              >
+                {deletionLoading ? "Deleting..." : "Delete Account Permanently"}
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        );
+      })()}
     </Container>
   );
 };

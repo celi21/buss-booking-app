@@ -7,13 +7,16 @@ import {
     Accordion,
     Row,
     Col,
+    Modal,
+    Spinner,
 } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { Person, Telephone, Envelope, GeoAlt, Globe } from "react-bootstrap-icons";
+import { Person, Telephone, Envelope, GeoAlt, Globe, ExclamationTriangleFill } from "react-bootstrap-icons";
+import axios from "axios";
 
 const PassengerProfile = () => {
-    const { user } = useSelector((state) => state.auth);
+    const { user, token } = useSelector((state) => state.auth);
     const [editMode, setEditMode] = useState(false);
     const [profileData, setProfileData] = useState({
         firstName: user?.name?.split(" ")[0] || "",
@@ -26,9 +29,41 @@ const PassengerProfile = () => {
         language: "English",
     });
 
+    // Account deletion state
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deletionLoading, setDeletionLoading] = useState(false);
+
     const handleSave = () => {
         toast.success("Profile updated successfully");
         setEditMode(false);
+    };
+
+    const handleRequestDeletion = async () => {
+        setDeletionLoading(true);
+        try {
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_BASE_URL}/task/request-account-deletion`,
+                {},
+                config
+            );
+            if (response.data && response.data.success) {
+                toast.success(response.data.message);
+                setShowDeleteModal(false);
+            } else {
+                toast.error(response.data.message || "Failed to submit deletion request.");
+            }
+        } catch (error) {
+            const msg = error.response?.data?.message || "Failed to submit request. Please try again.";
+            toast.error(msg);
+        } finally {
+            setDeletionLoading(false);
+        }
     };
 
     return (
@@ -194,14 +229,14 @@ const PassengerProfile = () => {
             </Card>
 
             {/* Information */}
-            <Card className="shadow-sm">
+            <Card className="mb-4 shadow-sm">
                 <Card.Header>
                     <h5 className="mb-0">Information</h5>
                 </Card.Header>
                 <Card.Body>
                     <Accordion>
                         <Accordion.Item eventKey="0">
-                            <Accordion.Header>Rules & Policies</Accordion.Header>
+                            <Accordion.Header>Rules &amp; Policies</Accordion.Header>
                             <Accordion.Body>
                                 <p>
                                     For complete rules and policies, please visit{" "}
@@ -270,8 +305,98 @@ const PassengerProfile = () => {
                     </Accordion>
                 </Card.Body>
             </Card>
+
+            {/* Account Management */}
+            <Card className="shadow-sm border-danger">
+                <Card.Header className="bg-danger text-white">
+                    <h5 className="mb-0">
+                        <ExclamationTriangleFill className="me-2" />
+                        Account Management
+                    </h5>
+                </Card.Header>
+                <Card.Body>
+                    <p className="text-muted mb-1">
+                        <strong>Delete Account</strong>
+                    </p>
+                    <p className="text-muted small mb-3">
+                        Request permanent deletion of your Bueno Transit account. This action
+                        will be reviewed by our team before processing.
+                    </p>
+                    <Button
+                        variant="outline-danger"
+                        onClick={() => setShowDeleteModal(true)}
+                    >
+                        Request Account Deletion
+                    </Button>
+                </Card.Body>
+            </Card>
+
+            {/* Account Deletion Confirmation Modal */}
+            <Modal
+                show={showDeleteModal}
+                onHide={() => setShowDeleteModal(false)}
+                centered
+            >
+                <Modal.Header closeButton className="border-danger">
+                    <Modal.Title className="text-danger">
+                        <ExclamationTriangleFill className="me-2" />
+                        Delete Your Account
+                    </Modal.Title>
+                </Modal.Header>
+                <Modal.Body>
+                    <p>
+                        Deleting your Bueno Transit account is permanent and cannot be undone.
+                    </p>
+                    <ul className="mb-3">
+                        <li>
+                            Your profile information will be permanently removed after approval.
+                        </li>
+                        <li>
+                            Active reservations must be completed or cancelled before deletion.
+                        </li>
+                        <li>
+                            If you signed in with Google or Apple, this only removes your Bueno
+                            Transit account. It does <strong>NOT</strong> delete your Google or
+                            Apple account.
+                        </li>
+                    </ul>
+                    <p className="text-muted small mb-0">
+                        After submitting, our team will review your request. You will remain
+                        logged in until the deletion is processed.
+                    </p>
+                </Modal.Body>
+                <Modal.Footer>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setShowDeleteModal(false)}
+                        disabled={deletionLoading}
+                    >
+                        Cancel
+                    </Button>
+                    <Button
+                        variant="danger"
+                        onClick={handleRequestDeletion}
+                        disabled={deletionLoading}
+                    >
+                        {deletionLoading ? (
+                            <>
+                                <Spinner
+                                    as="span"
+                                    animation="border"
+                                    size="sm"
+                                    className="me-2"
+                                />
+                                Submitting...
+                            </>
+                        ) : (
+                            "Request Account Deletion"
+                        )}
+                    </Button>
+                </Modal.Footer>
+            </Modal>
         </Container>
     );
 };
 
 export default PassengerProfile;
+
