@@ -36,6 +36,7 @@ import PassengerProfile from "./pages/user-dashboard/pages/passenger-profile/Pas
 import AuthCallback from "./pages/AuthCallback";
 import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
+import AppInfo from "./pages/AppInfo";
 
 function App() {
   const dispatch = useDispatch();
@@ -56,6 +57,7 @@ function App() {
         <Route path="auth/callback" element={<AuthCallback />} />
         <Route path="faq" element={<FAQ />} />
         <Route path="terms" element={<Terms />} />
+        <Route path="app" element={<AppInfo />} />
 
         <Route
           path="admin"
