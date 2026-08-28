@@ -76,6 +76,12 @@ function Header() {
                   translateText("Home", selectedLanguage.code)}
               </Link>
             </Navbar.Text>
+            <Navbar.Text style={{ marginRight: "1rem" }}>
+              <Link to="/terms">
+                {selectedLanguage &&
+                  translateText("Terms", selectedLanguage.code)}
+              </Link>
+            </Navbar.Text>
             {!user && (
               <>
                 <Navbar.Text style={{ marginRight: "1rem" }}>

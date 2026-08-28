@@ -35,6 +35,7 @@ import PassengerSupport from "./pages/user-dashboard/pages/passenger-support/Pas
 import PassengerProfile from "./pages/user-dashboard/pages/passenger-profile/PassengerProfile";
 import AuthCallback from "./pages/AuthCallback";
 import FAQ from "./pages/FAQ";
+import Terms from "./pages/Terms";
 
 function App() {
   const dispatch = useDispatch();
@@ -54,6 +55,7 @@ function App() {
         <Route path="booking/:bookingId" element={<SearchBooking />} />
         <Route path="auth/callback" element={<AuthCallback />} />
         <Route path="faq" element={<FAQ />} />
+        <Route path="terms" element={<Terms />} />
 
         <Route
           path="admin"
