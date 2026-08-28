@@ -4,7 +4,7 @@ import {
   BusFront,
   TruckFront,
   GeoAltFill,
-  HeadsetFill,
+  Headset,
   Ticket,
   PencilFill,
   ClockHistory,
@@ -67,7 +67,7 @@ const AppInfo = () => {
       href: "#",
     },
     {
-      icon: <HeadsetFill size={18} />,
+      icon: <Headset size={18} />,
       label: "Support Page",
       href: "#",
     },
@@ -178,7 +178,7 @@ const AppInfo = () => {
                 flexShrink: 0,
               }}
             >
-              <HeadsetFill size={15} />
+              <Headset size={15} />
               buenotransit@gmail.com
             </div>
           </div>
