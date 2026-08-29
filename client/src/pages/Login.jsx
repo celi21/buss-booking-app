@@ -33,11 +33,14 @@ function Login() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/api/oauth/google`;
+    // OAuth routes are always at /api/oauth/* on the backend root (not inside /api prefix of REACT_APP_API_BASE_URL)
+    const backendRoot = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/api$/, '');
+    window.location.href = `${backendRoot}/api/oauth/google`;
   };
 
   const handleAppleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/api/oauth/apple`;
+    const backendRoot = (process.env.REACT_APP_API_BASE_URL || '').replace(/\/api$/, '');
+    window.location.href = `${backendRoot}/api/oauth/apple`;
   };
 
   const selectedLanguage = useSelector(
