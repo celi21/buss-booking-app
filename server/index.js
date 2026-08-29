@@ -31,8 +31,10 @@ app.use(
 // Cookie parser
 app.use(cookieParser());
 
-// Form parser
+// Form parser (JSON for API requests)
 app.use(express.json());
+// URL-encoded parser required for Apple OAuth POST callback
+app.use(express.urlencoded({ extended: true }));
 
 // Initialize Passport
 app.use(passport.initialize());
