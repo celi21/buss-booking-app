@@ -33,11 +33,11 @@ function Login() {
   };
 
   const handleGoogleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/oauth/google`;
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/api/oauth/google`;
   };
 
   const handleAppleLogin = () => {
-    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/oauth/apple`;
+    window.location.href = `${process.env.REACT_APP_API_BASE_URL}/api/oauth/apple`;
   };
 
   const selectedLanguage = useSelector(

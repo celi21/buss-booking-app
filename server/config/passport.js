@@ -3,6 +3,16 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import AppleStrategy from 'passport-apple';
 import User from '../models/user.js';
 
+// Safely extract only the base origin from BACKEND_URL
+// (guards against accidentally setting BACKEND_URL to a full path like .../api/oauth/google/callback)
+const backendBase = (() => {
+    try {
+        return new URL(process.env.BACKEND_URL || '').origin;
+    } catch {
+        return process.env.BACKEND_URL || '';
+    }
+})();
+
 // Serialize user for session
 passport.serializeUser((user, done) => {
     done(null, user.id);
@@ -25,7 +35,7 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: `${process.env.BACKEND_URL}/api/oauth/google/callback`,
+                callbackURL: `${backendBase}/api/oauth/google/callback`,
             },
             async (accessToken, refreshToken, profile, done) => {
                 try {
@@ -77,7 +87,7 @@ if (
                 teamID: process.env.APPLE_TEAM_ID,
                 keyID: process.env.APPLE_KEY_ID,
                 privateKeyLocation: process.env.APPLE_PRIVATE_KEY_PATH,
-                callbackURL: `${process.env.BACKEND_URL}/api/oauth/apple/callback`,
+                callbackURL: `${backendBase}/api/oauth/apple/callback`,
             },
             async (accessToken, refreshToken, idToken, profile, done) => {
                 try {
