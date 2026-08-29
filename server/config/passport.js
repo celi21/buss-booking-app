@@ -99,35 +99,25 @@ if (
                     // idToken.sub is Apple's unique stable user identifier (always present)
                     // idToken.email is ONLY sent on the very first authorization — never again after that
                     const appleId = idToken.sub;
-                    const email = idToken.email;
+
+                    // Use Apple-provided email or generate a deterministic private relay-style
+                    // email from the appleId (same format Apple uses for "Hide My Email").
+                    // This ensures the required email field is always satisfied.
+                    const email = idToken.email || `${appleId}@privaterelay.appleid.com`;
 
                     // First: try to find the user by their Apple ID (works on all logins after the first)
                     let user = await User.findOne({ appleId });
 
                     if (user) {
-                        // Update email if Apple finally provided one and we didn't have it
-                        if (email && !user.email) {
-                            user.email = email;
-                            await user.save();
-                        }
                         return done(null, user);
                     }
 
                     // Second: if no Apple ID match, try email (handles linking to existing account)
-                    if (email) {
-                        user = await User.findOne({ email });
-                        if (user) {
-                            user.appleId = appleId;
-                            await user.save();
-                            return done(null, user);
-                        }
-                    }
-
-                    // New user — Apple must provide email on first sign-in to create an account
-                    if (!email) {
-                        // This happens when the user previously approved the app but we have no record.
-                        // They must revoke app access in Apple ID settings and sign in again.
-                        return done(null, false, { message: 'apple_no_email' });
+                    user = await User.findOne({ email });
+                    if (user) {
+                        user.appleId = appleId;
+                        await user.save();
+                        return done(null, user);
                     }
 
                     // Create new user
