@@ -12,7 +12,7 @@ const taskSchema = new Schema(
         },
         source: {
             type: String,
-            enum: ["Passenger", "Admin"],
+            enum: ["Passenger", "Admin", "Need Help Chatbox"],
             default: "Admin",
         },
         tag: {
@@ -38,7 +38,7 @@ const taskSchema = new Schema(
         createdBy: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
-            required: true,
+            default: null,
         },
         statusHistory: [
             {

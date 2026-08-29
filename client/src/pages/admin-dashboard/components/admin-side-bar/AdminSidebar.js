@@ -14,6 +14,7 @@ import {
   CloudArrowDown,
   BoxArrowRight,
   Truck,
+  ChatDots,
 } from "react-bootstrap-icons";
 import "./admin-sidebar.css";
 import { Link, NavLink, useNavigate } from "react-router-dom";
@@ -153,6 +154,19 @@ function AdminSidebar() {
         >
           <Truck className="me-2" />
           Dispatch Task Queue
+        </NavLink>
+        <NavLink
+          to="/admin/support-chat"
+          className={({ isActive, isPending }) =>
+            isPending
+              ? "text-muted"
+              : isActive
+                ? "active nav-link "
+                : "nav-link"
+          }
+        >
+          <ChatDots className="me-2" />
+          Support Chat
         </NavLink>
         {/* <NavLink
         to="/google-sheets"

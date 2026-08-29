@@ -92,8 +92,8 @@ function Home() {
       )}
 
       {/* HERO SECTION */}
-      <div 
-        className="hero-section position-relative d-flex align-items-center justify-content-center text-white" 
+      <div
+        className="hero-section position-relative d-flex align-items-center justify-content-center text-white"
         style={{
           width: "100%",
           minHeight: "85vh",
@@ -104,8 +104,8 @@ function Home() {
         }}
       >
         {/* Dark overlay at 55% opacity */}
-        <div 
-          className="position-absolute top-0 start-0 w-100 h-100" 
+        <div
+          className="position-absolute top-0 start-0 w-100 h-100"
           style={{
             backgroundColor: "rgba(0, 0, 0, 0.55)",
             zIndex: 1
@@ -280,7 +280,7 @@ function Home() {
               <GeoAltFill size={20} className="text-primary" />
               <h4 className="fw-bold mb-0 homepage-text-black">{t("Where We Travel")}</h4>
             </div>
-            
+
             <Row className="g-3">
               <Col md={6}>
                 <Card className="border-0 bg-light p-3 rounded-4 h-100">
@@ -358,7 +358,7 @@ function Home() {
               <small className="text-muted">🕒 {t("Showing today's departures")}</small>
             </Col>
           </Row>
-          
+
           <p className="homepage-text-black mb-4">
             {t("Schedules are designed to serve daily commuters and travelers. Check real-time schedules and timings via the online booking portal.")}
           </p>

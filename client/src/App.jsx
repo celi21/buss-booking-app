@@ -37,6 +37,8 @@ import AuthCallback from "./pages/AuthCallback";
 import FAQ from "./pages/FAQ";
 import Terms from "./pages/Terms";
 import AppInfo from "./pages/AppInfo";
+import AdminSupportChat from "./pages/admin-dashboard/pages/support-chat/AdminSupportChat";
+import NeedHelpWidget from "./components/support-chat/NeedHelpWidget";
 
 function App() {
   const dispatch = useDispatch();
@@ -79,6 +81,7 @@ function App() {
           <Route path="reports" element={<Reports />} />
           <Route path="dispatch" element={<Dispatch />} />
           <Route path="task-queue" element={<DispatchTaskQueue />} />
+          <Route path="support-chat" element={<AdminSupportChat />} />
         </Route>
 
         <Route
@@ -98,6 +101,7 @@ function App() {
           <Route path="profile" element={<PassengerProfile />} />
         </Route>
       </Routes>
+      <NeedHelpWidget />
     </BrowserRouter>
   );
 }

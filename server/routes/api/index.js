@@ -8,6 +8,7 @@ import routesRouter from "./routes.js";
 import settingsRouter from "./settings.js";
 import taskRouter from "./task.js";
 import oauthRouter from "./oauth.js";
+import supportChatRouter from "./supportChat.js";
 
 const router = express.Router();
 
@@ -20,5 +21,6 @@ router.use("/coupon", couponRouter);
 router.use("/payment", paymentRouter);
 router.use("/task", taskRouter);
 router.use("/oauth", oauthRouter);
+router.use("/support-chat", supportChatRouter);
 
 export default router;
