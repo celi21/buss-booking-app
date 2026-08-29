@@ -87,9 +87,11 @@ if (
                 teamID: process.env.APPLE_TEAM_ID,
                 keyID: process.env.APPLE_KEY_ID,
                 // Support both a file path (Secret File on Render) or raw key string (env var)
+                // Note: When pasted as an env var, Render stores \n as literal escape sequences.
+                // We normalize them back to real newlines so the key is valid.
                 ...(process.env.APPLE_PRIVATE_KEY_PATH
                     ? { privateKeyLocation: process.env.APPLE_PRIVATE_KEY_PATH }
-                    : { privateKeyString: process.env.APPLE_PRIVATE_KEY }),
+                    : { privateKeyString: (process.env.APPLE_PRIVATE_KEY || '').replace(/\\n/g, '\n') }),
                 callbackURL: `${backendBase}/api/oauth/apple/callback`,
             },
             async (accessToken, refreshToken, idToken, profile, done) => {
