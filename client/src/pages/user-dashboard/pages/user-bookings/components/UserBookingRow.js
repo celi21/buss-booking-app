@@ -27,6 +27,15 @@ const UserBookingRow = ({ booking }) => {
     (state) => state.settings.selectedLanguage
   );
 
+  const getTotalPaidAmount = (b) => {
+    if (!b || !b.payment) return "0.00";
+    const amount = Number(b.payment.amount || 0);
+    const tax = Number(b.payment.tax || 0);
+    const flexFee = b.flexOption === true ? 5 : 0;
+    const total = amount + tax + flexFee;
+    return total.toFixed(2);
+  };
+
   return (
     <>
       {showCancelModal && (
@@ -75,7 +84,7 @@ const UserBookingRow = ({ booking }) => {
             );
           })}
         </td>
-        <td>${booking.payment.amount}</td>
+        <td>${getTotalPaidAmount(booking)}</td>
         <td>
           <div
             className={`${getStatusColor(
