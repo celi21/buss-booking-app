@@ -14,6 +14,7 @@ import transporter from "../../utils/emailConfig.js";
 import Settings from "../../models/settings.js";
 import Stripe from "stripe";
 import DeletionLog from "../../models/deletionLog.js";
+import Task from "../../models/task.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   maxNetworkRetries: 2,
@@ -1723,20 +1724,24 @@ export const changeBookingStatus = async (req, res, next) => {
 
     await booking.save();
 
+    // Helper for safe city ID matching
+    const getCityId = (city) => (city?._id ? city._id.toString() : city?.toString());
+
     // 5a. Automatically create a Refund Task if marked as cancelled and none exists
     if (status === "cancelled") {
-      const Task = (await import("../../models/task.js")).default;
       const existingTask = await Task.findOne({
         relatedBooking: booking._id,
         title: `Refund Request: ${booking.bookingId}`,
       });
 
       if (!existingTask) {
-        const fromLocation = booking.bus.locations.find(
-          (loc) => loc.city.toString() === booking.from.toString()
-        );
+        const fromId = getCityId(booking.from);
+        const fromLocation = booking.bus?.locations?.find((loc) => {
+          const locCityId = getCityId(loc?.city);
+          return locCityId && fromId && locCityId === fromId;
+        });
         const departureTime = fromLocation?.departureTime || "00:00";
-        const bookingDate = booking.bookingDate;
+        const bookingDate = booking.bookingDate || "";
         const bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
         const hoursDifference = (bookingDateTime - Date.now()) / (1000 * 60 * 60);
 
@@ -1750,7 +1755,7 @@ export const changeBookingStatus = async (req, res, next) => {
         const stripePaymentId = booking.payment?.transactionId || "N/A";
         const refundAmount = Number((amount * (refundPercentage / 100)).toFixed(2));
         const routeName = booking.route?.name || "N/A";
-        const departureStr = `${booking.bookingDate} ${departureTime}`;
+        const departureStr = `${bookingDate} ${departureTime}`;
         const creationDateStr = new Date().toISOString().split("T")[0];
 
         const taskDescription = `Customer Name: ${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}
@@ -1765,6 +1770,8 @@ Refund Reason: ${reason}
 Booking Status: cancelled
 Task Creation Date: ${creationDateStr}`;
 
+        const userId = req.user?.id || req.user?._id;
+
         const newTask = new Task({
           title: `Refund Request: ${booking.bookingId}`,
           description: taskDescription,
@@ -1772,11 +1779,11 @@ Task Creation Date: ${creationDateStr}`;
           tag: "URGENT",
           status: "Pending",
           relatedBooking: booking._id,
-          createdBy: req.user.id,
+          createdBy: userId,
           statusHistory: [
             {
               status: "Pending",
-              changedBy: req.user.id,
+              changedBy: userId,
               changedAt: new Date(),
             },
           ],
@@ -1787,26 +1794,27 @@ Task Creation Date: ${creationDateStr}`;
 
     // 5b. Automatically create a Refund Task if marked as refunded and none exists
     if (status === "refunded") {
-      const Task = (await import("../../models/task.js")).default;
       const existingTask = await Task.findOne({
         relatedBooking: booking._id,
         title: `Refund Request: ${booking.bookingId}`,
       });
 
       if (!existingTask) {
-        const fromLocation = booking.bus?.locations?.find(
-          (loc) => loc.city.toString() === booking.from.toString()
-        );
+        const fromId = getCityId(booking.from);
+        const fromLocation = booking.bus?.locations?.find((loc) => {
+          const locCityId = getCityId(loc?.city);
+          return locCityId && fromId && locCityId === fromId;
+        });
         const departureTime = fromLocation?.departureTime || "N/A";
         const amount = booking.payment?.amount || 0;
         const tax = booking.payment?.tax || 0;
         const totalPaid = Number((amount + tax).toFixed(2));
         const stripePaymentId = booking.payment?.transactionId || "N/A";
         const routeName = booking.route?.name || "N/A";
-        const customerName = `${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}`.trim();
+        const customerName = `${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}`.trim() || "Customer";
         const customerEmail = booking.personalDetails?.email || "N/A";
         const customerPhone = booking.personalDetails?.phone || "N/A";
-        const departureStr = `${booking.bookingDate} ${departureTime}`;
+        const departureStr = `${booking.bookingDate || "N/A"} ${departureTime}`;
         const creationDateStr = new Date().toLocaleDateString("en-US", {
           year: "numeric",
           month: "long",
@@ -1831,6 +1839,8 @@ Refund Reason: Admin manually marked booking as Refunded
 Booking Status: refunded
 Task Creation Date: ${creationDateStr}`;
 
+        const userId = req.user?.id || req.user?._id;
+
         const newTask = new Task({
           title: `Refund Request: ${booking.bookingId}`,
           description: taskDescription,
@@ -1838,11 +1848,11 @@ Task Creation Date: ${creationDateStr}`;
           tag: "URGENT",
           status: "Pending",
           relatedBooking: booking._id,
-          createdBy: req.user.id,
+          createdBy: userId,
           statusHistory: [
             {
               status: "Pending",
-              changedBy: req.user.id,
+              changedBy: userId,
               changedAt: new Date(),
             },
           ],
