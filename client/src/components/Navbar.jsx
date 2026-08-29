@@ -53,7 +53,7 @@ function Header() {
         <Navbar.Brand>
           <Link to="/">
             {selectedLanguage &&
-              translateText("Bus Booking", selectedLanguage.code)}{" "}
+              (translateText("Bueno Express", selectedLanguage.code) || "Bueno Express")}{" "}
             {user &&
               (isAdmin
                 ? `| ${

@@ -43,8 +43,9 @@ function Home() {
   const [liveSchedules, setLiveSchedules] = useState([]);
   const navigate = useNavigate();
 
-  // Load today's live schedules
+  // Load today's live schedules & set browser title
   useEffect(() => {
+    document.title = "Bueno Express Transit";
     const fetchSchedules = async () => {
       try {
         const res = await api.post("/booking/public-trip-statuses");
