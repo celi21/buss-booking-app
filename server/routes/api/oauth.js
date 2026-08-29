@@ -1,8 +1,16 @@
 import express from 'express';
+import cors from 'cors';
 import passport from '../../config/passport.js';
 import jwt from 'jsonwebtoken';
 
 const router = express.Router();
+
+// Apple sends its OAuth callback as a form POST from appleid.apple.com.
+// This targeted cors config allows that origin only on the Apple callback route.
+const appleCallbackCors = cors({
+    origin: 'https://appleid.apple.com',
+    methods: ['POST'],
+});
 
 // Check if Google OAuth is configured
 const isGoogleConfigured = !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET);
@@ -55,6 +63,7 @@ router.get('/apple', (req, res, next) => {
 
 router.post(
     '/apple/callback',
+    appleCallbackCors,
     (req, res, next) => {
         if (!isAppleConfigured) {
             return res.redirect(`${process.env.FRONTEND_URL}/login?error=apple_not_configured`);

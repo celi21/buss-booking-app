@@ -491,7 +491,7 @@ function Home() {
               <Card className="h-100 border-0 bg-light p-3" style={{ borderRadius: "12px" }}>
                 <Card.Body className="p-2">
                   <h6 className="fw-bold mb-2 homepage-text-black">{t("Cancellation & Refund Policy")}</h6>
-                  <small className="d-block homepage-text-black">{t("Cancellations are allowed before departure. Receive a 100% refund with flex option. 50% if 24h+ in advance, 30% if less than 24h. Same-day or no-show: 10% refund.")}</small>
+                  <small className="d-block homepage-text-black">{t("Cancellations are allowed before departure. Receive a 100% refund with flex option. 50% if 24h+ in advance, 30% if less than 24h. Same-day or no-show: ticket is forfeited.")}</small>
                 </Card.Body>
               </Card>
             </Col>
