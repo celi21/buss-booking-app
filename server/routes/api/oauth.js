@@ -70,7 +70,7 @@ router.post(
         }
         next();
     },
-    passport.authenticate('apple', { session: false, failureRedirect: `${process.env.FRONTEND_URL}/login?error=apple` }),
+    passport.authenticate('apple', { session: false, failureRedirect: `${process.env.FRONTEND_URL}/login?error=apple_no_email` }),
     (req, res) => {
         // Generate JWT token
         const token = jwt.sign(
