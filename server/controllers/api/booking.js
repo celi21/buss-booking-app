@@ -1723,7 +1723,7 @@ export const changeBookingStatus = async (req, res, next) => {
 
     await booking.save();
 
-    // 5. Automatically create a Refund Task if marked as cancelled and none exists
+    // 5a. Automatically create a Refund Task if marked as cancelled and none exists
     if (status === "cancelled") {
       const Task = (await import("../../models/task.js")).default;
       const existingTask = await Task.findOne({
@@ -1763,6 +1763,72 @@ Refund Amount: $${refundAmount.toFixed(2)}
 Refund Percentage: ${refundPercentage}%
 Refund Reason: ${reason}
 Booking Status: cancelled
+Task Creation Date: ${creationDateStr}`;
+
+        const newTask = new Task({
+          title: `Refund Request: ${booking.bookingId}`,
+          description: taskDescription,
+          source: "Admin",
+          tag: "URGENT",
+          status: "Pending",
+          relatedBooking: booking._id,
+          createdBy: req.user.id,
+          statusHistory: [
+            {
+              status: "Pending",
+              changedBy: req.user.id,
+              changedAt: new Date(),
+            },
+          ],
+        });
+        await newTask.save();
+      }
+    }
+
+    // 5b. Automatically create a Refund Task if marked as refunded and none exists
+    if (status === "refunded") {
+      const Task = (await import("../../models/task.js")).default;
+      const existingTask = await Task.findOne({
+        relatedBooking: booking._id,
+        title: `Refund Request: ${booking.bookingId}`,
+      });
+
+      if (!existingTask) {
+        const fromLocation = booking.bus?.locations?.find(
+          (loc) => loc.city.toString() === booking.from.toString()
+        );
+        const departureTime = fromLocation?.departureTime || "N/A";
+        const amount = booking.payment?.amount || 0;
+        const tax = booking.payment?.tax || 0;
+        const totalPaid = Number((amount + tax).toFixed(2));
+        const stripePaymentId = booking.payment?.transactionId || "N/A";
+        const routeName = booking.route?.name || "N/A";
+        const customerName = `${booking.personalDetails?.firstName || ""} ${booking.personalDetails?.lastName || ""}`.trim();
+        const customerEmail = booking.personalDetails?.email || "N/A";
+        const customerPhone = booking.personalDetails?.phone || "N/A";
+        const departureStr = `${booking.bookingDate} ${departureTime}`;
+        const creationDateStr = new Date().toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+        });
+
+        const taskDescription = `Admin has marked this booking as Refunded. Please process the refund in Stripe.
+
+Customer Name: ${customerName}
+Customer Email: ${customerEmail}
+Customer Phone: ${customerPhone}
+Booking ID: ${booking.bookingId}
+Trip Route/Details: ${routeName}
+Departure Date/Time: ${departureStr}
+Payment Amount: $${amount.toFixed(2)}
+Tax: $${tax.toFixed(2)}
+Total Paid: $${totalPaid}
+Stripe Payment ID: ${stripePaymentId}
+Refund Amount: $${amount.toFixed(2)}
+Refund Percentage: 100%
+Refund Reason: Admin manually marked booking as Refunded
+Booking Status: refunded
 Task Creation Date: ${creationDateStr}`;
 
         const newTask = new Task({

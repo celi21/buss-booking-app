@@ -178,6 +178,7 @@ const translation = {
       "You did not provided any Booking ID",
     Wallet: "Wallet",
     Profile: "Profile",
+    Support: "Support",
     "Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.":
       "Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.",
     "Reliable Transportation Between Upstate New York & New York City": "Reliable Transportation Between Upstate New York & New York City",
@@ -690,7 +691,7 @@ const translation = {
 };
 
 const translateText = (text, code) => {
-  return translation[code][text];
+  return translation[code]?.[text] || text;
 };
 
 export { translateText };

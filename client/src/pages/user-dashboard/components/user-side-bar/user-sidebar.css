@@ -1,5 +1,5 @@
 .sidebar .nav-link {
-  /* color: #ffffff; */
+  color: #000000;
   font-size: 16px;
   padding: 10px 15px;
   border-radius: 5px;
@@ -9,5 +9,11 @@
 }
 
 .sidebar .nav-link:hover {
-  background-color: #e0dfdf;
+  color: #ffffff;
+  background-color: #0d6efd;
+}
+
+.sidebar .nav-link.active {
+  color: #ffffff;
+  background-color: #0d6efd;
 }
