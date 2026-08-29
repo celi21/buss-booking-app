@@ -19,6 +19,7 @@ import {
   Clock,
   PersonCircle,
   ExclamationCircle,
+  Trash,
 } from "react-bootstrap-icons";
 import toast from "react-hot-toast";
 
@@ -31,6 +32,7 @@ const AdminSupportChat = () => {
   const [loading, setLoading] = useState(true);
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const messagesEndRef = useRef(null);
 
@@ -80,6 +82,50 @@ const AdminSupportChat = () => {
   useEffect(() => {
     scrollToBottom();
   }, [selectedChat?.messages]);
+
+  // Delete chat permanently
+  const handleDeleteChat = async () => {
+    if (!selectedChat) return;
+
+    if (
+      !window.confirm(
+        `Are you sure you want to permanently delete the chat conversation with "${
+          selectedChat.customerName || "Guest"
+        }" from the database?`
+      )
+    ) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const res = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/support-chat/admin/delete`,
+        { chatId: selectedChat._id },
+        config
+      );
+
+      if (res.data && res.data.success) {
+        toast.success("Chat deleted permanently.");
+        const remaining = chats.filter((c) => c._id !== selectedChat._id);
+        setChats(remaining);
+        setSelectedChatId(remaining.length > 0 ? remaining[0]._id : null);
+      } else {
+        toast.error(res.data?.message || "Failed to delete chat.");
+      }
+    } catch (err) {
+      console.error("Delete chat error:", err);
+      toast.error("Failed to delete chat session.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   // Send dispatcher reply
   const handleSendReply = async (e) => {
@@ -296,13 +342,23 @@ const AdminSupportChat = () => {
                       </Button>
                     ) : (
                       <Button
-                        variant="outline-danger"
+                        variant="outline-secondary"
                         size="sm"
                         onClick={() => handleUpdateStatus("Open")}
                       >
                         Re-Open Chat
                       </Button>
                     )}
+
+                    <Button
+                      variant="outline-danger"
+                      size="sm"
+                      onClick={handleDeleteChat}
+                      disabled={deleting}
+                      title="Permanently delete this chat conversation"
+                    >
+                      <Trash className="me-1" /> Delete Chat
+                    </Button>
                   </div>
                 </Card.Header>
 

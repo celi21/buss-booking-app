@@ -318,3 +318,36 @@ export const updateChatStatus = async (req, res, next) => {
         });
     }
 };
+
+// Delete chat session permanently from database
+export const deleteChat = async (req, res, next) => {
+    try {
+        const { chatId } = req.body;
+
+        if (!chatId) {
+            return res.status(400).json({
+                success: false,
+                message: "Chat ID is required.",
+            });
+        }
+
+        const deleted = await SupportChat.findByIdAndDelete(chatId);
+        if (!deleted) {
+            return res.status(404).json({
+                success: false,
+                message: "Chat session not found.",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Chat conversation deleted successfully from database.",
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to delete chat session.",
+        });
+    }
+};

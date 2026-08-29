@@ -268,6 +268,39 @@ const NeedHelpWidget = () => {
             {isSupportAvailable ? (
               /* LIVE CHAT VIEW */
               <>
+                {/* Optional Customer Name & Email Banner */}
+                <div className="bg-white p-2 rounded-3 mb-2 border shadow-sm" style={{ fontSize: "12px" }}>
+                  <div className="d-flex align-items-center justify-content-between mb-1 text-secondary fw-semibold">
+                    <span>Your Details for Dispatcher</span>
+                  </div>
+                  <div className="row g-1">
+                    <div className="col-6">
+                      <input
+                        type="text"
+                        className="form-control form-control-sm"
+                        placeholder="Your Name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        style={{ fontSize: "12px" }}
+                      />
+                    </div>
+                    <div className="col-6">
+                      <input
+                        type="email"
+                        className="form-control form-control-sm"
+                        placeholder="Your Email"
+                        value={formData.email}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
+                        style={{ fontSize: "12px" }}
+                      />
+                    </div>
+                  </div>
+                </div>
+
                 {messages.map((msg, index) => (
                   <div
                     key={index}

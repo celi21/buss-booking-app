@@ -5,6 +5,7 @@ import {
     submitAfterHoursRequest,
     getAdminChats,
     updateChatStatus,
+    deleteChat,
 } from "../../controllers/api/supportChat.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 
@@ -41,5 +42,6 @@ router.post("/after-hours", optionalAuth, submitAfterHoursRequest);
 // Admin / Dispatcher inbox routes
 router.post("/admin/chats", verifyAdmin, getAdminChats);
 router.post("/admin/status", verifyAdmin, updateChatStatus);
+router.post("/admin/delete", verifyAdmin, deleteChat);
 
 export default router;
