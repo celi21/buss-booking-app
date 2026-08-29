@@ -47,19 +47,30 @@ const PersonalDetails = ({
 
   const { availableBus, isBusAvailableLoading, busAvailabilityData, cities } =
     useSelector((state) => state.booking);
+  const { user } = useSelector((state) => state.auth);
 
-  const [firstName, setFirstName] = useState(personalDetails.firstName);
-  const [lastName, setLastName] = useState(personalDetails.lastName);
-  const [phone, setPhone] = useState(personalDetails.phone);
-  const [email, setEmail] = useState(personalDetails.email);
+  const [firstName, setFirstName] = useState(
+    personalDetails.firstName || user?.name?.split(" ")[0] || ""
+  );
+  const [lastName, setLastName] = useState(
+    personalDetails.lastName || user?.name?.split(" ").slice(1).join(" ") || ""
+  );
+  const [phone, setPhone] = useState(personalDetails.phone || user?.phone || "");
+  const [email, setEmail] = useState(personalDetails.email || user?.email || "");
   const [pickupAddress, setPickupAddress] = useState(
-    personalDetails.pickupAddress || ""
+    personalDetails.pickupAddress || user?.defaultPickupAddress || ""
   );
   const [dropoffAddress, setDropoffAddress] = useState(
     personalDetails.dropoffAddress || ""
   );
 
-  // Auto-populate pickup and dropoff addresses based on booking search origin/destination
+  // Auto-populate pickup and dropoff addresses based on user default pickup address or booking search origin/destination
+  useEffect(() => {
+    if (user?.defaultPickupAddress && !personalDetails.pickupAddress) {
+      setPickupAddress(user.defaultPickupAddress);
+    }
+  }, [user, personalDetails.pickupAddress]);
+
   useEffect(() => {
     if (cities && cities.length > 0) {
       const isManualStop = (cityName) => {
@@ -73,7 +84,7 @@ const PersonalDetails = ({
         ].includes(cleaned);
       };
 
-      if (!pickupAddress && !personalDetails.pickupAddress) {
+      if (!pickupAddress && !personalDetails.pickupAddress && !user?.defaultPickupAddress) {
         const fromCity = cities.find((city) => city._id === selectedFromCity);
         if (fromCity) {
           if (isManualStop(fromCity.name)) {
@@ -94,7 +105,7 @@ const PersonalDetails = ({
         }
       }
     }
-  }, [cities, selectedFromCity, selectedToCity, personalDetails.pickupAddress, personalDetails.dropoffAddress]);
+  }, [cities, selectedFromCity, selectedToCity, personalDetails.pickupAddress, personalDetails.dropoffAddress, user]);
   const [notes, setNotes] = useState(personalDetails.notes);
   const [suitcases, setSuitcases] = useState(personalDetails.suitcases);
   const [captcha, setCaptcha] = useState(personalDetails.captcha);

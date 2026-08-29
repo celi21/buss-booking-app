@@ -28,6 +28,14 @@ const userSchema = new Schema(
       unique: true,
       sparse: true,
     },
+    phone: {
+      type: String,
+      default: "",
+    },
+    defaultPickupAddress: {
+      type: String,
+      default: "",
+    },
   },
   {
     timestamps: true,

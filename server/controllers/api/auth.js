@@ -47,6 +47,8 @@ export const signup = async (req, res, next) => {
         name: newUser.name,
         email: newUser.email,
         isAdmin: newUser.isAdmin,
+        phone: newUser.phone || "",
+        defaultPickupAddress: newUser.defaultPickupAddress || "",
       },
       isAdmin: newUser.isAdmin,
     });
@@ -105,6 +107,8 @@ export const login = async (req, res, next) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        phone: user.phone || "",
+        defaultPickupAddress: user.defaultPickupAddress || "",
       },
       isAdmin: user.isAdmin,
     });
@@ -148,8 +152,50 @@ export const checkIfUserIsLoggedIn = async (req, res, next) => {
         name: user.name,
         email: user.email,
         isAdmin: user.isAdmin,
+        phone: user.phone || "",
+        defaultPickupAddress: user.defaultPickupAddress || "",
       },
       isAdmin: user.isAdmin,
+    });
+  }
+};
+
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { name, phone, defaultPickupAddress } = req.body;
+    const userId = req.user.id;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found.",
+      });
+    }
+
+    if (name !== undefined) user.name = name;
+    if (phone !== undefined) user.phone = phone;
+    if (defaultPickupAddress !== undefined) user.defaultPickupAddress = defaultPickupAddress;
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        isAdmin: user.isAdmin,
+        phone: user.phone || "",
+        defaultPickupAddress: user.defaultPickupAddress || "",
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error. Failed to update profile.",
     });
   }
 };

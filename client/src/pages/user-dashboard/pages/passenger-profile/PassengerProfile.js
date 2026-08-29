@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
     Container,
     Card,
@@ -10,32 +10,78 @@ import {
     Modal,
     Spinner,
 } from "react-bootstrap";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import toast from "react-hot-toast";
 import { Person, Telephone, Envelope, GeoAlt, Globe, ExclamationTriangleFill } from "react-bootstrap-icons";
 import axios from "axios";
+import { updateUserSuccess } from "../../../../store/slices/AuthSlice";
 
 const PassengerProfile = () => {
+    const dispatch = useDispatch();
     const { user, token } = useSelector((state) => state.auth);
     const [editMode, setEditMode] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [profileData, setProfileData] = useState({
         firstName: user?.name?.split(" ")[0] || "",
         lastName: user?.name?.split(" ").slice(1).join(" ") || "",
-        phone: "",
+        phone: user?.phone || "",
         email: user?.email || "",
         emergencyContact: "",
-        defaultPickupAddress: "",
+        defaultPickupAddress: user?.defaultPickupAddress || "",
         savedAddresses: [],
         language: "English",
     });
+
+    useEffect(() => {
+        if (user) {
+            setProfileData((prev) => ({
+                ...prev,
+                firstName: user.name?.split(" ")[0] || "",
+                lastName: user.name?.split(" ").slice(1).join(" ") || "",
+                phone: user.phone || "",
+                email: user.email || "",
+                defaultPickupAddress: user.defaultPickupAddress || "",
+            }));
+        }
+    }, [user]);
 
     // Account deletion state
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deletionLoading, setDeletionLoading] = useState(false);
 
-    const handleSave = () => {
-        toast.success("Profile updated successfully");
-        setEditMode(false);
+    const handleSave = async () => {
+        setSaving(true);
+        try {
+            const fullName = `${profileData.firstName} ${profileData.lastName}`.trim();
+            const config = {
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${token}`,
+                },
+            };
+            const response = await axios.post(
+                `${process.env.REACT_APP_API_BASE_URL}/auth/update-profile`,
+                {
+                    name: fullName,
+                    phone: profileData.phone,
+                    defaultPickupAddress: profileData.defaultPickupAddress,
+                },
+                config
+            );
+
+            if (response.data && response.data.success) {
+                dispatch(updateUserSuccess(response.data.user));
+                toast.success("Profile updated successfully!");
+                setEditMode(false);
+            } else {
+                toast.error(response.data.message || "Failed to update profile.");
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(error.response?.data?.message || "Failed to update profile.");
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleRequestDeletion = async () => {
@@ -165,12 +211,13 @@ const PassengerProfile = () => {
 
                         {editMode ? (
                             <div className="d-flex gap-2">
-                                <Button variant="primary" onClick={handleSave}>
-                                    Save Changes
+                                <Button variant="primary" onClick={handleSave} disabled={saving}>
+                                    {saving ? "Saving..." : "Save Changes"}
                                 </Button>
                                 <Button
                                     variant="secondary"
                                     onClick={() => setEditMode(false)}
+                                    disabled={saving}
                                 >
                                     Cancel
                                 </Button>
@@ -207,6 +254,9 @@ const PassengerProfile = () => {
                                     })
                                 }
                             />
+                            <Form.Text className="text-muted">
+                                This address will automatically pre-fill on your future booking reservations.
+                            </Form.Text>
                         </Form.Group>
 
                         <Form.Group className="mb-3">
@@ -224,6 +274,10 @@ const PassengerProfile = () => {
                                 <option value="Spanish">Español</option>
                             </Form.Select>
                         </Form.Group>
+
+                        <Button variant="primary" onClick={handleSave} disabled={saving}>
+                            {saving ? "Saving Settings..." : "Save Settings"}
+                        </Button>
                     </Form>
                 </Card.Body>
             </Card>
