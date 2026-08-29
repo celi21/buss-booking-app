@@ -94,28 +94,35 @@ function Login() {
             </Button>
 
             <div className="text-center my-3">
-              <span className="text-muted">or continue with</span>
+              <span className="text-muted small text-uppercase fw-semibold" style={{ letterSpacing: "0.5px" }}>
+                or continue with
+              </span>
             </div>
 
-            <Button
-              variant="outline-danger"
-              className="w-100 mb-2 d-flex align-items-center justify-content-center"
-              onClick={handleGoogleLogin}
-              style={{ gap: '8px' }}
-            >
-              <Google size={20} />
-              Sign in with Google
-            </Button>
-
-            <Button
-              variant="outline-dark"
-              className="w-100 d-flex align-items-center justify-content-center"
-              onClick={handleAppleLogin}
-              style={{ gap: '8px' }}
-            >
-              <Apple size={20} />
-              Sign in with Apple
-            </Button>
+            <Row className="g-2">
+              <Col xs={6}>
+                <Button
+                  variant="outline-secondary"
+                  className="w-100 py-2 d-flex align-items-center justify-content-center fw-semibold text-dark border shadow-sm rounded-3"
+                  onClick={handleGoogleLogin}
+                  style={{ gap: "8px", backgroundColor: "#ffffff", borderColor: "#dadce0", fontSize: "14px" }}
+                >
+                  <Google size={18} style={{ color: "#ea4335" }} />
+                  <span>Google</span>
+                </Button>
+              </Col>
+              <Col xs={6}>
+                <Button
+                  variant="dark"
+                  className="w-100 py-2 d-flex align-items-center justify-content-center fw-semibold border-0 shadow-sm rounded-3 text-white"
+                  onClick={handleAppleLogin}
+                  style={{ gap: "8px", backgroundColor: "#000000", fontSize: "14px" }}
+                >
+                  <Apple size={18} style={{ marginBottom: "2px" }} />
+                  <span>Apple</span>
+                </Button>
+              </Col>
+            </Row>
           </Form>
         </Col>
       </Row>
