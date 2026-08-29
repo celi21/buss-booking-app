@@ -22,6 +22,9 @@ app.use(
       if (!origin) return callback(null, true);
       if (allowedOrigins.length === 0) return callback(null, true);
       if (allowedOrigins.includes(origin)) return callback(null, true);
+      // Apple sends its OAuth callback as a form POST from appleid.apple.com —
+      // this origin must always be allowed regardless of CORS_ORIGINS env var.
+      if (origin === 'https://appleid.apple.com') return callback(null, true);
       return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
