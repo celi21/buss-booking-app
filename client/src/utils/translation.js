@@ -341,6 +341,7 @@ const translation = {
     "Packages are subject to mandatory safety inspection. Bueno Express is not responsible for lost or damaged personal contents.": "Packages are subject to mandatory safety inspection. Bueno Express is not responsible for lost or damaged personal contents.",
     "Questions about our Terms or Refund Policy?": "Questions about our Terms or Refund Policy?",
     "Our dispatch team is available every day to assist you with travel questions, rescheduling, or ticket assistance.": "Our dispatch team is available every day to assist you with travel questions, rescheduling, or ticket assistance.",
+    "Back To Home": "Back to Home",
   },
   ES: {
     "Enjoy quick transitions to connecting trains, local subway lines, commuter paths, and regional cities such as Pennsylvania, Massachusetts, Delaware, Ohio, Rhode Island, and Connecticut. In Pennsylvania, the route includes Allentown, Philadelphia, Reading, Harrisburg, York, Hazleton, the Poconos, Lebanon, and Wilkes-Barre. In Massachusetts, it stops in Boston, Lawrence, and Worcester. The itinerary also features Utica in New York, Providence in Rhode Island, Springfield in Massachusetts, and Lancaster in Pennsylvania.":
@@ -687,6 +688,7 @@ const translation = {
     "Packages are subject to mandatory safety inspection. Bueno Express is not responsible for lost or damaged personal contents.": "Los paquetes están sujetos a una inspección de seguridad obligatoria. Bueno Express no se hace responsable de contenidos personales perdidos o dañados.",
     "Questions about our Terms or Refund Policy?": "¿Preguntas sobre nuestros Términos o Política de Reembolso?",
     "Our dispatch team is available every day to assist you with travel questions, rescheduling, or ticket assistance.": "Nuestro equipo de despacho está disponible todos los días para ayudarle con preguntas de viaje, reprogramación o asistencia con boletos.",
+    "Back To Home": "Volver al inicio",
   },
 };
 
