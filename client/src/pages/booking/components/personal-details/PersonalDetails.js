@@ -282,106 +282,6 @@ const PersonalDetails = ({
       );
       return;
     }
-    // if (!fullName || fullName.trim() == "") {
-    //   toast.error(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide your Full Name on Card Details.",
-    //         selectedLanguage.code
-    //       ),
-    //     {
-    //       duration: 4000,
-    //     }
-    //   );
-    //   setLocalError(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide your Full Name on Card Details.",
-    //         selectedLanguage.code
-    //       )
-    //   );
-    //   return;
-    // }
-    // if (!cardNumber || cardNumber.trim() == "") {
-    //   toast.error(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide your Card Number on Card Details.",
-    //         selectedLanguage.code
-    //       ),
-    //     {
-    //       duration: 4000,
-    //     }
-    //   );
-    //   setLocalError(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide your Card Number on Card Details.",
-    //         selectedLanguage.code
-    //       )
-    //   );
-    //   return;
-    // }
-    // if (!expiryMonth || expiryMonth.trim() == "") {
-    //   toast.error(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide card Expiry Month on Card Details.",
-    //         selectedLanguage.code
-    //       ),
-    //     {
-    //       duration: 4000,
-    //     }
-    //   );
-    //   setLocalError(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide card Expiry Month on Card Details.",
-    //         selectedLanguage.code
-    //       )
-    //   );
-    //   return;
-    // }
-    // if (!expiryYear || expiryYear.trim() == "") {
-    //   toast.error(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide card Expiry Year on Card Details.",
-    //         selectedLanguage.code
-    //       ),
-    //     {
-    //       duration: 4000,
-    //     }
-    //   );
-    //   setLocalError(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide card Expiry Year on Card Details.",
-    //         selectedLanguage.code
-    //       )
-    //   );
-    //   return;
-    // }
-    // if (!cvv || cvv.trim() == "") {
-    //   toast.error(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide card CVV/CVC number on Card Details.",
-    //         selectedLanguage.code
-    //       ),
-    //     {
-    //       duration: 4000,
-    //     }
-    //   );
-    //   setLocalError(
-    //     selectedLanguage &&
-    //       translateText(
-    //         "Please provide card CVV/CVC number on Card Details.",
-    //         selectedLanguage.code
-    //       )
-    //   );
-    //   return;
-    // }
 
 
     const details = {
@@ -562,6 +462,9 @@ const PersonalDetails = ({
                     setLocalError(null);
                   }}
                   className="form-control"
+                  options={{
+                    componentRestrictions: { country: ["us"] },
+                  }}
                 />
               </Form.Group>
             </Col>
@@ -586,6 +489,9 @@ const PersonalDetails = ({
                     setLocalError(null);
                   }}
                   className="form-control"
+                  options={{
+                    componentRestrictions: { country: ["us"] },
+                  }}
                 />
               </Form.Group>
             </Col>

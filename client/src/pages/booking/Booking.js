@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Button, Col, Container, Row } from "react-bootstrap";
-import { ArrowRight } from "react-bootstrap-icons";
+import { ArrowLeft, ArrowRight } from "react-bootstrap-icons";
 import BookingSearch from "../../components/shared/BookingSearch/BookingSearch";
 import Tickets from "./components/tickets/Tickets";
 import PersonalDetails from "./components/personal-details/PersonalDetails";
@@ -19,6 +19,7 @@ import {
 import BookingConfirmationModal from "./components/booking-payment/booking-confirmation-modal/BookingConfirmationModal";
 import { translateText } from "../../utils/translation";
 import { fetchTaxAmount } from "../../store/slices/SettingsSlice";
+import { Link } from "react-router-dom";
 
 const Booking = () => {
   const dispatch = useDispatch();
@@ -209,6 +210,17 @@ const Booking = () => {
       )}
 
       {/* Navigation Steps */}
+      <Row className="justify-content-center d-flex align-items-center px-3 mb-4">
+        <Col className="p-0">
+          <Link to="/">
+            <span className="block text-primary w-100 border-bottom border-primary text-center">
+              <ArrowLeft className="me-1" size={18} color="#3b82f6" />
+              {selectedLanguage && translateText("Back To Home", selectedLanguage.code)}
+            </span>
+          </Link>
+        </Col>
+      </Row>
+
       <Row className="justify-content-center d-flex align-items-center px-3">
         <Col xl="auto" lg="auto" md="auto" sm="auto" xs="6" className="mb-2 p-0">
           <div className="d-flex flex-row align-items-center">

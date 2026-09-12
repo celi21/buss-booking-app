@@ -65,8 +65,7 @@
     "@babel/core": "^7.29.7",
     "@babel/plugin-transform-modules-systemjs": "^7.29.7",
     "@tootallnate/once": "^2.0.1",
-    "qs": "^6.15.3",
-    "webpack-dev-server": "^5.2.6"
+    "qs": "^6.15.3"
   },
   "devDependencies": {
     "eslint": "^8.55.0",
