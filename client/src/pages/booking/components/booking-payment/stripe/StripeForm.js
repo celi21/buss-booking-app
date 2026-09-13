@@ -234,11 +234,23 @@ const StripeForm = ({
         >
           <PaymentElement
             id="payment-element"
-            options={
-              {
-                // layout: "tabs",
-              }
-            }
+            options={{
+              layout: {
+                type: "tabs",
+                defaultCollapsed: false,
+              },
+              paymentMethodOrder: [
+                "card",
+                "apple_pay",
+                "google_pay",
+                "cashapp",
+                "link",
+              ],
+              wallets: {
+                applePay: "auto",
+                googlePay: "auto",
+              },
+            }}
             onLoaderStart={() => {
               setFormLoading(true);
             }}

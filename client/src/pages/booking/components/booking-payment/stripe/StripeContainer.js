@@ -31,9 +31,16 @@ const StripeContainer = ({
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/booking/create-payment-intent`,
-        { ticketsPrice },
         {
-          method: "POST",
+          ticketsPrice,
+          customerEmail: personalDetails?.email || "",
+          customerName: `${personalDetails?.firstName || ""} ${personalDetails?.lastName || ""}`.trim(),
+          customerPhone: personalDetails?.phone || "",
+          route: selectedFromCity && selectedToCity ? `${selectedFromCity} → ${selectedToCity}` : "",
+          travelDate: selectedDate || "",
+          seats: Array.isArray(selectedSeats) ? selectedSeats.join(", ") : "",
+        },
+        {
           headers: {
             "Content-Type": "application/json",
           },
