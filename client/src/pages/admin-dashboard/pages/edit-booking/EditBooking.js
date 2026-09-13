@@ -21,6 +21,8 @@ const EditBooking = () => {
   const [selectedToCity, setSelectedToCity] = useState(null);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [ticketsPrice, setTicketsPrice] = useState(0);
+  const [taxAmount, setTaxAmount] = useState(0);
+  const [flexOption, setFlexOption] = useState(false);
   const [departureTime, setDepartureTime] = useState(null);
   const [arrivalTime, setArrivalTime] = useState(null);
   const [firstName, setFirstName] = useState(null);
@@ -78,6 +80,8 @@ const EditBooking = () => {
     setSelectedToCity(null);
     setSelectedSeats([]);
     setTicketsPrice(0);
+    setTaxAmount(0);
+    setFlexOption(false);
     setDepartureTime(null);
     setArrivalTime(null);
     setFirstName(null);
@@ -126,7 +130,9 @@ const EditBooking = () => {
             ? booking.bus.locations[booking.bus.locations.length - 1].arrivalTime
             : 'N/A'
         );
-        setTicketsPrice(booking.payment.amount);
+        setTicketsPrice(booking.payment ? booking.payment.amount : 0);
+        setTaxAmount(booking.payment?.tax || 0);
+        setFlexOption(booking.flexOption || false);
         setFirstName(booking.personalDetails.firstName);
         setLastName(booking.personalDetails.lastName);
         setPhone(booking.personalDetails.phone);
@@ -432,6 +438,8 @@ const EditBooking = () => {
             setArrivalTime={setArrivalTime}
             ticketsPrice={ticketsPrice}
             setTicketsPrice={setTicketsPrice}
+            taxAmount={taxAmount}
+            flexOption={flexOption}
             handleToCityChange={handleToCityChange}
           />
         </Tab>

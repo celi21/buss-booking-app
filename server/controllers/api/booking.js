@@ -437,6 +437,11 @@ const sendConfirmationEmail = async (booking, to) => {
 
   let fullRouteAndTime = routeName + ", " + departureTime + " - " + arrivalTime;
 
+  const fareAmount = Number(booking.payment?.amount || 0);
+  const taxAmount = Number(booking.payment?.tax || 0);
+  const flexAmount = booking.flexOption === true ? 5 : 0;
+  const totalAmount = fareAmount + taxAmount + flexAmount;
+
   const html = `
   <div style="background-color:#f5f3ef">
     <table border="0" cellpadding="0" cellspacing="0" width="100%">
@@ -555,6 +560,29 @@ const sendConfirmationEmail = async (booking, to) => {
                           </td>
                         </tr>
                         
+                        <!-- Fare / Subtotal -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Fare</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:600;border-bottom:1px solid #f0ede8">$${fareAmount.toFixed(2)}</td>
+                        </tr>
+                        
+                        <!-- Tax -->
+                        <tr>
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Tax</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:600;border-bottom:1px solid #f0ede8">$${taxAmount.toFixed(2)}</td>
+                        </tr>
+                        ${flexAmount > 0 ? `
+                        <!-- Flex Charges -->
+                        <tr style="background-color:#fafaf8">
+                          <td width="45%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;border-bottom:1px solid #f0ede8">
+                            <span style="display:inline-block;padding:5px 16px;border:2px solid #1e90ff;border-radius:20px;font-size:13px;font-weight:700;color:#000000;letter-spacing:0.5px;text-transform:uppercase">Flex Charges</span>
+                          </td>
+                          <td width="55%" style="padding:14px 20px;font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;color:#1a1a2e;font-weight:600;border-bottom:1px solid #f0ede8">$${flexAmount.toFixed(2)}</td>
+                        </tr>` : ""}
                         <!-- Total -->
                         <tr>
                           <td colspan="2" style="padding:18px 20px;background-color:#1a1a2e;border-radius:0 0 8px 8px">
@@ -563,7 +591,7 @@ const sendConfirmationEmail = async (booking, to) => {
                                 <tr>
                                   <td width="50%" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:16px;font-weight:700;color:#ffffff">Total Amount</td>
                                   <td width="50%" align="right" style="font-family:'Segoe UI',Helvetica,Arial,sans-serif;font-size:20px;font-weight:700;color:#ffffff">
-                                    $${booking.flexOption == true ? booking.payment.amount + 5 + booking.payment.tax : booking.payment.amount + booking.payment.tax}
+                                    $${totalAmount.toFixed(2)}
                                   </td>
                                 </tr>
                               </tbody>

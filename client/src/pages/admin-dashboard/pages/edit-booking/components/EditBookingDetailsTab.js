@@ -25,6 +25,8 @@ const EditBookingDetailsTab = ({
   setArrivalTime,
   ticketsPrice,
   setTicketsPrice,
+  taxAmount = 0,
+  flexOption = false,
   handleToCityChange,
 }) => {
   const getCurrentDate = () => {
@@ -368,76 +370,113 @@ const EditBookingDetailsTab = ({
         </Col>
       </Row>
 
-      <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
-          Sub-total:
-        </Col>
-        <Col lg={4} md={6} sm={6}>
-          <div class="input-group input-group-md">
-            <span class="input-group-text">
-              <CurrencyDollar size={16} />
-            </span>
-            <Form.Control
-              type="text"
-              disabled
-              className="bg-white"
-              value={ticketsPrice}
-            />
-          </div>
-        </Col>
-      </Row>
+      {(() => {
+        const fare = Number(ticketsPrice || 0);
+        const tax = Number(taxAmount || 0);
+        const flex = flexOption === true ? 5 : 0;
+        const total = fare + tax + flex;
 
-      <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
-          Tax:
-        </Col>
-        <Col lg={4} md={6} sm={6}>
-          <div class="input-group input-group-md">
-            <span class="input-group-text">
-              <CurrencyDollar size={16} />
-            </span>
-            <Form.Control type="text" disabled className="bg-white" value={0} />
-          </div>
-        </Col>
-      </Row>
+        return (
+          <>
+            <Row className="mb-4">
+              <Col lg={3} md={6} sm={6}>
+                Sub-total:
+              </Col>
+              <Col lg={4} md={6} sm={6}>
+                <div className="input-group input-group-md">
+                  <span className="input-group-text">
+                    <CurrencyDollar size={16} />
+                  </span>
+                  <Form.Control
+                    type="text"
+                    disabled
+                    className="bg-white"
+                    value={fare.toFixed(2)}
+                  />
+                </div>
+              </Col>
+            </Row>
 
-      <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
-          Total:
-        </Col>
-        <Col lg={4} md={6} sm={6}>
-          <div class="input-group input-group-md">
-            <span class="input-group-text">
-              <CurrencyDollar size={16} />
-            </span>
-            <Form.Control
-              type="text"
-              disabled
-              className="bg-white"
-              value={ticketsPrice}
-            />
-          </div>
-        </Col>
-      </Row>
+            <Row className="mb-4">
+              <Col lg={3} md={6} sm={6}>
+                Tax:
+              </Col>
+              <Col lg={4} md={6} sm={6}>
+                <div className="input-group input-group-md">
+                  <span className="input-group-text">
+                    <CurrencyDollar size={16} />
+                  </span>
+                  <Form.Control
+                    type="text"
+                    disabled
+                    className="bg-white"
+                    value={tax.toFixed(2)}
+                  />
+                </div>
+              </Col>
+            </Row>
 
-      <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
-          Deposit:
-        </Col>
-        <Col lg={4} md={6} sm={6}>
-          <div class="input-group input-group-md">
-            <span class="input-group-text">
-              <CurrencyDollar size={16} />
-            </span>
-            <Form.Control
-              type="text"
-              disabled
-              className="bg-white"
-              value={ticketsPrice}
-            />
-          </div>
-        </Col>
-      </Row>
+            {flexOption && (
+              <Row className="mb-4">
+                <Col lg={3} md={6} sm={6}>
+                  Flex Charges:
+                </Col>
+                <Col lg={4} md={6} sm={6}>
+                  <div className="input-group input-group-md">
+                    <span className="input-group-text">
+                      <CurrencyDollar size={16} />
+                    </span>
+                    <Form.Control
+                      type="text"
+                      disabled
+                      className="bg-white"
+                      value={flex.toFixed(2)}
+                    />
+                  </div>
+                </Col>
+              </Row>
+            )}
+
+            <Row className="mb-4">
+              <Col lg={3} md={6} sm={6}>
+                Total:
+              </Col>
+              <Col lg={4} md={6} sm={6}>
+                <div className="input-group input-group-md">
+                  <span className="input-group-text">
+                    <CurrencyDollar size={16} />
+                  </span>
+                  <Form.Control
+                    type="text"
+                    disabled
+                    className="bg-white fw-bold"
+                    value={total.toFixed(2)}
+                  />
+                </div>
+              </Col>
+            </Row>
+
+            <Row className="mb-4">
+              <Col lg={3} md={6} sm={6}>
+                Deposit:
+              </Col>
+              <Col lg={4} md={6} sm={6}>
+                <div className="input-group input-group-md">
+                  <span className="input-group-text">
+                    <CurrencyDollar size={16} />
+                  </span>
+                  <Form.Control
+                    type="text"
+                    disabled
+                    className="bg-white"
+                    value={total.toFixed(2)}
+                  />
+                </div>
+              </Col>
+            </Row>
+          </>
+        );
+      })()}
     </Container>
   );
 };

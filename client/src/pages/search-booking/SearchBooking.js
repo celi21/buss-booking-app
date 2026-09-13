@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
-import { Alert, Button, Card, Col, Container, ListGroup, Row } from "react-bootstrap";
+import { Badge, Button, Card, Col, Container, ListGroup, Row } from "react-bootstrap";
 import { ExclamationCircleFill, ArrowLeft } from "react-bootstrap-icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -349,94 +349,109 @@ const SearchBooking = () => {
             <Col xl={4} lg={4} md={6} sm={12} xs={12} className="mb-4">
               <Card className="shadow-sm h-100">
                 <Card.Body>
-                  <Card.Title>
-                    {selectedLanguage &&
-                      translateText("payment", selectedLanguage.code)}{" "}
-                    {selectedLanguage &&
-                      translateText("details", selectedLanguage.code)}
+                  <Card.Title className="d-flex justify-content-between align-items-center">
+                    <span>
+                      {selectedLanguage &&
+                        translateText("payment", selectedLanguage.code)}{" "}
+                      {selectedLanguage &&
+                        translateText("details", selectedLanguage.code)}
+                    </span>
+                    {bookingData.linkedBookingId && (
+                      <Badge bg="light" text="dark" className="border text-wrap fw-normal" style={{ fontSize: "11px" }}>
+                        Round-Trip Payment
+                      </Badge>
+                    )}
                   </Card.Title>
-                  <ListGroup className="list-group-flush">
-                    <ListGroup.Item className="px-0 mx-0">
-                      <div>
-                        <div className="fw-semibold">
-                          {selectedLanguage &&
-                            translateText(
-                              "Transaction",
-                              selectedLanguage.code
-                            )}{" "}
-                          ID
-                        </div>
-                        <div>{bookingData.payment.transactionId}</div>
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item className="px-0 mx-0">
-                      <div>
-                        <div className="fw-semibold">
-                          {selectedLanguage &&
-                            translateText(
-                              "Tickets total",
-                              selectedLanguage.code
-                            )}
-                        </div>
-                        <div>${bookingData.payment.amount}</div>
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item className="px-0 mx-0">
-                      <div>
-                        <div className="fw-semibold">
-                          {selectedLanguage &&
-                            translateText("Tax", selectedLanguage.code)}
-                        </div>
-                        <div>${bookingData.payment.tax}</div>
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item className="px-0 mx-0">
-                      <div>
-                        <div className="fw-semibold">
-                          {selectedLanguage &&
-                            translateText(
-                              "Flex Charges",
-                              selectedLanguage.code
-                            )}
-                        </div>
-                        <div>${bookingData.flexOption == true ? 8 : 0}</div>
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item className="px-0 mx-0">
-                      <div>
-                        <div className="fw-semibold">
-                          {selectedLanguage &&
-                            translateText("Total", selectedLanguage.code)}
-                        </div>
-                        <div>
-                          $
-                          {bookingData.flexOption == true
-                            ? bookingData.payment.amount +
-                              8 +
-                              bookingData.payment.tax
-                            : bookingData.payment.amount +
-                              bookingData.payment.tax}
-                        </div>
-                      </div>
-                    </ListGroup.Item>
-                    <ListGroup.Item className="px-0 mx-0">
-                      <div>
-                        <div className="fw-semibold">
-                          {selectedLanguage &&
-                            translateText("Deposit", selectedLanguage.code)}
-                        </div>
-                        <div>
-                          $
-                          {bookingData.flexOption == true
-                            ? bookingData.payment.amount +
-                              8 +
-                              bookingData.payment.tax
-                            : bookingData.payment.amount +
-                              bookingData.payment.tax}
-                        </div>
-                      </div>
-                    </ListGroup.Item>
-                  </ListGroup>
+                  {bookingData.linkedBookingId && (
+                    <div className="small text-muted mb-2">
+                      Covers round-trip journey (Linked:{" "}
+                      <Link to={`/booking/${bookingData.linkedBookingId}`} className="text-decoration-underline">
+                        #{bookingData.linkedBookingId}
+                      </Link>
+                      )
+                    </div>
+                  )}
+                  {(() => {
+                    const fareAmount = Number(bookingData?.payment?.amount || 0);
+                    const taxAmount = Number(bookingData?.payment?.tax || 0);
+                    const flexAmount = bookingData?.flexOption === true ? 5 : 0;
+                    const totalAmount = fareAmount + taxAmount + flexAmount;
+
+                    return (
+                      <ListGroup className="list-group-flush">
+                        <ListGroup.Item className="px-0 mx-0">
+                          <div>
+                            <div className="fw-semibold">
+                              {selectedLanguage &&
+                                translateText(
+                                  "Transaction",
+                                  selectedLanguage.code
+                                )}{" "}
+                              ID
+                            </div>
+                            <div>{bookingData?.payment?.transactionId || "N/A"}</div>
+                          </div>
+                        </ListGroup.Item>
+                        <ListGroup.Item className="px-0 mx-0">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="fw-semibold">
+                              {selectedLanguage &&
+                                translateText(
+                                  "Fare / Subtotal",
+                                  selectedLanguage.code
+                                )}
+                            </div>
+                            <div>${fareAmount.toFixed(2)}</div>
+                          </div>
+                        </ListGroup.Item>
+                        <ListGroup.Item className="px-0 mx-0">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="fw-semibold">
+                              {selectedLanguage &&
+                                translateText("Tax", selectedLanguage.code)}
+                            </div>
+                            <div>${taxAmount.toFixed(2)}</div>
+                          </div>
+                        </ListGroup.Item>
+                        {bookingData.flexOption === true && (
+                          <ListGroup.Item className="px-0 mx-0">
+                            <div className="d-flex justify-content-between align-items-center">
+                              <div className="fw-semibold">
+                                {selectedLanguage &&
+                                  translateText(
+                                    "Flex Charges",
+                                    selectedLanguage.code
+                                  )}
+                              </div>
+                              <div>${flexAmount.toFixed(2)}</div>
+                            </div>
+                          </ListGroup.Item>
+                        )}
+                        <ListGroup.Item className="px-0 mx-0 bg-light-subtle">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="fw-bold fs-6">
+                              {selectedLanguage &&
+                                translateText("Total", selectedLanguage.code)}
+                            </div>
+                            <div className="fw-bold fs-6 text-primary">
+                              ${totalAmount.toFixed(2)}
+                            </div>
+                          </div>
+                        </ListGroup.Item>
+                        <ListGroup.Item className="px-0 mx-0">
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div className="fw-semibold">
+                              {selectedLanguage &&
+                                translateText("Total Paid", selectedLanguage.code)}
+                            </div>
+                            <div className="fw-semibold text-success">
+                              ${totalAmount.toFixed(2)}
+                            </div>
+                          </div>
+                        </ListGroup.Item>
+                      </ListGroup>
+                    );
+                  })()}
                 </Card.Body>
               </Card>
             </Col>

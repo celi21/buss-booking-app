@@ -141,7 +141,7 @@ const BookingPayment = ({
                         fontSize: 14,
                       }}
                     >
-                      ${((Number(tax) / 100) * ticketsPrice).toFixed(3)}
+                      ${((Number(tax || 0) / 100) * ticketsPrice).toFixed(2)}
                     </span>
                   </Col>
                 </Row>
@@ -175,7 +175,7 @@ const BookingPayment = ({
                         fontSize: 14,
                       }}
                     >
-                      ${ticketsPrice + (Number(tax) / 100) * ticketsPrice}
+                      ${(ticketsPrice + (Number(tax || 0) / 100) * ticketsPrice).toFixed(2)}
                     </span>
                   </Col>
                 </Row>
