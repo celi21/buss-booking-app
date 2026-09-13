@@ -203,7 +203,8 @@ const filterBus = (
 ) => {
   let StartDate = new Date(periodStartDate);
   let EndDate = new Date(periodEndDate);
-  let checkDate = new Date(date);
+  const [y, m, d] = date.split("-").map(Number);
+  let checkDate = new Date(y, m - 1, d, 12, 0, 0);
   const day = checkDate.getDay();
   console.log(day, getFullDayName(day), checkDate);
 
@@ -233,9 +234,7 @@ const filterBus = (
     }
   }
 
-  const isOutOfService = outOfServiceDates.includes(
-    checkDate.toISOString().split("T")[0]
-  );
+  const isOutOfService = outOfServiceDates.includes(date);
 
   // Return true if conditions are met
   return (
@@ -759,10 +758,10 @@ export const createPaymentIntent = async (req, res, next) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalTicketsPrice * 100),
       currency: "usd",
-      automatic_payment_methods: {
-        enabled: true,
-        allow_redirects: "never",
-      },
+      payment_method_types: [
+        "card",
+        "cashapp",
+      ],
       receipt_email: req.body.customerEmail || undefined,
       description: "Payment for Bus reservation/booking with Bueno Express.",
       metadata: {

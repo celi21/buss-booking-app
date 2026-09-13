@@ -280,18 +280,27 @@ const Tickets = ({
     setTicketsPrice(priceSum);
   };
 
+  const formatTravelDate = (dateStr) => {
+    if (!dateStr) return "";
+    const parts = String(dateStr).split("-").map(Number);
+    if (parts.length === 3) {
+      return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0).toDateString();
+    }
+    return new Date(dateStr).toDateString();
+  };
+
   const handleNextButtonClick = async () => {
     if (!selectedDate || !selectedFromCity || !selectedToCity) {
       return;
     }
 
-    const date = new Date(selectedDate);
-    let nextDate = new Date(date);
-    nextDate.setDate(date.getDate() + 1);
-    // let "2024-09-13"
-    nextDate = `${nextDate.getFullYear()}-${(nextDate.getMonth() + 1)
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    const date = new Date(y, m - 1, d, 12, 0, 0);
+    date.setDate(date.getDate() + 1);
+
+    const nextDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
-      .padStart(2, "0")}-${nextDate.getDate().toString().padStart(2, "0")}`;
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 
     setSelectedDate(nextDate);
 
@@ -320,23 +329,23 @@ const Tickets = ({
       return;
     }
 
-    const date = new Date(selectedDate);
-    let nextDate = new Date(date);
-    nextDate.setDate(date.getDate() - 1);
+    const [y, m, d] = selectedDate.split("-").map(Number);
+    const date = new Date(y, m - 1, d, 12, 0, 0);
+    date.setDate(date.getDate() - 1);
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    if (nextDate < today) {
+    if (date < today) {
       toast.error("You cannot choose a past date.", {
         duration: 4000,
       });
       return;
     }
 
-    nextDate = `${nextDate.getFullYear()}-${(nextDate.getMonth() + 1)
+    const nextDate = `${date.getFullYear()}-${(date.getMonth() + 1)
       .toString()
-      .padStart(2, "0")}-${nextDate.getDate().toString().padStart(2, "0")}`;
+      .padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
 
     setSelectedDate(nextDate);
 
@@ -489,7 +498,7 @@ const Tickets = ({
                   ?.city?.name.toUpperCase()}
               </p>
               <p className="h5 text-center">
-                {new Date(selectedDate).toDateString()} {departureTime}
+                {formatTravelDate(selectedDate)} {departureTime}
               </p>
             </Col>
 
@@ -505,7 +514,7 @@ const Tickets = ({
                   ?.city?.name.toUpperCase()}
               </p>
               <p className="h5 text-center">
-                {new Date(selectedDate).toDateString()}, {arrivalTime}
+                {formatTravelDate(selectedDate)}, {arrivalTime}
               </p>
             </Col>
           </Row>

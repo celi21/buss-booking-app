@@ -241,10 +241,7 @@ const StripeForm = ({
               },
               paymentMethodOrder: [
                 "card",
-                "apple_pay",
-                "google_pay",
                 "cashapp",
-                "link",
               ],
               wallets: {
                 applePay: "auto",
