@@ -116,8 +116,9 @@ const BookingSearch = ({
   };
 
   const handleDateChange = (e) => {
-    const newDate = e.target.value;
-    const finalDate = new Date(newDate) < new Date(minCurrentDate) ? minCurrentDate : newDate;
+    const newDate = e.target.value; // already "YYYY-MM-DD" string
+    // Compare strings directly — avoids UTC midnight timezone shift
+    const finalDate = newDate < minCurrentDate ? minCurrentDate : newDate;
     setLocalDate(finalDate);
     if (setSelectedDate) setSelectedDate(finalDate);
   };

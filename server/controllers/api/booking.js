@@ -759,11 +759,10 @@ export const createPaymentIntent = async (req, res, next) => {
     const paymentIntent = await stripe.paymentIntents.create({
       amount: Math.round(totalTicketsPrice * 100),
       currency: "usd",
-      payment_method_types: [
-        "card",
-        "cashapp",
-        "link",
-      ],
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never",
+      },
       receipt_email: req.body.customerEmail || undefined,
       description: "Payment for Bus reservation/booking with Bueno Express.",
       metadata: {
