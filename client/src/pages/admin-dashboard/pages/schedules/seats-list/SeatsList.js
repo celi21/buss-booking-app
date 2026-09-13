@@ -3,6 +3,8 @@ import {
   Button,
   Col,
   Container,
+  FormControl,
+  InputGroup,
   Overlay,
   Row,
   Table,
@@ -14,6 +16,15 @@ import LoadingSpinner from "../../../../../components/loading-spinner/LoadingSpi
 import SeatRow from "./components/SeatRow";
 
 const SeatsList = () => {
+  const getCurrentDate = () => {
+    var now = new Date();
+    var day = ("0" + now.getDate()).slice(-2);
+    var month = ("0" + (now.getMonth() + 1)).slice(-2);
+    var today = now.getFullYear() + "-" + month + "-" + day;
+    return today;
+  };
+
+  const [selectedDate, setSelectedDate] = useState(getCurrentDate());
   const [selectedBus, setSelectedBus] = useState(null);
   const [selectedStartLocation, setSelectedStartLocation] = useState(null);
   const { buses, isBusesLoading } = useSelector((state) => state.bus);
@@ -23,62 +34,76 @@ const SeatsList = () => {
   const [busLocations, setBusLocations] = useState([]);
   const dispatch = useDispatch();
 
-  const getCurrentDate = () => {
-    var now = new Date();
-    var day = ("0" + now.getDate()).slice(-2);
-    var month = ("0" + (now.getMonth() + 1)).slice(-2);
-    var today = now.getFullYear() + "-" + month + "-" + day;
-    return today;
-  };
-
-  const handleBusChange = (busId) => {
+  const handleBusChange = (busId, date = selectedDate) => {
     if (!busId) return;
 
     setSelectedBus(busId);
-    dispatch(fetchPassengersList(busId));
-    setBusLocations(buses.find((bus) => bus._id === busId).locations);
+    dispatch(fetchPassengersList({ busId, date }));
+    setBusLocations(buses.find((bus) => bus._id === busId)?.locations || []);
+  };
+
+  const handleDateChange = (newDate) => {
+    setSelectedDate(newDate);
+    if (selectedBus) {
+      dispatch(fetchPassengersList({ busId: selectedBus, date: newDate }));
+    }
   };
 
   useEffect(() => {
     if (buses.length > 0) {
-      setSelectedBus(buses[0]._id);
-      setBusLocations(buses[0].locations);
-      dispatch(fetchPassengersList(buses[0]._id));
+      const initialBus = selectedBus || buses[0]._id;
+      setSelectedBus(initialBus);
+      setBusLocations(buses.find((b) => b._id === initialBus)?.locations || buses[0].locations);
+      dispatch(fetchPassengersList({ busId: initialBus, date: selectedDate }));
     }
   }, [buses]);
 
   return (
     <Container fluid>
-      <div className="fw-semibold mb-2">Date: {getCurrentDate()}</div>
+      <div className="fw-semibold mb-2">Assigned Date: {selectedDate}</div>
 
-      <Row className="mb-3 gap-2">
-        <Col className="d-flex justify-content-start align-items-center gap-3">
+      <Row className="mb-3 g-2 align-items-center">
+        <Col md="auto">
+          <Button
+            variant="light"
+            className="border fw-semibold d-flex align-items-center"
+            onClick={() => handleDateChange(getCurrentDate())}
+          >
+            Today
+          </Button>
+        </Col>
+        <Col md="auto">
+          <InputGroup>
+            <FormControl
+              type="date"
+              value={selectedDate}
+              onChange={(e) => handleDateChange(e.target.value)}
+            />
+          </InputGroup>
+        </Col>
+        <Col md="auto" className="d-flex justify-content-start align-items-center gap-2">
           <div>Bus:</div>
-          <Row className="d-flex flex-row">
-            <div>
-              <select
-                className="form-select w-auto"
-                defaultValue={selectedBus}
-                onChange={(e) => {
-                  handleBusChange(e.target.value);
-                }}
-              >
-                {buses?.map((bus) => (
-                  <option
-                    value={bus._id}
-                    key={bus._id}
-                    defaultValue={bus._id}
-                    selected={selectedBus == bus._id}
-                  >
-                    {bus.route?.name || 'N/A'},{" "}
-                    {bus.locations && bus.locations.length > 0
-                      ? `${bus.locations[0].departureTime} - ${bus.locations[bus.locations.length - 1].arrivalTime}`
-                      : 'N/A'}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </Row>
+          <div>
+            <select
+              className="form-select w-auto"
+              value={selectedBus || ""}
+              onChange={(e) => {
+                handleBusChange(e.target.value);
+              }}
+            >
+              {buses?.map((bus) => (
+                <option
+                  value={bus._id}
+                  key={bus._id}
+                >
+                  {bus.route?.name || 'N/A'},{" "}
+                  {bus.locations && bus.locations.length > 0
+                    ? `${bus.locations[0].departureTime} - ${bus.locations[bus.locations.length - 1].arrivalTime}`
+                    : 'N/A'}
+                </option>
+              ))}
+            </select>
+          </div>
         </Col>
       </Row>
 

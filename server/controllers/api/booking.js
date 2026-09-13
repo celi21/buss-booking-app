@@ -1451,23 +1451,27 @@ export const fetchAdminBookings = async (req, res, nex) => {
 };
 
 export const fetchPassengersList = async (req, res, nex) => {
-  const { busId } = req.body;
+  const { busId, date } = req.body;
   try {
-    var now = new Date();
-    var day = ("0" + now.getDate()).slice(-2);
-    var month = ("0" + (now.getMonth() + 1)).slice(-2);
-    var today = now.getFullYear() + "-" + month + "-" + day;
+    var queryDate = date;
+    if (!queryDate) {
+      var now = new Date();
+      var day = ("0" + now.getDate()).slice(-2);
+      var month = ("0" + (now.getMonth() + 1)).slice(-2);
+      queryDate = now.getFullYear() + "-" + month + "-" + day;
+    }
 
     const bookings = await Booking.find({
       bus: busId,
-      bookingDate: today,
+      bookingDate: queryDate,
       status: {
         $in: ["pending", "confirmed"],
       },
     })
-      .populate("personalDetails", "firstName lastName email phone")
+      .populate("personalDetails", "firstName lastName email phone pickupAddress dropoffAddress suitcases notes")
       .populate("from", "name")
-      .populate("to", "name");
+      .populate("to", "name")
+      .populate("payment", "amount tax currency transactionId");
 
     return res.status(200).json({
       success: true,
@@ -2158,6 +2162,52 @@ export const getDispatchTrips = async (req, res, next) => {
       });
     }
 
+    // Ensure all active buses operating on this date (or having bookings on this date) have BusAvailability
+    const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const [y, m, d] = date.split("-").map(Number);
+    const targetDateObj = new Date(y, m - 1, d);
+    const dayName = dayNames[targetDateObj.getDay()];
+
+    const allBuses = await Bus.find({ status: "active" })
+      .populate("route locations.city busType");
+
+    for (const bus of allBuses) {
+      if (!bus.busType) continue;
+      const startDate = new Date(bus.periodStartDate);
+      const endDate = new Date(bus.periodEndDate);
+      const isInRange = targetDateObj >= startDate && targetDateObj <= endDate;
+      const isRecurringDay = bus.recurring?.some(
+        (rec) => rec.name === dayName && rec.checked === true
+      );
+
+      // Check if any bookings exist for this bus and date
+      const hasBookings = await Booking.exists({
+        bus: bus._id,
+        bookingDate: date,
+        status: { $in: ["confirmed", "pending"] },
+      });
+
+      if ((isInRange && isRecurringDay) || hasBookings) {
+        let avail = await BusAvailability.findOne({ bus: bus._id, date });
+        if (!avail) {
+          const booked = await Booking.find({
+            bus: bus._id,
+            bookingDate: date,
+            status: { $in: ["confirmed", "pending"] },
+          });
+          let bookedSeatsCount = 0;
+          booked.forEach((b) => b.seatDetails?.forEach((s) => (bookedSeatsCount += s.seats)));
+          avail = new BusAvailability({
+            bus: bus._id,
+            date,
+            totalSeats: bus.busType.seats,
+            availableSeats: Math.max(0, bus.busType.seats - bookedSeatsCount),
+          });
+          await avail.save();
+        }
+      }
+    }
+
     // Get all bus availability for the selected date
     const trips = await BusAvailability.find({ date })
       .populate({
@@ -2171,14 +2221,22 @@ export const getDispatchTrips = async (req, res, next) => {
     const formattedTrips = await Promise.all(trips
       .filter(trip => trip.bus && trip.bus.route)
       .map(async (trip) => {
-        const firstLocation = trip.bus.locations[0];
-        const lastLocation = trip.bus.locations[trip.bus.locations.length - 1];
+        const firstLocation = trip.bus.locations?.[0];
+        const lastLocation = trip.bus.locations?.[trip.bus.locations.length - 1];
 
-        // Find one booking to fetch the tripStatus
-        const sampleBooking = await Booking.findOne({
+        // Find bookings for this bus & date to calculate passenger count and status
+        const tripBookings = await Booking.find({
           bus: trip.bus._id,
           bookingDate: date,
+          status: { $in: ["confirmed", "pending"] },
         });
+
+        let passengers = 0;
+        tripBookings.forEach((b) => {
+          b.seatDetails?.forEach((s) => (passengers += s.seats));
+        });
+
+        const sampleBooking = tripBookings[0];
 
         return {
           tripId: trip._id,
@@ -2190,6 +2248,7 @@ export const getDispatchTrips = async (req, res, next) => {
           arrivalTime: lastLocation?.arrivalTime || 'N/A',
           totalSeats: trip.totalSeats,
           availableSeats: trip.availableSeats,
+          passengers,
           date: trip.date,
           tripStatus: sampleBooking?.tripStatus || 'On Time',
         };

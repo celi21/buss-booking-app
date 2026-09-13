@@ -191,9 +191,12 @@ export const fetchAdminBookings = createAsyncThunk(
 
 export const fetchPassengersList = createAsyncThunk(
   "booking/fetchPassengersList",
-  async (busId, { getState, rejectWithValue }) => {
+  async (payload, { getState, rejectWithValue }) => {
     const { isAdmin, token } = getState().auth;
     if (!isAdmin || !token) return rejectWithValue("Unauthorized");
+
+    const busId = typeof payload === "object" ? payload.busId : payload;
+    const date = typeof payload === "object" ? payload.date : null;
 
     try {
       const config = {
@@ -206,6 +209,7 @@ export const fetchPassengersList = createAsyncThunk(
         `${process.env.REACT_APP_API_BASE_URL}/booking/fetch-passengers-list`,
         {
           busId,
+          date,
         },
         config
       );
