@@ -11,9 +11,11 @@ import {
 import toast from "react-hot-toast";
 import axios from "axios";
 import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinner";
+import { Envelope } from "react-bootstrap-icons";
 
 const EditBooking = () => {
   const { bookingId } = useParams();
+  const [isResendingEmail, setIsResendingEmail] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [selectedFromCity, setSelectedFromCity] = useState(null);
   const [selectedToCity, setSelectedToCity] = useState(null);
@@ -372,6 +374,45 @@ const EditBooking = () => {
     }
   };
 
+  const handleResendConfirmationEmail = async () => {
+    if (!bookingId) {
+      toast.error("Booking ID not available.");
+      return;
+    }
+    setIsResendingEmail(true);
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      };
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_BASE_URL}/booking/resend-confirmation-email`,
+        { bookingId },
+        config
+      );
+
+      if (response.data && response.data.success) {
+        toast.success("Confirmation email sent successfully.", {
+          duration: 4000,
+        });
+      } else {
+        toast.error(
+          response.data?.message || "Unable to send confirmation email. Please try again.",
+          { duration: 4000 }
+        );
+      }
+    } catch (err) {
+      console.error("Error resending email:", err);
+      toast.error("Unable to send confirmation email. Please try again.", {
+        duration: 4000,
+      });
+    } finally {
+      setIsResendingEmail(false);
+    }
+  };
+
   return (
     <Container fluid>
       <Tabs defaultActiveKey="Booking-Details" className="mb-3 pb-3">
@@ -418,17 +459,30 @@ const EditBooking = () => {
 
       {error && <Alert variant="danger">{error}</Alert>}
 
-      <div className="w-100 d-flex flex-row gap-2 mb-5">
-        <Link
-          to="/admin/bookings"
-          className="btn btn-secondary"
-          onClick={() => resetState()}
-        >
-          Cancel
-        </Link>
-        <Button variant="primary" onClick={submitForm} disabled={loading}>
-          {loading ? <LoadingSpinner /> : "Save"}
-        </Button>
+      <div className="w-100 d-flex flex-wrap justify-content-between align-items-center gap-2 mb-5">
+        <div className="d-flex flex-row gap-2">
+          <Link
+            to="/admin/bookings"
+            className="btn btn-secondary"
+            onClick={() => resetState()}
+          >
+            Cancel
+          </Link>
+          <Button variant="primary" onClick={submitForm} disabled={loading}>
+            {loading ? <LoadingSpinner /> : "Save"}
+          </Button>
+        </div>
+        <div>
+          <Button
+            variant="outline-primary"
+            className="d-flex align-items-center gap-2 fw-semibold"
+            onClick={handleResendConfirmationEmail}
+            disabled={isResendingEmail || loading}
+          >
+            <Envelope size={17} />
+            {isResendingEmail ? "Sending..." : "Resend Confirmation Email"}
+          </Button>
+        </div>
       </div>
     </Container>
   );

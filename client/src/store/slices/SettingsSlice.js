@@ -54,6 +54,10 @@ export const updateTaxAmount = createAsyncThunk(
         { tax },
         config
       );
+      if (response.data && response.data.success) {
+        return response.data.tax;
+      }
+      return rejectWithValue(response.data?.message || "Failed to update tax");
     } catch (error) {
       if (error.response && error.response.data.message) {
         return rejectWithValue(error.response.data.message);
@@ -91,9 +95,10 @@ const settingsSlice = createSlice({
         state.isTaxLoading = true;
         state.taxError = null;
       })
-      .addCase(updateTaxAmount.fulfilled, (state) => {
+      .addCase(updateTaxAmount.fulfilled, (state, action) => {
         state.isTaxLoading = false;
         state.taxError = null;
+        state.tax = action.payload;
       })
       .addCase(updateTaxAmount.rejected, (state, action) => {
         state.isTaxLoading = false;

@@ -62,7 +62,7 @@ const EditBusTicketTypes = ({ handleCancel }) => {
   };
 
   const dispatch = useDispatch();
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (ticketTypes.length > 0) {
       for (let i = 0; i < ticketTypes.length; i++) {
         if (
@@ -85,12 +85,16 @@ const EditBusTicketTypes = ({ handleCancel }) => {
       tab: "ticket-types",
     };
 
-    dispatch(editBus(busObject));
-    if (!editBusLoading && !editBusError) {
-      toast.success("Bus Ticket Types Saved", {
+    try {
+      await dispatch(editBus(busObject)).unwrap();
+      toast.success("Bus Ticket Types Saved Successfully", {
         duration: 4000,
       });
       dispatch(setEditBusError(null));
+    } catch (err) {
+      toast.error(err || "Failed to save ticket types", {
+        duration: 4000,
+      });
     }
   };
 

@@ -19,12 +19,10 @@ import LoadingSpinner from "../../../../components/loading-spinner/LoadingSpinne
 import {
     GripVertical,
     InfoCircle,
-    FileEarmarkPdf,
+    FiletypeHtml,
     FiletypeCsv,
     Eye,
 } from "react-bootstrap-icons";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 
 const Dispatch = () => {
     const [selectedDate, setSelectedDate] = useState(
@@ -251,99 +249,207 @@ const Dispatch = () => {
         setShowDetailsModal(true);
     };
 
-    const exportDriverPDF = () => {
-        const doc = new jsPDF();
-        doc.setFontSize(16);
-        doc.text("Driver Manifest", 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Route: ${selectedTrip?.route || "N/A"}`, 14, 25);
-        doc.text(`Date: ${selectedDate}`, 14, 30);
-        doc.text(`Departure: ${selectedTrip?.departureTime || "N/A"}`, 14, 35);
-
-        const tableData = manifest.map((p, idx) => [
-            idx + 1,
-            p.clientName,
-            p.pickupAddress,
-            p.dropoffAddress,
-            p.numberOfPassengers,
-            p.notes || "-",
-            `$${p.paymentAmount}`,
-        ]);
-
-        doc.autoTable({
-            startY: 40,
-            head: [
-                ["#", "Client Name", "Pickup", "Dropoff", "Passengers", "Notes", "Amount"],
-            ],
-            body: tableData,
-            styles: { fontSize: 8 },
-        });
-
-        doc.save(`driver-manifest-${selectedDate}.pdf`);
-        toast.success("Driver manifest exported");
+    const exportDriverHTML = () => {
+        const totalPax = manifest.reduce((sum, p) => sum + (Number(p.numberOfPassengers) || 0), 0);
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Driver Passenger Manifest - ${selectedDate}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 24px; color: #1a1a2e; background: #fff; }
+    .header { border-bottom: 2px solid #0d6efd; padding-bottom: 14px; margin-bottom: 20px; }
+    .title { font-size: 22px; font-weight: 700; margin: 0 0 6px; color: #0d6efd; }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; font-size: 13px; }
+    .meta-item strong { color: #555; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 12px; }
+    th { background: #f1f5f9; color: #334155; font-weight: 600; text-align: left; padding: 10px 10px; border: 1px solid #cbd5e1; }
+    td { padding: 9px 10px; border: 1px solid #e2e8f0; vertical-align: top; }
+    tr:nth-child(even) { background-color: #f8fafc; }
+    .price-col { font-weight: 600; text-align: right; }
+    .no-print { margin-bottom: 20px; display: flex; gap: 10px; }
+    .btn { padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; text-decoration: none; border: none; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-secondary { background: #64748b; color: #fff; }
+    @media print {
+      .no-print { display: none !important; }
+      body { margin: 0; padding: 12px; }
+      th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="btn btn-primary" onclick="window.print()">Print Manifest</button>
+    <button class="btn btn-secondary" onclick="window.close()">Close</button>
+  </div>
+  <div class="header">
+    <div class="title">Bueno Transit — Driver Passenger Manifest</div>
+    <div class="meta-grid">
+      <div class="meta-item"><strong>Route:</strong> ${selectedTrip?.route || "N/A"}</div>
+      <div class="meta-item"><strong>Date:</strong> ${selectedDate}</div>
+      <div class="meta-item"><strong>Departure Time:</strong> ${selectedTrip?.departureTime || "N/A"}</div>
+      <div class="meta-item"><strong>Total Passengers:</strong> ${totalPax}</div>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 35px;">#</th>
+        <th>Booking ID</th>
+        <th>Client Name</th>
+        <th>Pickup Address</th>
+        <th>Dropoff Address</th>
+        <th style="width: 50px; text-align: center;">Pax</th>
+        <th>Notes</th>
+        <th style="width: 90px; text-align: right;">Total Paid</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${manifest.map((p, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${p.bookingId}</strong></td>
+          <td><strong>${p.clientName}</strong></td>
+          <td>${p.pickupAddress || "-"}</td>
+          <td>${p.dropoffAddress || "-"}</td>
+          <td style="text-align: center;">${p.numberOfPassengers}</td>
+          <td>${p.notes || "-"}</td>
+          <td class="price-col">$${Number(p.paymentAmount || 0).toFixed(2)}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</body>
+</html>
+        `;
+        const printWindow = window.open("", "_blank");
+        if (printWindow) {
+            printWindow.document.open();
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            toast.success("Driver HTML manifest opened");
+        } else {
+            toast.error("Please allow popups to view the HTML manifest");
+        }
     };
 
-    const exportDispatchPDF = () => {
-        const doc = new jsPDF("landscape");
-        doc.setFontSize(16);
-        doc.text("Dispatch Manifest", 14, 15);
-        doc.setFontSize(10);
-        doc.text(`Route: ${selectedTrip?.route || "N/A"}`, 14, 25);
-        doc.text(`Date: ${selectedDate}`, 14, 30);
-
-        const tableData = manifest.map((p, idx) => [
-            idx + 1,
-            p.clientName,
-            p.phone,
-            p.email,
-            p.pickupAddress,
-            p.dropoffAddress,
-            p.numberOfPassengers,
-            `$${p.paymentAmount}`,
-            p.boardingStatus,
-        ]);
-
-        doc.autoTable({
-            startY: 35,
-            head: [
-                [
-                    "#",
-                    "Name",
-                    "Phone",
-                    "Email",
-                    "Pickup",
-                    "Dropoff",
-                    "Pax",
-                    "Amount",
-                    "Status",
-                ],
-            ],
-            body: tableData,
-            styles: { fontSize: 7 },
-        });
-
-        doc.save(`dispatch-manifest-${selectedDate}.pdf`);
-        toast.success("Dispatch manifest exported");
+    const exportDispatchHTML = () => {
+        const totalPax = manifest.reduce((sum, p) => sum + (Number(p.numberOfPassengers) || 0), 0);
+        const totalRevenue = manifest.reduce((sum, p) => sum + (Number(p.paymentAmount) || 0), 0);
+        const htmlContent = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Dispatch Passenger Manifest - ${selectedDate}</title>
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 24px; color: #1a1a2e; background: #fff; }
+    .header { border-bottom: 2px solid #0d6efd; padding-bottom: 14px; margin-bottom: 20px; }
+    .title { font-size: 22px; font-weight: 700; margin: 0 0 6px; color: #0d6efd; }
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px; font-size: 13px; }
+    .meta-item strong { color: #555; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; font-size: 11px; }
+    th { background: #f1f5f9; color: #334155; font-weight: 600; text-align: left; padding: 8px 8px; border: 1px solid #cbd5e1; }
+    td { padding: 7px 8px; border: 1px solid #e2e8f0; vertical-align: top; }
+    tr:nth-child(even) { background-color: #f8fafc; }
+    .price-col { font-weight: 600; text-align: right; }
+    .status-badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 600; font-size: 10px; }
+    .no-print { margin-bottom: 20px; display: flex; gap: 10px; }
+    .btn { padding: 8px 18px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; text-decoration: none; border: none; }
+    .btn-primary { background: #0d6efd; color: #fff; }
+    .btn-secondary { background: #64748b; color: #fff; }
+    @media print {
+      .no-print { display: none !important; }
+      body { margin: 0; padding: 8px; }
+      th { background-color: #f1f5f9 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button class="btn btn-primary" onclick="window.print()">Print Manifest</button>
+    <button class="btn btn-secondary" onclick="window.close()">Close</button>
+  </div>
+  <div class="header">
+    <div class="title">Bueno Transit — Dispatch Passenger Manifest (Full)</div>
+    <div class="meta-grid">
+      <div class="meta-item"><strong>Route:</strong> ${selectedTrip?.route || "N/A"}</div>
+      <div class="meta-item"><strong>Date:</strong> ${selectedDate}</div>
+      <div class="meta-item"><strong>Departure Time:</strong> ${selectedTrip?.departureTime || "N/A"}</div>
+      <div class="meta-item"><strong>Total Passengers:</strong> ${totalPax}</div>
+      <div class="meta-item"><strong>Total Collected (incl. Tax):</strong> $${totalRevenue.toFixed(2)}</div>
+    </div>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 30px;">#</th>
+        <th>Booking ID</th>
+        <th>Passenger Name</th>
+        <th>Phone</th>
+        <th>Email</th>
+        <th>Pickup Address</th>
+        <th>Dropoff Address</th>
+        <th style="width: 40px; text-align: center;">Pax</th>
+        <th style="width: 75px; text-align: right;">Total Paid</th>
+        <th style="width: 75px;">Status</th>
+        <th>Notes</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${manifest.map((p, idx) => `
+        <tr>
+          <td>${idx + 1}</td>
+          <td><strong>${p.bookingId}</strong></td>
+          <td><strong>${p.clientName}</strong></td>
+          <td>${p.phone || "-"}</td>
+          <td>${p.email || "-"}</td>
+          <td>${p.pickupAddress || "-"}</td>
+          <td>${p.dropoffAddress || "-"}</td>
+          <td style="text-align: center;">${p.numberOfPassengers}</td>
+          <td class="price-col">$${Number(p.paymentAmount || 0).toFixed(2)}</td>
+          <td>${p.boardingStatus || "Not Boarded"}</td>
+          <td>${p.notes || "-"}</td>
+        </tr>
+      `).join("")}
+    </tbody>
+  </table>
+</body>
+</html>
+        `;
+        const printWindow = window.open("", "_blank");
+        if (printWindow) {
+            printWindow.document.open();
+            printWindow.document.write(htmlContent);
+            printWindow.document.close();
+            toast.success("Dispatch HTML manifest opened");
+        } else {
+            toast.error("Please allow popups to view the HTML manifest");
+        }
     };
 
     const exportDriverCSV = () => {
         const headers = [
             "Order",
+            "Booking ID",
             "Client Name",
             "Pickup Address",
             "Dropoff Address",
             "Passengers",
             "Notes",
-            "Amount",
+            "Total Amount (incl. Tax)",
         ];
         const rows = manifest.map((p, idx) => [
             idx + 1,
+            p.bookingId,
             p.clientName,
             p.pickupAddress,
             p.dropoffAddress,
             p.numberOfPassengers,
             p.notes || "-",
-            p.paymentAmount,
+            Number(p.paymentAmount || 0).toFixed(2),
         ]);
 
         const csvContent = [
@@ -363,24 +469,26 @@ const Dispatch = () => {
     const exportDispatchCSV = () => {
         const headers = [
             "Order",
+            "Booking ID",
             "Name",
             "Phone",
             "Email",
             "Pickup",
             "Dropoff",
             "Passengers",
-            "Amount",
+            "Total Amount (incl. Tax)",
             "Status",
         ];
         const rows = manifest.map((p, idx) => [
             idx + 1,
+            p.bookingId,
             p.clientName,
             p.phone,
             p.email,
             p.pickupAddress,
             p.dropoffAddress,
             p.numberOfPassengers,
-            p.paymentAmount,
+            Number(p.paymentAmount || 0).toFixed(2),
             p.boardingStatus,
         ]);
 
@@ -487,12 +595,12 @@ const Dispatch = () => {
                             <Col>
                                 <h6>Driver Export (Restricted)</h6>
                                 <Button
-                                    variant="danger"
+                                    variant="outline-primary"
                                     size="sm"
                                     className="me-2"
-                                    onClick={exportDriverPDF}
+                                    onClick={exportDriverHTML}
                                 >
-                                    <FileEarmarkPdf className="me-1" /> PDF
+                                    <FiletypeHtml className="me-1" /> HTML
                                 </Button>
                                 <Button variant="success" size="sm" onClick={exportDriverCSV}>
                                     <FiletypeCsv className="me-1" /> CSV
@@ -501,12 +609,12 @@ const Dispatch = () => {
                             <Col>
                                 <h6>Dispatch Export (Full)</h6>
                                 <Button
-                                    variant="danger"
+                                    variant="outline-primary"
                                     size="sm"
                                     className="me-2"
-                                    onClick={exportDispatchPDF}
+                                    onClick={exportDispatchHTML}
                                 >
-                                    <FileEarmarkPdf className="me-1" /> PDF
+                                    <FiletypeHtml className="me-1" /> HTML
                                 </Button>
                                 <Button variant="success" size="sm" onClick={exportDispatchCSV}>
                                     <FiletypeCsv className="me-1" /> CSV

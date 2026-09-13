@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Button, Col, Container, Form, Row, Table } from "react-bootstrap";
-import { CurrencyDollar } from "react-bootstrap-icons";
+import { Button, Card, Col, Container, Form, InputGroup, Row, Table } from "react-bootstrap";
+import { CurrencyDollar, Percent } from "react-bootstrap-icons";
 import { useDispatch, useSelector } from "react-redux";
 import LoadingSpinner from "../../../../../../../components/loading-spinner/LoadingSpinner";
 import toast from "react-hot-toast";
@@ -8,27 +8,49 @@ import {
   editBus,
   setEditBusError,
 } from "../../../../../../../store/slices/BusSlice";
+import {
+  fetchTaxAmount,
+  updateTaxAmount,
+} from "../../../../../../../store/slices/SettingsSlice";
 import TicketPriceInput from "./TicketPriceInput";
 
 const EditBusTicketPrices = ({ handleCancel }) => {
+  const dispatch = useDispatch();
   const { fetchBusObject, editBusLoading, editBusError } = useSelector(
     (state) => state.bus
   );
+  const { tax } = useSelector((state) => state.settings);
+
   const [ticketTypes, setTicketTypes] = useState([]);
   const [selectedTicketType, setSelectedTicketType] = useState(null);
   const [busLocations, setBusLocations] = useState([]);
-  const [ticketChangeLoading, setTicketChangeLoading] = useState(false);
   const [ticketPrices, setTicketPrices] = useState([]);
+  const [isSavingPrices, setIsSavingPrices] = useState(false);
+
+  // Tax configuration state
+  const [taxRateInput, setTaxRateInput] = useState("");
+  const [isSavingTax, setIsSavingTax] = useState(false);
+
+  useEffect(() => {
+    dispatch(fetchTaxAmount());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (tax !== null && tax !== undefined) {
+      setTaxRateInput(String(tax));
+    }
+  }, [tax]);
 
   useEffect(() => {
     if (fetchBusObject) {
-      setTicketTypes(fetchBusObject.ticketTypes);
+      const types = fetchBusObject.ticketTypes || [];
+      setTicketTypes(types);
 
-      if (fetchBusObject.ticketTypes.length > 0) {
-        setSelectedTicketType(fetchBusObject.ticketTypes[0]._id);
+      if (types.length > 0) {
+        setSelectedTicketType(types[0]._id);
       }
 
-      if (fetchBusObject.locations.length > 0) {
+      if (fetchBusObject.locations && fetchBusObject.locations.length > 0) {
         setBusLocations(fetchBusObject.locations);
       }
 
@@ -38,260 +60,294 @@ const EditBusTicketPrices = ({ handleCancel }) => {
     }
   }, [fetchBusObject]);
 
-  const handleTicketTypeChange = async (e) => {
-    // console.log(e.target.value);
+  const handleTicketTypeChange = (e) => {
     if (!e.target.value) return;
-    setTicketChangeLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 3000));
-
     setSelectedTicketType(e.target.value);
-    setTicketChangeLoading(false);
+  };
+
+  const getInputValue = (fromLocation, toLocation) => {
+    const fromId = String(fromLocation._id || fromLocation);
+    const toId = String(toLocation._id || toLocation);
+    const targetTicketType = String(selectedTicketType);
+
+    const ticketGroup = ticketPrices.find(
+      (t) => String(t.ticketType?._id || t.ticketType) === targetTicketType
+    );
+
+    const priceEntry = ticketGroup?.prices?.find(
+      (p) =>
+        String(p.fromLocationId?._id || p.fromLocationId) === fromId &&
+        String(p.toLocationId?._id || p.toLocationId) === toId
+    );
+
+    return priceEntry?.price !== undefined ? priceEntry.price : "";
   };
 
   const handlePriceChange = (fromLocation, toLocation, price) => {
-    // if the bus have ticket types
-    if (ticketTypes.length > 0) {
-      // if there is a selected ticket
-      if (selectedTicketType) {
-        // check if ticket type exists in array.
-        const findTicket = ticketPrices.find(
-          (t) => t.ticketType === selectedTicketType
-        );
-        if (findTicket) {
-          const updatedTicketPrices = ticketPrices.map((ticket) => {
-            // if the ticket type (eg: Adults) already exists.
-            if (ticket.ticketType === selectedTicketType) {
-              // check to see if the to and from locations are same and update its price
-              const existingPriceIndex = ticket.prices.findIndex(
-                (p) =>
-                  p.fromLocationId == fromLocation._id &&
-                  p.toLocationId == toLocation._id
-              );
-              // meaning price exist
-              if (existingPriceIndex !== -1) {
-                let ticketPrices = [...ticket.prices];
-                let updatedPrice = {
-                  ...ticketPrices[existingPriceIndex],
-                  price: price,
-                };
-                ticketPrices[existingPriceIndex] = updatedPrice;
-                return {
-                  ...ticket,
-                  prices: ticketPrices,
-                };
-              } else {
-                // price does not exist. add new
-                // ticket.prices.push({
-                //   fromLocationId: fromLocation._id,
-                //   toLocationId: toLocation._id,
-                //   price: price,
-                // });
-                let ticketPrices = [...ticket.prices];
-                ticketPrices.push({
-                  fromLocationId: fromLocation._id,
-                  toLocationId: toLocation._id,
-                  price: price,
-                });
-                return {
-                  ...ticket,
-                  prices: ticketPrices,
-                };
-              }
-            }
+    const fromId = String(fromLocation._id || fromLocation);
+    const toId = String(toLocation._id || toLocation);
+    const targetTicketType = String(selectedTicketType);
 
-            return ticket;
-          });
-          setTicketPrices(updatedTicketPrices);
-        } else {
-          let newTicket = {
-            ticketType: selectedTicketType,
-            prices: [
-              {
-                fromLocationId: fromLocation._id,
-                toLocationId: toLocation._id,
-                price: price,
-              },
-            ],
+    if (ticketTypes.length > 0 && selectedTicketType) {
+      const existingTicketIndex = ticketPrices.findIndex(
+        (t) => String(t.ticketType?._id || t.ticketType) === targetTicketType
+      );
+
+      if (existingTicketIndex !== -1) {
+        const ticketGroup = ticketPrices[existingTicketIndex];
+        const prices = [...(ticketGroup.prices || [])];
+        const existingPriceIndex = prices.findIndex(
+          (p) =>
+            String(p.fromLocationId?._id || p.fromLocationId) === fromId &&
+            String(p.toLocationId?._id || p.toLocationId) === toId
+        );
+
+        if (existingPriceIndex !== -1) {
+          prices[existingPriceIndex] = {
+            ...prices[existingPriceIndex],
+            fromLocationId: fromId,
+            toLocationId: toId,
+            price: price,
           };
-          let updatedTicketPrices = [...ticketPrices, newTicket];
-          setTicketPrices(updatedTicketPrices);
+        } else {
+          prices.push({
+            fromLocationId: fromId,
+            toLocationId: toId,
+            price: price,
+          });
         }
+
+        const updated = [...ticketPrices];
+        updated[existingTicketIndex] = {
+          ...ticketGroup,
+          ticketType: targetTicketType,
+          prices,
+        };
+        setTicketPrices(updated);
+      } else {
+        const newGroup = {
+          ticketType: targetTicketType,
+          prices: [
+            {
+              fromLocationId: fromId,
+              toLocationId: toId,
+              price: price,
+            },
+          ],
+        };
+        setTicketPrices([...ticketPrices, newGroup]);
       }
     } else {
-      // bus does not have any ticket types yet. just store a new entry with no ticket type and price and location
-      let newTicket = {
+      const newGroup = {
         prices: [
           {
-            fromLocationId: fromLocation._id,
-            toLocationId: toLocation._id,
+            fromLocationId: fromId,
+            toLocationId: toId,
             price: price,
           },
         ],
       };
-      let updatedTicketPrices = [...ticketPrices, newTicket];
-      setTicketPrices(updatedTicketPrices);
+      setTicketPrices([...ticketPrices, newGroup]);
     }
-
-    console.log(ticketPrices);
   };
 
-  const dispatch = useDispatch();
+  const handleSaveTicketPrices = async () => {
+    if (!fetchBusObject) return;
 
-  const handleSubmit = () => {
-    if (fetchBusObject) {
-      console.log(ticketPrices);
-      const busObject = {
-        ticketPrices,
-        busId: fetchBusObject._id,
-        tab: "ticket-prices",
-      };
+    setIsSavingPrices(true);
+    const busObject = {
+      ticketPrices,
+      busId: fetchBusObject._id,
+      tab: "ticket-prices",
+    };
 
-      dispatch(editBus(busObject));
-
-      if (!editBusLoading && !editBusError) {
-        toast.success("Ticket Prices Settings Updated", {
-          duration: 4000,
-        });
-        dispatch(setEditBusError(null));
+    try {
+      const savedBus = await dispatch(editBus(busObject)).unwrap();
+      if (savedBus && savedBus.ticketPrices) {
+        setTicketPrices(savedBus.ticketPrices);
       }
+      toast.success("Ticket prices saved successfully!", {
+        duration: 4000,
+      });
+      dispatch(setEditBusError(null));
+    } catch (err) {
+      toast.error(err || "Failed to save ticket prices. Please try again.", {
+        duration: 4000,
+      });
+    } finally {
+      setIsSavingPrices(false);
     }
   };
 
-  const getInputValue = (fromLocation, toLocation) => {
-    return ticketPrices
-      .find((t) => t.ticketType === selectedTicketType)
-      ?.prices.find(
-        (p) =>
-          p.fromLocationId === fromLocation._id &&
-          p.toLocationId === toLocation._id
-      )?.price;
+  const handleSaveTax = async (e) => {
+    if (e) e.preventDefault();
+    if (
+      taxRateInput === "" ||
+      isNaN(Number(taxRateInput)) ||
+      Number(taxRateInput) < 0
+    ) {
+      toast.error("Please enter a valid non-negative tax percentage (e.g. 8 for 8%).");
+      return;
+    }
+
+    setIsSavingTax(true);
+    try {
+      const savedTax = await dispatch(updateTaxAmount(Number(taxRateInput))).unwrap();
+      setTaxRateInput(String(savedTax));
+      toast.success(`Tax rate saved to database: ${savedTax}%!`, {
+        duration: 4000,
+      });
+    } catch (err) {
+      toast.error(err || "Failed to save tax rate. Please try again.", {
+        duration: 4000,
+      });
+    } finally {
+      setIsSavingTax(false);
+    }
   };
 
   return (
     <Container fluid>
-      <Row className="mb-3 align-items-center">
-        <Col sm="5" lg="3" md="5" xl="2">
-          <div>Select Ticket Type:</div>
-        </Col>
-        <Col>
-          {ticketTypes.length > 0 ? (
-            <select
-              className="form-select w-auto"
-              defaultValue={selectedTicketType}
-              onChange={(e) => {
-                handleTicketTypeChange(e);
-              }}
-            >
-              {ticketTypes?.map((ticket) => (
-                <option
-                  value={ticket._id}
-                  key={ticket._id}
-                  defaultValue={ticket._id}
-                  selected={selectedTicketType._id == ticket._id}
-                >
-                  {ticket.name}
-                </option>
-              ))}
-            </select>
-          ) : (
-            <i>First add a ticket type for the Bus.</i>
-          )}
-        </Col>
-      </Row>
-
-      {ticketChangeLoading ? (
-        <div style={{ height: 300 }}>
-          <LoadingSpinner />
-        </div>
-      ) : (
-        <Row className="my-5">
-          <p>
-            <b>Note: </b>The tax feature is currently under development.
+      {/* Tax Configuration Section */}
+      <Card className="mb-4 border shadow-sm">
+        <Card.Header className="bg-light fw-bold py-2">
+          Global Tax Configuration
+        </Card.Header>
+        <Card.Body>
+          <p className="text-muted small mb-3">
+            Set the applicable tax rate applied to all ticket bookings across BuenoTransit. This value is stored permanently in the database and persists across reloads and server restarts.
           </p>
-          <Table responsive hover bordered>
-            <thead>
-              <tr>
-                <th className="bg-light"></th>
-                {busLocations.map((location, index) => {
-                  if (index != 0)
-                    return (
-                      <th className="fw-semibold" style={{ fontSize: 15 }}>
-                        {location.city.name}
-                      </th>
-                    );
-                })}
-              </tr>
-            </thead>
-            <tbody>
-              {busLocations.map((location, index) => {
-                // input render
-                let renderRow = () => {
-                  let render = [];
-                  for (let i = 0; i < busLocations.length - 1; i++) {
-                    if (i < index) {
-                      render.push(<td className="bg-light" key={i}></td>);
-                    } else {
-                      let inputValue =
-                        getInputValue(location, busLocations[i + 1]) || "";
-                      render.push(
-                        <td
-                          key={`${busLocations[i]._id}-${selectedTicketType}`}
-                        >
-                          <div class="input-group input-group-md mb-2">
-                            <span class="input-group-text p-1">
-                              <CurrencyDollar size={16} />
-                            </span>
-                            <TicketPriceInput
-                              handlePriceChange={handlePriceChange}
-                              fromLocation={location}
-                              toLocation={busLocations[i + 1]}
-                              inputValue={inputValue}
-                            />
-                          </div>
-                          <div class="input-group input-group-md">
-                            <span class="input-group-text p-1">
-                              <CurrencyDollar size={16} />
-                            </span>
-                            <Form.Control type="text" placeholder="Tax" />
-                          </div>
-                        </td>
+          <Form onSubmit={handleSaveTax} className="d-flex align-items-center gap-3 flex-wrap">
+            <div style={{ maxWidth: "220px" }}>
+              <InputGroup>
+                <Form.Control
+                  type="number"
+                  step="any"
+                  min="0"
+                  placeholder="e.g. 8"
+                  value={taxRateInput}
+                  onChange={(e) => setTaxRateInput(e.target.value)}
+                  disabled={isSavingTax}
+                />
+                <InputGroup.Text>
+                  <Percent size={16} />
+                </InputGroup.Text>
+              </InputGroup>
+            </div>
+            <Button
+              variant="success"
+              type="submit"
+              disabled={isSavingTax}
+              className="fw-semibold px-3"
+            >
+              {isSavingTax ? "Saving Tax..." : "Save Tax Rate"}
+            </Button>
+            {tax !== null && tax !== undefined && (
+              <span className="badge bg-secondary p-2">
+                Current in Database: {tax}%
+              </span>
+            )}
+          </Form>
+        </Card.Body>
+      </Card>
+
+      {/* Ticket Prices by Route Matrix */}
+      <Card className="mb-4 border shadow-sm">
+        <Card.Header className="bg-light d-flex justify-content-between align-items-center py-2">
+          <span className="fw-bold">Ticket Prices by Stop / Destination</span>
+          {ticketTypes.length > 0 && (
+            <div className="d-flex align-items-center gap-2">
+              <span className="small fw-semibold text-secondary">Ticket Type:</span>
+              <select
+                className="form-select form-select-sm w-auto"
+                value={selectedTicketType || ""}
+                onChange={handleTicketTypeChange}
+              >
+                {ticketTypes?.map((ticket) => (
+                  <option value={ticket._id} key={ticket._id}>
+                    {ticket.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </Card.Header>
+        <Card.Body>
+          {ticketTypes.length === 0 ? (
+            <div className="text-center py-4 text-muted">
+              <i>First add at least one Ticket Type in the &ldquo;Ticket Types&rdquo; tab before setting prices.</i>
+            </div>
+          ) : busLocations.length < 2 ? (
+            <div className="text-center py-4 text-muted">
+              <i>Add at least two locations in General Settings to configure fares.</i>
+            </div>
+          ) : (
+            <Table responsive hover bordered className="align-middle mb-0">
+              <thead>
+                <tr>
+                  <th className="bg-light text-secondary small text-uppercase">Origin \ Destination</th>
+                  {busLocations.map((location, index) => {
+                    if (index !== 0)
+                      return (
+                        <th className="fw-semibold text-center" style={{ fontSize: 14 }} key={location._id || index}>
+                          {location.city?.name || "City"}
+                        </th>
                       );
-                    }
-                  }
+                    return null;
+                  })}
+                </tr>
+              </thead>
+              <tbody>
+                {busLocations.map((location, index) => {
+                  if (index === busLocations.length - 1) return null;
 
-                  return render;
-                };
-
-                if (index != busLocations.length - 1)
                   return (
-                    <tr
-                      className="fw-semibold"
-                      style={{ fontSize: 15 }}
-                      key={`${location._id}-${selectedTicketType}`}
-                    >
-                      <td>{location.city.name}</td>
-                      {renderRow()}
+                    <tr key={`${location._id || index}-${selectedTicketType}`}>
+                      <td className="fw-semibold bg-light" style={{ fontSize: 14 }}>
+                        {location.city?.name || "City"}
+                      </td>
+                      {busLocations.slice(1).map((destLocation, colIndex) => {
+                        if (colIndex < index) {
+                          return <td className="bg-light text-center text-muted" key={colIndex}>-</td>;
+                        }
+
+                        const inputValue = getInputValue(location, destLocation);
+                        return (
+                          <td key={`${destLocation._id || colIndex}-${selectedTicketType}`} style={{ minWidth: "130px" }}>
+                            <div className="input-group input-group-sm">
+                              <span className="input-group-text p-1">
+                                <CurrencyDollar size={15} />
+                              </span>
+                              <TicketPriceInput
+                                handlePriceChange={handlePriceChange}
+                                fromLocation={location}
+                                toLocation={destLocation}
+                                inputValue={inputValue}
+                              />
+                            </div>
+                          </td>
+                        );
+                      })}
                     </tr>
                   );
-              })}
-            </tbody>
-          </Table>
-        </Row>
-      )}
+                })}
+              </tbody>
+            </Table>
+          )}
+        </Card.Body>
+      </Card>
 
-      <hr />
-
-      <div className="w-100 d-flex flex-row gap-2">
-        <Button variant="secondary" onClick={handleCancel}>
+      <div className="w-100 d-flex flex-row gap-2 mb-4">
+        <Button variant="secondary" onClick={handleCancel} disabled={isSavingPrices}>
           Cancel
         </Button>
         <Button
           variant="primary"
-          onClick={handleSubmit}
-          // disabled={editBusLoading}
+          onClick={handleSaveTicketPrices}
+          disabled={isSavingPrices || editBusLoading}
+          className="px-4 fw-semibold"
         >
-          Save Ticket Prices
-          {/* {editBusLoading ? "loading..." : "Save Ticket Types"} */}
+          {isSavingPrices || editBusLoading ? "Saving Prices..." : "Save Ticket Prices"}
         </Button>
       </div>
     </Container>

@@ -3,6 +3,10 @@ import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row";
 import Col from "react-bootstrap/Col";
 import Card from "react-bootstrap/Card";
+import Modal from "react-bootstrap/Modal";
+import Form from "react-bootstrap/Form";
+import Spinner from "react-bootstrap/Spinner";
+import Alert from "react-bootstrap/Alert";
 import buenoBusHero from "../assets/bueno_bus_hero.png";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/esm/Button";
@@ -59,22 +63,55 @@ function Home() {
     fetchSchedules();
   }, []);
 
+  const [showManageBookingModal, setShowManageBookingModal] = useState(false);
+  const [manageBookingId, setManageBookingId] = useState("");
+  const [manageBookingLoading, setManageBookingLoading] = useState(false);
+  const [manageBookingError, setManageBookingError] = useState("");
+
   const handleBookingDetails = () => {
-    let bookingId = window.prompt("Please enter your Booking ID:");
-    if (!bookingId) {
-      toast.error(
-        selectedLanguage &&
-        translateText(
-          "You did not provided any Booking ID",
-          selectedLanguage.code
-        ),
-        {
-          duration: 2000,
-          position: "top-right",
-        }
+    setManageBookingId("");
+    setManageBookingError("");
+    setShowManageBookingModal(true);
+  };
+
+  const handleCloseManageBooking = () => {
+    setShowManageBookingModal(false);
+    setManageBookingId("");
+    setManageBookingError("");
+  };
+
+  const handleClearManageBooking = () => {
+    setManageBookingId("");
+    setManageBookingError("");
+  };
+
+  const handleSearchManageBooking = async (e) => {
+    if (e) e.preventDefault();
+    const id = manageBookingId.trim();
+    if (!id) {
+      setManageBookingError(
+        selectedLanguage
+          ? translateText("You did not provided any Booking ID", selectedLanguage.code) || "Please enter your Booking ID."
+          : "Please enter your Booking ID."
       );
-    } else {
-      navigate(`/booking/${bookingId}`);
+      return;
+    }
+
+    setManageBookingLoading(true);
+    setManageBookingError("");
+
+    try {
+      const response = await api.get(`/booking/search-booking/${id}`);
+      if (response.data && response.data.success && response.data.booking) {
+        setShowManageBookingModal(false);
+        navigate(`/booking/${id}`);
+      } else {
+        setManageBookingError("Booking not found. Please verify your Booking ID and try again.");
+      }
+    } catch (err) {
+      setManageBookingError("Booking not found. Please verify your Booking ID and try again.");
+    } finally {
+      setManageBookingLoading(false);
     }
   };
 
@@ -567,6 +604,95 @@ function Home() {
           </div>
         </div>
       </Container>
+
+      {/* Manage Booking Modal */}
+      <Modal
+        show={showManageBookingModal}
+        onHide={handleCloseManageBooking}
+        centered
+        backdrop="static"
+        keyboard={true}
+      >
+        <Modal.Header closeButton>
+          <Modal.Title className="fw-bold fs-5">
+            {t("Manage Booking")}
+          </Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleSearchManageBooking}>
+          <Modal.Body className="p-4">
+            <p className="text-muted small mb-3">
+              {t("Enter your Booking ID below to view, verify, or manage your reservation details.")}
+            </p>
+            {manageBookingError && (
+              <Alert variant="danger" className="py-2 small">
+                {manageBookingError}
+              </Alert>
+            )}
+            <Form.Group className="mb-3">
+              <Form.Label className="fw-semibold small">
+                {t("Booking ID")} <span className="text-danger">*</span>
+              </Form.Label>
+              <Form.Control
+                type="text"
+                placeholder="e.g. 1784655439223"
+                value={manageBookingId}
+                onChange={(e) => {
+                  setManageBookingId(e.target.value);
+                  if (manageBookingError) setManageBookingError("");
+                }}
+                autoFocus
+                disabled={manageBookingLoading}
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="d-flex justify-content-between">
+            <div>
+              {manageBookingId && (
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  onClick={handleClearManageBooking}
+                  disabled={manageBookingLoading}
+                >
+                  {t("Clear")}
+                </Button>
+              )}
+            </div>
+            <div className="d-flex gap-2">
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={handleCloseManageBooking}
+                disabled={manageBookingLoading}
+              >
+                {t("Close")}
+              </Button>
+              <Button
+                variant="primary"
+                size="sm"
+                type="submit"
+                disabled={manageBookingLoading || !manageBookingId.trim()}
+              >
+                {manageBookingLoading ? (
+                  <>
+                    <Spinner
+                      as="span"
+                      animation="border"
+                      size="sm"
+                      role="status"
+                      aria-hidden="true"
+                      className="me-1"
+                    />
+                    {t("Searching...")}
+                  </>
+                ) : (
+                  t("View Booking Details")
+                )}
+              </Button>
+            </div>
+          </Modal.Footer>
+        </Form>
+      </Modal>
     </div>
   );
 }

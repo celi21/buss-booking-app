@@ -1095,11 +1095,16 @@ export const addBooking = async (req, res, next) => {
       requestedSeats += parseInt(seat.seats);
     });
 
-    // create/save payment schema
+    // create/save payment schema with tax calculation
+    const settings = await Settings.find({});
+    const taxRate = settings.length > 0 && settings[0].tax !== undefined && settings[0].tax !== null ? Number(settings[0].tax) : 0;
+    const taxAmount = Number(((taxRate / 100) * ticketsPrice).toFixed(2));
+
     const paymentDetails = new Payment({
       firstName: bookingData.personalDetails.firstName,
       lastName: bookingData.personalDetails?.lastName,
       amount: ticketsPrice,
+      tax: taxAmount,
     });
 
     // if pay success then save the personal details
@@ -1132,6 +1137,8 @@ export const addBooking = async (req, res, next) => {
       seatDetails: seatsDetails,
       status: bookingData.status ? bookingData.status : "confirmed",
       isAddedByAdmin: true,
+      flexOption: bookingData.flexOption || false,
+      tripType: bookingData.tripType || "one-way",
     });
 
     let busAvailability = await BusAvailability.findOne({
@@ -2193,26 +2200,35 @@ export const getPassengerManifest = async (req, res, next) => {
       .populate("personalDetails payment")
       .sort({ createdAt: 1 });
 
-    const manifest = bookings.map((booking, index) => ({
-      _id: booking._id,
-      bookingId: booking.bookingId,
-      clientName: `${booking.personalDetails?.firstName || ''} ${booking.personalDetails?.lastName || ''}`.trim(),
-      phone: booking.personalDetails?.phone || 'N/A',
-      email: booking.personalDetails?.email || 'N/A',
-      pickupAddress: booking.personalDetails?.pickupAddress || 'N/A',
-      dropoffAddress: booking.personalDetails?.dropoffAddress || 'N/A',
-      notes: booking.personalDetails?.notes || '',
-      suitcases: booking.personalDetails?.suitcases || 0,
-      numberOfPassengers: booking.seatDetails.reduce((sum, seat) => sum + seat.seats, 0),
-      paymentAmount: booking.payment?.amount || 0,
-      paymentStatus: booking.payment?.status || 'N/A',
-      flexOption: booking.flexOption || false,
-      boardingStatus: booking.boardingStatus || 'Not Boarded',
-      pickupOrder: booking.pickupOrder || index,
-      seatDetails: booking.seatDetails,
-      status: booking.status,
-      createdAt: booking.createdAt
-    }));
+    const manifest = bookings.map((booking, index) => {
+      const baseAmount = Number(booking.payment?.amount || 0);
+      const taxAmount = Number(booking.payment?.tax || 0);
+      const flexAmount = booking.flexOption === true ? 5 : 0;
+      const totalAmount = Number((baseAmount + taxAmount + flexAmount).toFixed(2));
+
+      return {
+        _id: booking._id,
+        bookingId: booking.bookingId,
+        clientName: `${booking.personalDetails?.firstName || ''} ${booking.personalDetails?.lastName || ''}`.trim(),
+        phone: booking.personalDetails?.phone || 'N/A',
+        email: booking.personalDetails?.email || 'N/A',
+        pickupAddress: booking.personalDetails?.pickupAddress || 'N/A',
+        dropoffAddress: booking.personalDetails?.dropoffAddress || 'N/A',
+        notes: booking.personalDetails?.notes || '',
+        suitcases: booking.personalDetails?.suitcases || 0,
+        numberOfPassengers: (booking.seatDetails || []).reduce((sum, seat) => sum + (Number(seat.seats) || 0), 0),
+        paymentAmount: totalAmount,
+        baseAmount: baseAmount,
+        taxAmount: taxAmount,
+        flexOption: booking.flexOption || false,
+        paymentStatus: booking.payment?.status || 'Paid',
+        boardingStatus: booking.boardingStatus || 'Not Boarded',
+        pickupOrder: booking.pickupOrder !== undefined && booking.pickupOrder !== null ? booking.pickupOrder : index,
+        seatDetails: booking.seatDetails,
+        status: booking.status,
+        createdAt: booking.createdAt
+      };
+    });
 
     // Sort by pickup order
     manifest.sort((a, b) => a.pickupOrder - b.pickupOrder);
@@ -2832,6 +2848,53 @@ export const getPublicTripStatuses = async (req, res, next) => {
     return res.status(500).json({
       success: false,
       message: "Internal server error.",
+    });
+  }
+};
+
+export const resendConfirmationEmail = async (req, res, next) => {
+  const { bookingId } = req.body;
+  try {
+    if (!bookingId) {
+      return res.status(400).json({
+        success: false,
+        message: "Booking ID is required.",
+      });
+    }
+
+    const query = mongoose.Types.ObjectId.isValid(bookingId)
+      ? { $or: [{ _id: bookingId }, { bookingId: bookingId }] }
+      : { bookingId: bookingId };
+
+    const booking = await Booking.findOne(query)
+      .populate("personalDetails payment route bus busType from to");
+
+    if (!booking) {
+      return res.status(404).json({
+        success: false,
+        message: "Booking not found.",
+      });
+    }
+
+    const customerEmail = booking.personalDetails?.email;
+    if (!customerEmail) {
+      return res.status(400).json({
+        success: false,
+        message: "No customer email found for this reservation.",
+      });
+    }
+
+    await sendConfirmationEmail(booking, customerEmail);
+
+    return res.status(200).json({
+      success: true,
+      message: "Confirmation email sent successfully.",
+    });
+  } catch (error) {
+    console.error("Error resending confirmation email:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Unable to send confirmation email. Please try again.",
     });
   }
 };

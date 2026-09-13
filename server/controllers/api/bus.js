@@ -349,11 +349,18 @@ export const fetchBus = async (req, res, next) => {
 export const updateBus = async (req, res, next) => {
   const busObject = req.body;
   try {
-    console.log(busObject);
-    if (busObject && busObject.tab === "general-settings") {
-      let locations = busObject.locations.map((loc) => {
+    if (!busObject || !busObject.busId) {
+      return res.status(400).json({
+        success: false,
+        message: "Bus ID is required",
+      });
+    }
+
+    if (busObject.tab === "general-settings") {
+      let locations = (busObject.locations || []).map((loc) => {
         return {
-          city: loc.city._id,
+          ...(loc._id ? { _id: loc._id } : {}),
+          city: loc.city?._id || loc.city,
           departureTime: loc.departureTime ? loc.departureTime : null,
           arrivalTime: loc.arrivalTime ? loc.arrivalTime : null,
         };
@@ -380,9 +387,9 @@ export const updateBus = async (req, res, next) => {
           busObject: updatedBus,
         });
       }
-    } else if (busObject && busObject.tab === "out-of-service") {
-      let outOfServiceDates = busObject.dates.map((d) => {
-        return d.date;
+    } else if (busObject.tab === "out-of-service") {
+      let outOfServiceDates = (busObject.dates || []).map((d) => {
+        return d.date || d;
       });
       const updatedBus = await Bus.findByIdAndUpdate(
         busObject.busId,
@@ -400,11 +407,11 @@ export const updateBus = async (req, res, next) => {
           busObject: updatedBus,
         });
       }
-    } else if (busObject && busObject.tab === "ticket-types") {
-      const ticketTypes = busObject.ticketTypes.map((ticket) => {
+    } else if (busObject.tab === "ticket-types") {
+      const ticketTypes = (busObject.ticketTypes || []).map((ticket) => {
         return {
-          ...ticket,
-          name: ticket.type,
+          ...(ticket._id ? { _id: ticket._id } : {}),
+          name: ticket.type || ticket.name,
         };
       });
 
@@ -416,38 +423,53 @@ export const updateBus = async (req, res, next) => {
         { new: true }
       ).populate("route busType locations locations.city ticketTypes");
 
-      if (updateBus) {
+      if (updatedBus) {
         return res.status(200).json({
           success: true,
           message: "Bus Updated Successfully",
           busObject: updatedBus,
         });
       }
-    } else if (busObject && busObject.tab === "ticket-prices") {
-      const ticketPrices = busObject.ticketPrices;
-      if (ticketPrices) {
-        const updatedBus = await Bus.findByIdAndUpdate(
-          busObject.busId,
-          {
-            ticketPrices: ticketPrices,
-          },
-          {
-            new: true,
-          }
-        ).populate("route busType locations locations.city ticketTypes");
-        if (updateBus) {
-          return res.status(200).json({
-            success: true,
-            message: "Bus Updated Successfully",
-            busObject: updatedBus,
-          });
+    } else if (busObject.tab === "ticket-prices") {
+      const rawTicketPrices = busObject.ticketPrices || [];
+      const sanitizedTicketPrices = rawTicketPrices.map((tp) => ({
+        ticketType: tp.ticketType?._id || tp.ticketType,
+        prices: (tp.prices || [])
+          .filter((p) => p.fromLocationId && p.toLocationId)
+          .map((p) => ({
+            fromLocationId: p.fromLocationId?._id || p.fromLocationId,
+            toLocationId: p.toLocationId?._id || p.toLocationId,
+            price: String(p.price !== undefined && p.price !== null ? p.price : 0),
+          })),
+      }));
+
+      const updatedBus = await Bus.findByIdAndUpdate(
+        busObject.busId,
+        {
+          ticketPrices: sanitizedTicketPrices,
+        },
+        {
+          new: true,
         }
+      ).populate("route busType locations locations.city ticketTypes");
+      if (updatedBus) {
+        return res.status(200).json({
+          success: true,
+          message: "Bus Updated Successfully",
+          busObject: updatedBus,
+        });
       }
     }
+
+    return res.status(400).json({
+      success: false,
+      message: "Invalid tab or bus update operation",
+    });
   } catch (error) {
+    console.error("Error updating bus:", error);
     return res.status(500).json({
       success: false,
-      message: "Interval Server Error",
+      message: "Internal Server Error",
     });
   }
 };

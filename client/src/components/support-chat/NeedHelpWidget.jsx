@@ -258,8 +258,10 @@ const NeedHelpWidget = () => {
               className="need-help-close-btn"
               onClick={handleToggle}
               aria-label="Close Help Window"
+              type="button"
             >
-              <X size={24} />
+              <X size={18} />
+              <span>Close</span>
             </button>
           </div>
 

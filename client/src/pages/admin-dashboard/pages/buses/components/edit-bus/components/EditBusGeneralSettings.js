@@ -54,22 +54,18 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
   };
 
   const formatTime = (time) => {
+    if (!time) return "";
     let timeSplit = time.split(":"); // hours:minutes
-    let hours = timeSplit[0];
+    let hours = parseInt(timeSplit[0], 10);
     let minutes = timeSplit[1];
-    let meridian = "";
-    if (hours > 12) {
+    let meridian = "AM";
+    if (hours >= 12) {
       meridian = "PM";
-      hours -= 12;
-    } else if (hours < 12) {
-      meridian = "AM";
-      if (hours == 0) {
-        hours = 12;
-      }
-    } else {
-      meridian = "PM";
+      if (hours > 12) hours -= 12;
+    } else if (hours === 0) {
+      hours = 12;
     }
-    return `${hours}:${minutes}:${meridian}`;
+    return `${hours}:${minutes} ${meridian}`;
   };
 
   const handleTimeChange = (e, locId, index, type) => {
@@ -78,22 +74,22 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
     }
     let time = formatTime(e.target.value);
 
-    let updatedLocations = selectedRoute.locations.map((loc, index) => {
-      if (loc.city._id === locId) {
-        if (type == "departure") {
+    let updatedLocations = selectedRoute.locations.map((loc) => {
+      const currentLocCityId = loc.city?._id || loc.city;
+      if (String(currentLocCityId) === String(locId)) {
+        if (type === "departure") {
           return {
             ...loc,
             departureTime: time,
           };
-        } else if (type == "arrival") {
+        } else if (type === "arrival") {
           return {
             ...loc,
             arrivalTime: time,
           };
         }
-      } else {
-        return loc;
       }
+      return loc;
     });
     setSelectedRoute({
       ...selectedRoute,
@@ -102,22 +98,32 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
   };
 
   const timeInputDefaultValue = (timeString) => {
-    let [time, meridian] = timeString.includes("AM")
-      ? timeString.split(":AM")
-      : timeString.split(":PM");
-    meridian = timeString.includes("AM") ? "AM" : "PM";
-    var hours = parseInt(time.split(":")[0]);
-    var minutes = time.split(":")[1];
-    if (meridian === "PM" && hours !== 12) {
+    if (!timeString || typeof timeString !== "string") return "";
+    const clean = timeString.trim().toUpperCase();
+
+    if (/^\d{1,2}:\d{2}$/.test(clean)) {
+      const [h, m] = clean.split(":");
+      return `${h.padStart(2, "0")}:${m}`;
+    }
+
+    const match = clean.match(/^(\d{1,2}):(\d{2})(?::|\s*)([AP]M)?$/);
+    if (!match) return "";
+
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const meridian = match[3];
+
+    if (meridian === "PM" && hours < 12) {
       hours += 12;
     } else if (meridian === "AM" && hours === 12) {
       hours = 0;
     }
+
     return `${hours.toString().padStart(2, "0")}:${minutes}`;
   };
 
   const dispatch = useDispatch();
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!selectedRoute) {
       dispatch(setEditBusError("This route does not exist!"));
       toast.error("This route does not exist!", {
@@ -207,7 +213,7 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
 
     const busObject = {
       busId: selectedRoute._id,
-      routeId: selectedRoute.route._id,
+      routeId: selectedRoute.route?._id || selectedRoute.route,
       busTypeId: selectedBusType,
       locations: selectedRoute.locations,
       periodOperatingFrom,
@@ -216,12 +222,16 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
       tab: "general-settings",
     };
 
-    dispatch(editBus(busObject));
-    if (!editBusLoading && !editBusError) {
-      toast.success("Bus General Settings Updated", {
+    try {
+      await dispatch(editBus(busObject)).unwrap();
+      toast.success("Bus General Settings Updated Successfully", {
         duration: 4000,
       });
       dispatch(setEditBusError(null));
+    } catch (err) {
+      toast.error(err || "Failed to update bus settings", {
+        duration: 4000,
+      });
     }
   };
 
@@ -231,7 +241,7 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
         <div className="w-50 fw-semibold">Bus Type:</div>
         <select
           className="form-select"
-          defaultValue={selectedBusType}
+          value={selectedBusType || ""}
           onChange={(e) => {
             handleBusTypeChange(e);
           }}
@@ -243,8 +253,6 @@ const EditBusGeneralSettings = ({ handleCancel }) => {
             <option
               value={busType._id}
               key={busType._id}
-              defaultValue={busType._id}
-              selected={selectedBusType == busType._id}
             >
               {busType.name}, {busType.seats} seat(s)
             </option>

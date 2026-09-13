@@ -1,13 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import LoadingSpinner from "../../components/loading-spinner/LoadingSpinner";
-import { Alert, Card, Col, Container, ListGroup, Row } from "react-bootstrap";
+import { Alert, Button, Card, Col, Container, ListGroup, Row } from "react-bootstrap";
+import { ExclamationCircleFill, ArrowLeft } from "react-bootstrap-icons";
 import axios from "axios";
 import { useSelector } from "react-redux";
 import { translateText } from "../../utils/translation";
 
 const SearchBooking = () => {
   const { bookingId } = useParams();
+  const navigate = useNavigate();
   const [bookingData, setBookingData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -36,7 +38,7 @@ const SearchBooking = () => {
 
   const searchBooking = async (id) => {
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    setError(null);
 
     try {
       const config = {
@@ -52,15 +54,15 @@ const SearchBooking = () => {
       if (
         response.data &&
         response.data.success &&
-        response.data.success === true
+        response.data.booking
       ) {
         setBookingData(response.data.booking);
         setError(null);
-      } else if (response.data && response.data.success === false) {
-        setError(response.data.message);
+      } else {
+        setError("Booking not found. Please verify your Booking ID and try again.");
       }
     } catch (error) {
-      setError(error.message);
+      setError("Booking not found. Please verify your Booking ID and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -69,6 +71,8 @@ const SearchBooking = () => {
   useEffect(() => {
     if (bookingId) {
       searchBooking(bookingId);
+    } else {
+      setError("Booking not found. Please verify your Booking ID and try again.");
     }
   }, [bookingId]);
 
@@ -97,27 +101,44 @@ const SearchBooking = () => {
     }
   }, [bookingData]);
 
-  if (!bookingId) {
-    return (
-      <div className="d-flex align-items-center justify-content-center p-3">
-        No Booking Id Provided
-      </div>
-    );
-  }
-
   if (isLoading) {
     return (
-      <div className="py-3">
+      <div className="py-5 text-center">
         <LoadingSpinner />
+        <div className="text-muted mt-2 small">Loading booking details...</div>
       </div>
     );
   }
 
   return (
     <Container fluid className="my-4">
-      {error && <Alert variant="danger">{error}</Alert>}
+      {error && (
+        <Card
+          className="shadow-sm mx-auto my-5 p-4 text-center border-0"
+          style={{ maxWidth: "520px", borderRadius: "14px", backgroundColor: "#fff" }}
+        >
+          <Card.Body>
+            <div className="text-danger mb-3">
+              <ExclamationCircleFill size={46} />
+            </div>
+            <h5 className="fw-bold mb-2">Booking Not Found</h5>
+            <p className="text-muted mb-4" style={{ fontSize: "15px", lineHeight: "1.5" }}>
+              {error}
+            </p>
+            <div className="d-flex justify-content-center gap-2">
+              <Button
+                variant="primary"
+                className="d-inline-flex align-items-center gap-2 px-4 py-2"
+                onClick={() => navigate("/")}
+              >
+                <ArrowLeft size={16} /> Back to Home
+              </Button>
+            </div>
+          </Card.Body>
+        </Card>
+      )}
 
-      {bookingData && (
+      {bookingData && !error && (
         <>
           <Row className="mb-4 mx-auto border-bottom">
             <h4 className="fw-bold text-center">

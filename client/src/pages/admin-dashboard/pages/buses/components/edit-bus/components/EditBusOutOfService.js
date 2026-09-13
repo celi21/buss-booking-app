@@ -67,7 +67,7 @@ const EditBusOutOfService = ({ handleCancel }) => {
   };
 
   const dispatch = useDispatch();
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (dates.length > 0) {
       for (let i = 0; i < dates.length; i++) {
         if (
@@ -90,12 +90,16 @@ const EditBusOutOfService = ({ handleCancel }) => {
       tab: "out-of-service",
     };
 
-    dispatch(editBus(busObject));
-    if (!editBusLoading && !editBusError) {
-      toast.success("Bus Out of Service Dates Saved", {
+    try {
+      await dispatch(editBus(busObject)).unwrap();
+      toast.success("Bus Out of Service Dates Saved Successfully", {
         duration: 4000,
       });
       dispatch(setEditBusError(null));
+    } catch (err) {
+      toast.error(err || "Failed to save out of service dates", {
+        duration: 4000,
+      });
     }
   };
 

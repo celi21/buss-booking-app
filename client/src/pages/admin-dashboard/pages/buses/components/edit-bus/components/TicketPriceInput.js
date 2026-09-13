@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const TicketPriceInput = ({
   handlePriceChange,
@@ -6,13 +6,19 @@ const TicketPriceInput = ({
   toLocation,
   inputValue,
 }) => {
-  const [value, setValue] = useState(inputValue);
+  const [value, setValue] = useState(inputValue || "");
+
+  useEffect(() => {
+    setValue(inputValue !== undefined && inputValue !== null ? inputValue : "");
+  }, [inputValue]);
+
   return (
     <input
       type="number"
-      class="form-control shadow-none"
-      placeholder="Price"
+      className="form-control shadow-none"
+      placeholder="0.00"
       min={0}
+      step="any"
       value={value}
       onChange={(e) => {
         setValue(e.target.value);
@@ -23,3 +29,4 @@ const TicketPriceInput = ({
 };
 
 export default TicketPriceInput;
+

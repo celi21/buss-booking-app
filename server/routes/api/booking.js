@@ -34,6 +34,7 @@ import {
   submitPassengerRequest,
   getPassengerRequests,
   getPublicTripStatuses,
+  resendConfirmationEmail,
 } from "../../controllers/api/booking.js";
 import verifyAdmin from "../../middlewares/verifyAdmin.js";
 import verifyUser from "../../middlewares/verifyUser.js";
@@ -49,6 +50,7 @@ router.post("/create-payment-intent", createPaymentIntent);
 router.get("/search-booking/:bookingId", searchBooking);
 router.post("/user-bookings", verifyUser, fetchUserBookings);
 router.post("/add-booking", verifyAdmin, addBooking);
+router.post("/resend-confirmation-email", verifyAdmin, resendConfirmationEmail);
 router.post("/fetch-admin-bookings", verifyAdmin, fetchAdminBookings);
 router.post("/fetch-passengers-list", verifyAdmin, fetchPassengersList);
 router.post("/cancel-booking", verifyUser, cancelBooking);
