@@ -57,12 +57,36 @@ const PersonalDetails = ({
   );
   const [phone, setPhone] = useState(personalDetails.phone || user?.phone || "");
   const [email, setEmail] = useState(personalDetails.email || user?.email || "");
-  const [pickupAddress, setPickupAddress] = useState(
-    personalDetails.pickupAddress || user?.defaultPickupAddress || ""
-  );
-  const [dropoffAddress, setDropoffAddress] = useState(
-    personalDetails.dropoffAddress || ""
-  );
+  const isManualStop = (cityName) => {
+    if (!cityName) return false;
+    const cleaned = cityName.trim().toLowerCase();
+    return (
+      cleaned === "utica/upstate" ||
+      cleaned.includes("utica") ||
+      cleaned.includes("upstate door service") ||
+      cleaned === "rome, ny" ||
+      cleaned.includes("package delivery")
+    );
+  };
+
+  const getInitialPickupAddress = () => {
+    if (personalDetails.pickupAddress) {
+      if (isManualStop(personalDetails.pickupAddress)) return "";
+      return personalDetails.pickupAddress;
+    }
+    return user?.defaultPickupAddress || "";
+  };
+
+  const getInitialDropoffAddress = () => {
+    if (personalDetails.dropoffAddress) {
+      if (isManualStop(personalDetails.dropoffAddress)) return "";
+      return personalDetails.dropoffAddress;
+    }
+    return "";
+  };
+
+  const [pickupAddress, setPickupAddress] = useState(getInitialPickupAddress());
+  const [dropoffAddress, setDropoffAddress] = useState(getInitialDropoffAddress());
 
   // Auto-populate pickup and dropoff addresses based on user default pickup address or booking search origin/destination
   useEffect(() => {
@@ -73,35 +97,24 @@ const PersonalDetails = ({
 
   useEffect(() => {
     if (cities && cities.length > 0) {
-      const isManualStop = (cityName) => {
-        if (!cityName) return false;
-        const cleaned = cityName.trim().toLowerCase();
-        return [
-          "upstate door service",
-          "rome, ny",
-          "package delivery utica",
-          "package delivery nyc"
-        ].includes(cleaned);
-      };
-
-      if (!pickupAddress && !personalDetails.pickupAddress && !user?.defaultPickupAddress) {
-        const fromCity = cities.find((city) => city._id === selectedFromCity);
-        if (fromCity) {
-          if (isManualStop(fromCity.name)) {
+      const fromCity = cities.find((city) => city._id === selectedFromCity);
+      if (fromCity) {
+        if (isManualStop(fromCity.name)) {
+          if (!pickupAddress || pickupAddress === fromCity.name || personalDetails.pickupAddress === fromCity.name) {
             setPickupAddress("");
-          } else {
-            setPickupAddress(fromCity.name);
           }
+        } else if (!pickupAddress && !personalDetails.pickupAddress && !user?.defaultPickupAddress) {
+          setPickupAddress(fromCity.name);
         }
       }
-      if (!dropoffAddress && !personalDetails.dropoffAddress) {
-        const toCity = cities.find((city) => city._id === selectedToCity);
-        if (toCity) {
-          if (isManualStop(toCity.name)) {
+      const toCity = cities.find((city) => city._id === selectedToCity);
+      if (toCity) {
+        if (isManualStop(toCity.name)) {
+          if (!dropoffAddress || dropoffAddress === toCity.name || personalDetails.dropoffAddress === toCity.name) {
             setDropoffAddress("");
-          } else {
-            setDropoffAddress(toCity.name);
           }
+        } else if (!dropoffAddress && !personalDetails.dropoffAddress) {
+          setDropoffAddress(toCity.name);
         }
       }
     }
@@ -242,7 +255,14 @@ const PersonalDetails = ({
       );
       return;
     }
-    if (!pickupAddress || pickupAddress.trim() == "") {
+    const fromCity = cities?.find((city) => city._id === selectedFromCity);
+    const toCity = cities?.find((city) => city._id === selectedToCity);
+
+    if (
+      !pickupAddress ||
+      pickupAddress.trim() === "" ||
+      (isManualStop(fromCity?.name) && pickupAddress.trim().toLowerCase() === fromCity?.name.trim().toLowerCase())
+    ) {
       toast.error(
         selectedLanguage &&
           translateText(
@@ -262,7 +282,11 @@ const PersonalDetails = ({
       );
       return;
     }
-    if (!dropoffAddress || dropoffAddress.trim() == "") {
+    if (
+      !dropoffAddress ||
+      dropoffAddress.trim() === "" ||
+      (isManualStop(toCity?.name) && dropoffAddress.trim().toLowerCase() === toCity?.name.trim().toLowerCase())
+    ) {
       toast.error(
         selectedLanguage &&
           translateText(
@@ -463,7 +487,14 @@ const PersonalDetails = ({
                   }}
                   className="form-control"
                   options={{
+                    types: ["address"],
                     componentRestrictions: { country: ["us"] },
+                    bounds: {
+                      north: 45.016,
+                      south: 40.477,
+                      east: -71.777,
+                      west: -79.788,
+                    },
                   }}
                 />
               </Form.Group>
@@ -490,7 +521,14 @@ const PersonalDetails = ({
                   }}
                   className="form-control"
                   options={{
+                    types: ["address"],
                     componentRestrictions: { country: ["us"] },
+                    bounds: {
+                      north: 45.016,
+                      south: 40.477,
+                      east: -71.777,
+                      west: -79.788,
+                    },
                   }}
                 />
               </Form.Group>
