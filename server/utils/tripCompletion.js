@@ -17,16 +17,25 @@ export const checkAndCompleteTrips = async () => {
         (loc) => loc.city.toString() === booking.from.toString()
       );
 
-      if (!fromLocation || !fromLocation.departureTime) continue;
+      if (!fromLocation) continue;
 
-      const bookingDate = booking.bookingDate;
-      const departureTime = fromLocation.departureTime;
-      const bookingDateTime = new Date(`${bookingDate} ${departureTime}`);
+      // Check arrival time at destination or final stop
+      const toLocation = booking.to
+        ? booking.bus.locations.find((loc) => loc.city.toString() === booking.to.toString())
+        : null;
+      const arrivalLocation = toLocation || booking.bus.locations[booking.bus.locations.length - 1];
+      const checkTimeStr = arrivalLocation?.arrivalTime || fromLocation?.departureTime;
+
+      if (!checkTimeStr) continue;
+
+      // Handle formats like "09:45:AM" -> "09:45 AM"
+      const formattedTime = checkTimeStr.replace(/:([AP]M)$/i, " $1");
+      const bookingDateTime = new Date(`${booking.bookingDate} ${formattedTime}`);
 
       // Skip if date parsing failed
       if (isNaN(bookingDateTime.getTime())) continue;
 
-      // If scheduled trip time has passed
+      // If scheduled arrival time has passed
       if (bookingDateTime < now) {
         booking.status = "completed";
         await booking.save();

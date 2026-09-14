@@ -769,9 +769,8 @@ export const createPaymentIntent = async (req, res, next) => {
         customer_name: req.body.customerName || "",
         customer_email: req.body.customerEmail || "",
         customer_phone: req.body.customerPhone || "",
-        route: req.body.route || "",
-        travel_date: req.body.travelDate || "",
-        seats: req.body.seats || "",
+        Travel_date: req.body.travelDate || "",
+        Route: req.body.route || "",
       },
     });
     if (paymentIntent) {
@@ -950,6 +949,25 @@ export const confirmBooking = async (req, res, next) => {
         .populate("to");
 
       await sendConfirmationEmail(populatedOutbound, populatedOutbound.personalDetails.email);
+
+      // Update Stripe PaymentIntent metadata with booking_id and reservation details
+      try {
+        if (stripeData?.paymentId) {
+          const routeName = populatedOutbound?.route?.name || foundBus?.route?.name || "";
+          await stripe.paymentIntents.update(stripeData.paymentId, {
+            metadata: {
+              booking_id: String(outboundBooking.bookingId),
+              customer_name: `${bookingData.personalDetails?.firstName || ""} ${bookingData.personalDetails?.lastName || ""}`.trim(),
+              customer_email: bookingData.personalDetails?.email || "",
+              customer_phone: bookingData.personalDetails?.phone || "",
+              Travel_date: outboundBooking.bookingDate || bookingData.selectedDate || "",
+              Route: routeName,
+            },
+          });
+        }
+      } catch (stripeErr) {
+        console.error("Failed to update Stripe PaymentIntent metadata with booking_id:", stripeErr);
+      }
 
       const response = {
         success: true,
@@ -2081,7 +2099,7 @@ export const getDashboardStats = async (req, res, next) => {
     // Get bookings for today's trips
     const todayTripBookings = await Booking.find({
       bookingDate: todayStr,
-      status: { $in: ["confirmed", "pending"] }
+      status: { $in: ["confirmed", "pending", "completed"] }
     }).populate("bus route");
 
     // Group trips by route
@@ -2191,7 +2209,7 @@ export const getDispatchTrips = async (req, res, next) => {
       const hasBookings = await Booking.exists({
         bus: bus._id,
         bookingDate: date,
-        status: { $in: ["confirmed", "pending"] },
+        status: { $in: ["confirmed", "pending", "completed"] },
       });
 
       if ((isInRange && isRecurringDay) || hasBookings) {
@@ -2200,7 +2218,7 @@ export const getDispatchTrips = async (req, res, next) => {
           const booked = await Booking.find({
             bus: bus._id,
             bookingDate: date,
-            status: { $in: ["confirmed", "pending"] },
+            status: { $in: ["confirmed", "pending", "completed"] },
           });
           let bookedSeatsCount = 0;
           booked.forEach((b) => b.seatDetails?.forEach((s) => (bookedSeatsCount += s.seats)));
@@ -2235,7 +2253,7 @@ export const getDispatchTrips = async (req, res, next) => {
         const tripBookings = await Booking.find({
           bus: trip.bus._id,
           bookingDate: date,
-          status: { $in: ["confirmed", "pending"] },
+          status: { $in: ["confirmed", "pending", "completed"] },
         });
 
         let passengers = 0;
@@ -2289,7 +2307,7 @@ export const getPassengerManifest = async (req, res, next) => {
     const bookings = await Booking.find({
       bus: busId,
       bookingDate: date,
-      status: { $in: ["confirmed", "pending"] }
+      status: { $in: ["confirmed", "pending", "completed"] }
     })
       .populate("personalDetails payment")
       .sort({ createdAt: 1 });

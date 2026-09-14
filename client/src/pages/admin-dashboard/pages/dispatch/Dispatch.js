@@ -24,10 +24,16 @@ import {
     Eye,
 } from "react-bootstrap-icons";
 
+const getTodayDate = () => {
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, "0");
+    const d = String(now.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+};
+
 const Dispatch = () => {
-    const [selectedDate, setSelectedDate] = useState(
-        new Date().toISOString().split("T")[0]
-    );
+    const [selectedDate, setSelectedDate] = useState(getTodayDate());
     const [trips, setTrips] = useState([]);
     const [selectedTrip, setSelectedTrip] = useState(null);
     const [manifest, setManifest] = useState([]);
@@ -103,9 +109,16 @@ const Dispatch = () => {
                 config
             );
             if (response.data && response.data.success) {
-                setTrips(response.data.data.trips);
-                if (response.data.data.trips.length > 0 && !selectedTrip) {
-                    setSelectedTrip(response.data.data.trips[0]);
+                const fetchedTrips = response.data.data.trips || [];
+                setTrips(fetchedTrips);
+                if (fetchedTrips.length > 0) {
+                    const matched = fetchedTrips.find(
+                        (t) => t.busId === selectedTrip?.busId || t.tripId === selectedTrip?.tripId
+                    );
+                    setSelectedTrip(matched || fetchedTrips[0]);
+                } else {
+                    setSelectedTrip(null);
+                    setManifest([]);
                 }
             }
         } catch (error) {

@@ -1,6 +1,7 @@
 import { Elements, PaymentElement } from "@stripe/react-stripe-js";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import LoadingSpinner from "../../../../../components/loading-spinner/LoadingSpinner";
 import { loadStripe } from "@stripe/stripe-js";
 import StripeForm from "./StripeForm";
@@ -25,10 +26,12 @@ const StripeContainer = ({
 }) => {
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const { availableBus } = useSelector((state) => state.booking);
 
   const fetchIntent = async () => {
     setIsLoading(true);
     try {
+      const routeName = availableBus?.route?.name || (selectedFromCity && selectedToCity ? `${selectedFromCity} → ${selectedToCity}` : "");
       const response = await axios.post(
         `${process.env.REACT_APP_API_BASE_URL}/booking/create-payment-intent`,
         {
@@ -36,7 +39,7 @@ const StripeContainer = ({
           customerEmail: personalDetails?.email || "",
           customerName: `${personalDetails?.firstName || ""} ${personalDetails?.lastName || ""}`.trim(),
           customerPhone: personalDetails?.phone || "",
-          route: selectedFromCity && selectedToCity ? `${selectedFromCity} → ${selectedToCity}` : "",
+          route: routeName,
           travelDate: selectedDate || "",
           seats: Array.isArray(selectedSeats) ? selectedSeats.join(", ") : "",
         },
