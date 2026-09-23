@@ -156,3 +156,9 @@
   background-color: #fee2e2;
   color: #b91c1c;
 }
+
+@media (max-width: 991.98px) {
+  .admin-booking-card {
+    height: auto;
+  }
+}

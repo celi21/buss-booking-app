@@ -21,23 +21,28 @@ import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { logoutUser } from "../../../../store/slices/AuthSlice";
 
-function AdminSidebar() {
+function AdminSidebar({ onItemClick }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const handleLogout = () => {
+    if (onItemClick) onItemClick();
     dispatch(logoutUser());
     navigate("/");
   };
 
+  const handleNavClick = () => {
+    if (onItemClick) onItemClick();
+  };
+
   return (
     <Nav
-      className="flex-column bg-light sidebar p-2 "
+      className="flex-column bg-light sidebar p-2"
       style={{
-        height: "100vh",
-        overflowY: "scroll",
+        minHeight: "100%",
+        overflowY: "auto",
       }}
     >
-      <div>
+      <div onClick={handleNavClick}>
         <NavLink
           to="/admin/dashboard"
           className={({ isActive, isPending }) =>

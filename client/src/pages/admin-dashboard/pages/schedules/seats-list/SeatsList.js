@@ -111,64 +111,66 @@ const SeatsList = () => {
         <LoadingSpinner />
       ) : (
         <Row>
-          <Table>
-            <thead>
-              <tr>
-                {busLocations.map((loc, index) => {
+          <div className="table-responsive">
+            <Table bordered hover className="align-middle text-center">
+              <thead>
+                <tr>
+                  {busLocations.map((loc, index) => {
+                    return (
+                      <th key={loc._id} className="border bg-light">
+                        {loc.city.name} <br />
+                        <div className="fw-normal text-nowrap">
+                          {index === busLocations.length - 1 ? (
+                            <div>Arrive: {loc.arrivalTime}</div>
+                          ) : (
+                            <div>Departure: {loc.departureTime}</div>
+                          )}
+                        </div>
+                      </th>
+                    );
+                  })}
+                </tr>
+              </thead>
+
+              <tbody>
+                {passengersList.map((booking) => {
+                  // Find the indices of the from and to locations in busLocations
+                  const fromIndex = busLocations.findIndex(
+                    (loc) => loc.city._id === booking.from._id
+                  );
+                  const toIndex = busLocations.findIndex(
+                    (loc) => loc.city._id === booking.to._id
+                  );
+
+                  // Calculate the middle index
+                  const middleIndex = Math.floor((fromIndex + toIndex) / 2);
+
                   return (
-                    <th key={loc._id} className="border bg-light">
-                      {loc.city.name} <br />
-                      <div className="fw-normal text-nowrap">
-                        {index === busLocations.length - 1 ? (
-                          <div>Arrive: {loc.arrivalTime}</div>
-                        ) : (
-                          <div>Departure: {loc.departureTime}</div>
-                        )}
-                      </div>
-                    </th>
+                    <tr key={booking._id}>
+                      {busLocations.map((loc, index) => {
+                        // Check if the current location is within the from-to range
+                        if (index >= fromIndex && index <= toIndex) {
+                          return (
+                            <SeatRow
+                              loc={loc}
+                              index={index}
+                              middleIndex={middleIndex}
+                              booking={booking}
+                            />
+                          );
+                        } else {
+                          return <td key={loc.city._id} className="border"></td>;
+                        }
+                      })}
+                    </tr>
                   );
                 })}
-              </tr>
-            </thead>
-
-            <tbody>
-              {passengersList.map((booking) => {
-                // Find the indices of the from and to locations in busLocations
-                const fromIndex = busLocations.findIndex(
-                  (loc) => loc.city._id === booking.from._id
-                );
-                const toIndex = busLocations.findIndex(
-                  (loc) => loc.city._id === booking.to._id
-                );
-
-                // Calculate the middle index
-                const middleIndex = Math.floor((fromIndex + toIndex) / 2);
-
-                return (
-                  <tr key={booking._id}>
-                    {busLocations.map((loc, index) => {
-                      // Check if the current location is within the from-to range
-                      if (index >= fromIndex && index <= toIndex) {
-                        return (
-                          <SeatRow
-                            loc={loc}
-                            index={index}
-                            middleIndex={middleIndex}
-                            booking={booking}
-                          />
-                        );
-                      } else {
-                        return <td key={loc.city._id} className="border"></td>;
-                      }
-                    })}
-                  </tr>
-                );
-              })}
-            </tbody>
-            {passengersList.length == 0 && (
-              <div className="text-center w-100 my-3">No Data Found</div>
-            )}
-          </Table>
+              </tbody>
+              {passengersList.length == 0 && (
+                <div className="text-center w-100 my-3">No Data Found</div>
+              )}
+            </Table>
+          </div>
         </Row>
       )}
     </Container>

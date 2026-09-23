@@ -895,6 +895,15 @@ export const confirmBooking = async (req, res, next) => {
         tax: taxAmount,
       });
 
+      let existingNotes = (bookingData.personalDetails.notes || "").trim();
+      const paymentIdTag = `Payment ID: ${stripeData.paymentId}`;
+      let finalNotes = existingNotes;
+      if (!existingNotes) {
+        finalNotes = paymentIdTag;
+      } else if (!existingNotes.includes(stripeData.paymentId)) {
+        finalNotes = `${existingNotes}\n${paymentIdTag}`;
+      }
+
       const personalDetails = new PersonalDetails({
         firstName: bookingData.personalDetails.firstName,
         lastName: bookingData.personalDetails.lastName,
@@ -902,7 +911,7 @@ export const confirmBooking = async (req, res, next) => {
         email: bookingData.personalDetails.email,
         pickupAddress: bookingData.personalDetails.pickupAddress,
         dropoffAddress: bookingData.personalDetails.dropoffAddress,
-        notes: bookingData.personalDetails.notes,
+        notes: finalNotes,
         suitcases: bookingData.personalDetails.suitcases,
         user: bookingData.user ? bookingData.user?.id : null,
       });
@@ -2927,16 +2936,16 @@ export const getPublicTripStatuses = async (req, res, next) => {
     });
 
     const buses = await Bus.find({ status: "active" }).populate("route locations.city");
-    
+
     const schedules = buses.map((bus) => {
       const initialLocation = bus.locations.find((l) => l.departureTime);
       const departureTime = initialLocation ? initialLocation.departureTime : "00:00";
-      
+
       const fromCity = bus.locations[0]?.city?.name || "";
       const toCity = bus.locations[bus.locations.length - 1]?.city?.name || "";
-      
+
       const status = busStatuses[bus._id.toString()] || "On Time";
-      
+
       return {
         busId: bus._id,
         routeName: bus.route ? bus.route.name : `${fromCity} - ${toCity}`,

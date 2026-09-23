@@ -56,6 +56,11 @@ const SeatRow = ({ loc, index, middleIndex, booking }) => {
                     </div>
                     <div>Phone: {booking.personalDetails.phone}</div>
                     <div>Email: {booking.personalDetails.email}</div>
+                    {booking.personalDetails?.notes && (
+                      <div className="text-start mt-1 pt-1 border-top border-light-subtle w-100">
+                        <small>Notes: {booking.personalDetails.notes}</small>
+                      </div>
+                    )}
                   </div>
                 </Tooltip>
               )}

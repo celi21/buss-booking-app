@@ -22,10 +22,10 @@ const EditClientDetails = ({
   return (
     <Container fluid>
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           First Name:<span className="text-danger ms-1">*</span>
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Control
             type="text"
             value={firstName}
@@ -36,10 +36,10 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Last Name:
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Control
             type="text"
             value={lastName}
@@ -50,10 +50,10 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Phone:<span className="text-danger ms-1">*</span>
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Control
             type="text"
             value={phone}
@@ -64,10 +64,10 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Email:<span className="text-danger ms-1">*</span>
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Control
             type="email"
             value={email}
@@ -78,10 +78,10 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Pickup Address:<span className="text-danger ms-1">*</span>
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Control
             type="text"
             value={pickupAddress}
@@ -92,10 +92,10 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Dropoff Address:<span className="text-danger ms-1">*</span>
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Control
             type="text"
             value={dropoffAddress}
@@ -106,10 +106,10 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Suitcases:
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={5} md={8} sm={7} xs={12}>
           <Form.Select
             value={suitcases}
             onChange={(e) => setSuitcases(e.target.value)}
@@ -126,13 +126,13 @@ const EditClientDetails = ({
       </Row>
 
       <Row className="mb-4">
-        <Col lg={3} md={6} sm={6}>
+        <Col lg={3} md={4} sm={5} xs={12} className="fw-semibold mb-1 mb-sm-0">
           Notes:
         </Col>
-        <Col lg={4} md={6} sm={6}>
+        <Col lg={6} md={8} sm={7} xs={12}>
           <textarea
             cols="30"
-            rows="10"
+            rows="6"
             className="form-control"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}

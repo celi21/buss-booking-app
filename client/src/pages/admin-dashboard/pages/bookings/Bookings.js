@@ -82,17 +82,17 @@ const Bookings = () => {
 
   return (
     <Container fluid>
-      <Row className="mb-3 position-relative">
-        <Col md="auto">
+      <Row className="mb-3 position-relative g-2 align-items-center">
+        <Col xs={12} sm="auto">
           <Link
-            className="border fw-semibold d-flex align-items-center btn btn-light"
+            className="border fw-semibold d-flex align-items-center justify-content-center btn btn-light w-100"
             to="/admin/add-booking"
           >
             <Plus size={20} />
             Add Booking
           </Link>
         </Col>
-        <Col md="auto">
+        <Col xs={12} sm="auto">
           <div className="d-flex flex-row gap-2">
             <InputGroup>
               <FormControl
@@ -117,40 +117,38 @@ const Bookings = () => {
           </div>
         </Col>
 
-        <Col className="d-flex justify-content-end align-items-center gap-3">
-          <div>Filter by:</div>
-          <Row className="d-flex flex-row">
-            <div className="w-100">
-              <select
-                className="form-select w-100"
-                onChange={(e) => setFilterStatus(e.target.value)}
-              >
-                <option value="all">All</option>
-                <option value="confirmed">Confirmed</option>
-                <option value="completed">Completed</option>
-                <option value="refunded">Refunded</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-          </Row>
+        <Col xs={12} md className="d-flex flex-wrap justify-content-md-end align-items-center gap-2 mt-2 mt-md-0">
+          <div className="text-nowrap fw-semibold small text-secondary">Filter by:</div>
+          <div style={{ minWidth: "160px" }}>
+            <select
+              className="form-select w-100"
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="refunded">Refunded</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
         </Col>
       </Row>
 
       {showMoreOptions && (
-        <Row>
+        <Row className="mb-3">
           <div
-            className="shadow-sm border rounded p-4"
+            className="shadow-sm border rounded p-3 p-md-4 bg-white"
             style={{
               fontSize: 14,
             }}
           >
-            <Row className="mb-2">
-              <Col>
-                <Row>
-                  <Col lg={3} md={3} xl={3} sm={3} xs={3}>
+            <Row className="g-3 mb-2">
+              <Col xs={12} md={6}>
+                <Row className="align-items-center g-2">
+                  <Col xs={12} sm={3}>
                     From
                   </Col>
-                  <Col>
+                  <Col xs={12} sm={9}>
                     <FormControl
                       type="date"
                       value={filterFromDate}
@@ -159,12 +157,12 @@ const Bookings = () => {
                   </Col>
                 </Row>
               </Col>
-              <Col>
-                <Row>
-                  <Col lg={3} md={3} xl={3} sm={3} xs={3}>
+              <Col xs={12} md={6}>
+                <Row className="align-items-center g-2">
+                  <Col xs={12} sm={3}>
                     To
                   </Col>
-                  <Col>
+                  <Col xs={12} sm={9}>
                     <FormControl
                       type="date"
                       value={filterToDate}
@@ -176,13 +174,13 @@ const Bookings = () => {
               </Col>
             </Row>
 
-            <Row>
-              <Col>
-                <Row>
-                  <Col lg={3} md={3} xl={3} sm={3} xs={3}>
+            <Row className="g-3">
+              <Col xs={12} md={6}>
+                <Row className="align-items-center g-2">
+                  <Col xs={12} sm={3}>
                     Route
                   </Col>
-                  <Col>
+                  <Col xs={12} sm={9}>
                     <Form.Select
                       onChange={(e) => setFilterRoute(e.target.value)}
                     >
@@ -200,12 +198,12 @@ const Bookings = () => {
                   </Col>
                 </Row>
               </Col>
-              <Col>
-                <Row>
-                  <Col lg={3} md={3} xl={3} sm={3} xs={3}>
+              <Col xs={12} md={6}>
+                <Row className="align-items-center g-2">
+                  <Col xs={12} sm={3}>
                     Bus
                   </Col>
-                  <Col>
+                  <Col xs={12} sm={9}>
                     <Form.Select onChange={(e) => setFilterBus(e.target.value)}>
                       <option value="" key="">
                         Choose

@@ -36,10 +36,10 @@ const UserSidebar = () => {
 
   return (
     <Nav
-      className="flex-column bg-light sidebar p-2 "
+      className="flex-column bg-light sidebar p-2"
       style={{
-        height: "100vh",
-        overflowY: "scroll",
+        minHeight: "100%",
+        overflowY: "auto",
       }}
     >
       <div>

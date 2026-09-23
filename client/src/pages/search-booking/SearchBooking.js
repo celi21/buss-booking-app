@@ -532,7 +532,13 @@ const SearchBooking = () => {
                           {selectedLanguage &&
                             translateText("Notes", selectedLanguage.code)}
                         </div>
-                        <div>{bookingData.personalDetails.notes}</div>
+                        <div>
+                          {(bookingData.personalDetails.notes || "")
+                            .split("\n")
+                            .filter((line) => !line.trim().startsWith("Payment ID:"))
+                            .join("\n")
+                            .trim() || "-"}
+                        </div>
                       </div>
                     </ListGroup.Item>
                     <ListGroup.Item className="px-0 mx-0">

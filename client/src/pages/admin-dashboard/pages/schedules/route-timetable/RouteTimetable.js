@@ -163,7 +163,7 @@ const RouteTimetable = () => {
         <LoadingSpinner />
       ) : (
         <Row>
-          <Table hover striped>
+          <Table hover striped responsive>
             <thead>
               <tr>
                 <th className="fw-normal">Bus</th>

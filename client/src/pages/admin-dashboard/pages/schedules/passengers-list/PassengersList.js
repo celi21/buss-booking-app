@@ -171,7 +171,7 @@ const PassengersList = () => {
         <LoadingSpinner />
       ) : (
         <Row>
-          <Table hover striped>
+          <Table hover striped responsive>
             <thead>
               <th>Client</th>
               <th>Phone</th>
